@@ -82,3 +82,16 @@ Status: In Progress
 ---
 
 ## ⬜ Chapter 10 - Version 1.0 Launch
+
+
+
+components/
+│
+├── UploadArea.tsx          // Logic kuu
+├── UploadDropZone.tsx      // Drag & Drop
+├── SelectedFiles.tsx       // Orodha ya files
+├── ProgressBar.tsx         // Progress
+├── SuccessScreen.tsx       // Download screen
+├── ImagePreview.tsx        // Preview ya AI/Image tools
+├── UploadButtons.tsx       // Convert & Remove buttons
+└── toolConfig.ts

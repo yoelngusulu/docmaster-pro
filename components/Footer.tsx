@@ -14,8 +14,8 @@ export default function Footer() {
               <Image
                 src="/images/logo.png"
                 alt="DocMaster logo"
-                width={56}
-                height={28}
+                width={36}
+                height={18}
                 className="h-auto w-auto"
               />
 

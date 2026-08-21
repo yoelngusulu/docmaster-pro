@@ -5,7 +5,7 @@ export default function FaceRetouchPage() {
     <ToolPage
       tool="face-retouch"
       backLink="/tools/ai"
-      backText="← Back to AI Tools"
+      backText="Back to AI Tools"
     />
   );
 }

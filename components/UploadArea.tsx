@@ -1,8 +1,14 @@
 "use client";
 
 import { toolConfig } from "./toolConfig";
+import { saveConversionHistory } from "@/lib/supabase/conversionHistory";
 import {
+  AlertCircle,
+  CheckCircle2,
+  Download,
+  FileText,
   Loader2,
+  RefreshCw,
   Trash2,
   UploadCloud,
 } from "lucide-react";
@@ -79,6 +85,11 @@ export default function UploadArea({
     setConvertedFileName,
   ] = useState("");
 
+    const [
+    showGuestAd,
+    setShowGuestAd,
+  ] = useState(false);
+
   const aiActions = [
     "Remove Background",
     "Enhance",
@@ -89,6 +100,23 @@ export default function UploadArea({
     "Change Background",
     "Color Correction",
   ];
+
+  const aiTools = new Set<
+    keyof typeof toolConfig
+  >([
+    "image-editor",
+    "background-remover",
+    "photo-enhancer",
+    "object-remover",
+    "face-retouch",
+    "image-upscaler",
+    "image-colorizer",
+    "image-to-text",
+    "summarize-pdf",
+    "chat-with-pdf",
+    "translate-document",
+    "resume-builder",
+  ]);
 
   useEffect(() => {
     return () => {
@@ -225,6 +253,7 @@ export default function UploadArea({
     setIsCompleted(false);
     setIsConverting(false);
     setSelectedAction("");
+    setShowGuestAd(false);
     setError("");
   };
 
@@ -246,6 +275,7 @@ export default function UploadArea({
     setPassword("");
     setConfirmPassword("");
     setPreviewUrl("");
+    setShowGuestAd(false);
     setError("");
 
     if (fileInputRef.current) {
@@ -280,6 +310,11 @@ export default function UploadArea({
     link.click();
 
     link.remove();
+  };
+
+  const handleContinueAfterAd = () => {
+    setShowGuestAd(false);
+    handleDownload();
   };
 
   const handleDrop = (
@@ -382,62 +417,72 @@ export default function UploadArea({
     );
   };
 
-  const completeConversion = (
-    blob: Blob,
-    fileName: string
+const completeConversion = async (
+  blob: Blob,
+  fileName: string
+) => {
+  if (blob.size <= 0) {
+    throw new Error(
+      "The server returned an empty file."
+    );
+  }
+
+  resetConvertedFile();
+
+  const downloadUrl =
+    URL.createObjectURL(blob);
+
+  setConvertedFileUrl(downloadUrl);
+  setConvertedFileName(fileName);
+  setProgress(100);
+  setIsConverting(false);
+  setIsCompleted(true);
+
+  const originalFileName =
+    selectedFiles[0]?.name ||
+    "Unknown file";
+
+  const historyResult =
+    await saveConversionHistory({
+      tool,
+      originalFileName,
+      outputFileName: fileName,
+    });
+
+  if (
+    !historyResult?.isAuthenticated
+  ) {
+    setShowGuestAd(true);
+  }
+};
+
+  const createBlobFromResponse = async (
+    response: Response,
+    fallbackMimeType: string
   ) => {
-    if (blob.size <= 0) {
+    const responseBuffer =
+      await response.arrayBuffer();
+
+    if (
+      responseBuffer.byteLength === 0
+    ) {
       throw new Error(
         "The server returned an empty file."
       );
     }
 
-    resetConvertedFile();
+    const contentType =
+      response.headers.get(
+        "content-type"
+      ) || fallbackMimeType;
 
-    const downloadUrl =
-      URL.createObjectURL(blob);
-
-    setConvertedFileUrl(
-      downloadUrl
-    );
-
-    setConvertedFileName(
-      fileName
-    );
-
-    setProgress(100);
-    setIsConverting(false);
-    setIsCompleted(true);
-  };
-
-  const createBlobFromResponse =
-    async (
-      response: Response,
-      fallbackMimeType: string
-    ) => {
-      const responseBuffer =
-        await response.arrayBuffer();
-
-      if (
-        responseBuffer.byteLength === 0
-      ) {
-        throw new Error(
-          "The server returned an empty file."
-        );
+    return new Blob(
+      [responseBuffer],
+      {
+        type: contentType,
       }
-
-      const contentType =
-        response.headers.get(
-          "content-type"
-        ) || fallbackMimeType;
-
-      return new Blob(
-        [responseBuffer],
-        {
-          type: contentType,
-        }
-      );
-    };
+    );
+  };
 
   const handleWordToPdf =
     async () => {
@@ -629,6 +674,72 @@ export default function UploadArea({
         fileName
       );
     };
+
+const handleCompressImage = async () => {
+  if (selectedFiles.length !== 1) {
+    throw new Error(
+      "Please select one image file."
+    );
+  }
+
+  const file = selectedFiles[0];
+  const formData = new FormData();
+
+  formData.append(
+    "file",
+    file,
+    file.name
+  );
+
+  setProgress(35);
+
+  const response = await fetch(
+    "/api/convert/compress-image",
+    {
+      method: "POST",
+      body: formData,
+      cache: "no-store",
+    }
+  );
+
+  setProgress(75);
+
+  if (!response.ok) {
+    throw new Error(
+      await readErrorMessage(
+        response,
+        "Unable to compress the image."
+      )
+    );
+  }
+
+  const compressedBlob =
+    await createBlobFromResponse(
+      response,
+      file.type || "image/jpeg"
+    );
+
+  const extension =
+    file.name.split(".").pop() || "jpg";
+
+  const originalName =
+    file.name.replace(
+      /\.[^/.]+$/,
+      ""
+    );
+
+  const fileName =
+    getFilenameFromResponse(
+      response,
+      `${originalName}-compressed.${extension}`
+    );
+
+  completeConversion(
+    compressedBlob,
+    fileName
+  );
+};
+    
   const handleCompressPdf =
     async () => {
       if (
@@ -782,8 +893,222 @@ export default function UploadArea({
       );
     };
 
+  
+  const handlePdfToImage =
+    async () => {
+      if (selectedFiles.length !== 1) {
+        throw new Error("Please select one PDF file.");
+      }
+      const file = selectedFiles[0];
+      const formData = new FormData();
+      formData.append("file", file, file.name);
+      setProgress(35);
+      const response = await fetch("/api/convert/pdf-to-image",{method:"POST",body:formData,cache:"no-store"});
+      setProgress(75);
+      if (!response.ok) {
+        throw new Error(await readErrorMessage(response,"Unable to convert PDF to Image."));
+      }
+      const convertedBlob = await createBlobFromResponse(response,"application/zip");
+      const originalName=file.name.replace(/\.pdf$/i,"");
+      const fileName=getFilenameFromResponse(response,`${originalName}-images.zip`);
+      completeConversion(convertedBlob,fileName);
+    };
 
-const handlePdfToWord = async () => {
+
+  const handleImageToPdf =
+    async () => {
+      if (
+        selectedFiles.length === 0
+      ) {
+        throw new Error(
+          "Please select at least one image."
+        );
+      }
+
+      const formData =
+        new FormData();
+
+      selectedFiles.forEach(
+        (file) => {
+          formData.append(
+            "files",
+            file,
+            file.name
+          );
+        }
+      );
+
+      setProgress(35);
+
+      const response = await fetch(
+        "/api/convert/image-to-pdf",
+        {
+          method: "POST",
+          body: formData,
+          cache: "no-store",
+        }
+      );
+
+      setProgress(75);
+
+      if (!response.ok) {
+        throw new Error(
+          await readErrorMessage(
+            response,
+            "Unable to convert images to PDF."
+          )
+        );
+      }
+
+      const convertedBlob =
+        await createBlobFromResponse(
+          response,
+          "application/pdf"
+        );
+
+      const fileName =
+        getFilenameFromResponse(
+          response,
+          "images-to-pdf.pdf"
+        );
+
+      completeConversion(
+        convertedBlob,
+        fileName
+      );
+    };
+
+  const handlePdfToPowerPoint =
+  async () => {
+    if (
+      selectedFiles.length !== 1
+    ) {
+      throw new Error(
+        "Please select one PDF file."
+      );
+    }
+
+    const file = selectedFiles[0];
+    const formData = new FormData();
+
+    formData.append(
+      "file",
+      file,
+      file.name
+    );
+
+    setProgress(35);
+
+    const response = await fetch(
+      "/api/convert/pdf-to-powerpoint",
+      {
+        method: "POST",
+        body: formData,
+        cache: "no-store",
+      }
+    );
+
+    setProgress(75);
+
+    if (!response.ok) {
+      throw new Error(
+        await readErrorMessage(
+          response,
+          "Unable to convert PDF to PowerPoint."
+        )
+      );
+    }
+
+    const convertedBlob =
+      await createBlobFromResponse(
+        response,
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+      );
+
+    const originalName =
+      file.name.replace(
+        /\.pdf$/i,
+        ""
+      );
+
+    const fileName =
+      getFilenameFromResponse(
+        response,
+        `${originalName}.pptx`
+      );
+
+    completeConversion(
+      convertedBlob,
+      fileName
+    );
+  };
+
+  const handlePdfToExcel =
+    async () => {
+      if (
+        selectedFiles.length !== 1
+      ) {
+        throw new Error(
+          "Please select one PDF file."
+        );
+      }
+ const file = selectedFiles[0];
+      const formData = new FormData();
+
+      formData.append(
+        "file",
+        file,
+        file.name
+      );
+
+      setProgress(35);
+
+      const response = await fetch(
+        "/api/convert/pdf-to-excel",
+        {
+          method: "POST",
+          body: formData,
+          cache: "no-store",
+        }
+      );
+
+      setProgress(75);
+
+      if (!response.ok) {
+        throw new Error(
+          await readErrorMessage(
+            response,
+            "Unable to convert PDF to Excel."
+          )
+        );
+      }
+
+      const convertedBlob =
+        await createBlobFromResponse(
+          response,
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+
+      const originalName =
+        file.name.replace(
+          /\.pdf$/i,
+          ""
+        );
+
+      const fileName =
+        getFilenameFromResponse(
+          response,
+          `${originalName}.xlsx`
+        );
+
+      completeConversion(
+        convertedBlob,
+        fileName
+      );
+    };
+
+
+  const handlePdfToWord = async () => {
   if (selectedFiles.length !== 1) {
     throw new Error(
       "Please select one PDF file."
@@ -844,7 +1169,7 @@ const handlePdfToWord = async () => {
   );
 };
 
-const handleUnlockPdf =
+  const handleUnlockPdf =
     async () => {
       if (selectedFiles.length !== 1) {
         throw new Error(
@@ -920,55 +1245,81 @@ const handleUnlockPdf =
       );
     };
 
-  const handleSimulation =
+  const handleAiProcess =
     async () => {
-      const response = await fetch(
-        "/api/convert",
-        {
-          method: "POST",
-        }
-      );
-
-      if (!response.ok) {
+      if (selectedFiles.length !== 1) {
         throw new Error(
-          "Conversion request failed."
+          "Please select one file for this AI tool."
         );
       }
 
-      await response.json();
+      const formData =
+        new FormData();
 
-      const interval =
-        window.setInterval(() => {
-          setProgress(
-            (previousProgress) => {
-              const nextProgress =
-                Math.min(
-                  previousProgress +
-                    20,
-                  100
-                );
+      formData.append(
+        "tool",
+        tool
+      );
 
-              if (
-                nextProgress >= 100
-              ) {
-                window.clearInterval(
-                  interval
-                );
+      formData.append(
+        "file",
+        selectedFiles[0],
+        selectedFiles[0].name
+      );
 
-                setIsConverting(
-                  false
-                );
+      if (selectedAction) {
+        formData.append(
+          "action",
+          selectedAction
+        );
+      }
 
-                setIsCompleted(
-                  true
-                );
-              }
+      setProgress(35);
 
-              return nextProgress;
-            }
-          );
-        }, 600);
+      const response = await fetch(
+        "/api/ai/process",
+        {
+          method: "POST",
+          body: formData,
+          cache: "no-store",
+        }
+      );
+
+      setProgress(75);
+
+      if (!response.ok) {
+        throw new Error(
+          await readErrorMessage(
+            response,
+            "Unable to process this file with AI."
+          )
+        );
+      }
+
+      const resultBlob =
+        await createBlobFromResponse(
+          response,
+          "text/plain"
+        );
+
+      const originalName =
+        selectedFiles[0].name.replace(
+          /\.[^/.]+$/,
+          ""
+        );
+
+      const fileName =
+        getFilenameFromResponse(
+          response,
+          `${originalName}-${tool}.txt`
+        );
+
+      completeConversion(
+        resultBlob,
+        fileName
+      );
     };
+
 
   const handleConvert =
     async () => {
@@ -996,6 +1347,17 @@ const handleUnlockPdf =
 
         return;
       }
+
+if (
+  tool === "compress-image" &&
+  selectedFiles.length !== 1
+) {
+  setError(
+    "Please select one image file."
+  );
+
+  return;
+}
 
       if (
         tool === "split-pdf" &&
@@ -1087,11 +1449,66 @@ const handleUnlockPdf =
       }
 
       if (
+        tool === "pdf-to-excel" &&
+        selectedFiles.length !== 1
+      ) {
+        setError(
+          "Please select one PDF file."
+        );
+
+        return;
+      }
+
+      if (
+        tool === "pdf-to-image" &&
+        selectedFiles.length !== 1
+      ) {
+        setError(
+          "Please select one PDF file."
+        );
+
+        return;
+      }
+
+      if (
+        tool === "image-to-pdf" &&
+        selectedFiles.length === 0
+      ) {
+        setError(
+          "Please select at least one image."
+        );
+
+        return;
+      }
+
+      if (
+        tool === "pdf-to-powerpoint" &&
+        selectedFiles.length !== 1
+      ) {
+        setError(
+          "Please select one PDF file."
+        );
+
+        return;
+      }
+
+      if (
         tool === "image-editor" &&
         !selectedAction
       ) {
         setError(
           "Please select an AI editing option."
+        );
+
+        return;
+      }
+
+      if (
+        aiTools.has(tool) &&
+        selectedFiles.length !== 1
+      ) {
+        setError(
+          "Please select one file for this AI tool."
         );
 
         return;
@@ -1107,6 +1524,46 @@ const handleUnlockPdf =
           tool === "pdf-to-word"
         ) {
           await handlePdfToWord();
+
+          return;
+        }
+
+        if (
+          tool === "pdf-to-excel"
+        ) {
+          await handlePdfToExcel();
+
+          return;
+        }
+
+        if (
+          tool === "pdf-to-image"
+        ) {
+          await handlePdfToImage();
+
+          return;
+        }
+
+        if (
+          tool === "image-to-pdf"
+        ) {
+          await handleImageToPdf();
+
+          return;
+        }
+
+        if (
+  tool === "compress-image"
+) {
+  await handleCompressImage();
+
+  return;
+}
+
+        if (
+          tool === "pdf-to-powerpoint"
+        ) {
+          await handlePdfToPowerPoint();
 
           return;
         }
@@ -1159,7 +1616,15 @@ const handleUnlockPdf =
           return;
         }
 
-        await handleSimulation();
+        if (aiTools.has(tool)) {
+          await handleAiProcess();
+
+          return;
+        }
+
+        throw new Error(
+  "This tool has not been implemented yet."
+);
       } catch (
         conversionError
       ) {
@@ -1193,12 +1658,13 @@ const handleUnlockPdf =
       transition={{
         duration: 0.5,
       }}
-      className="mt-10"
+      className="mt-0"
     >
-      <div className="rounded-3xl border-2 border-dashed border-blue-300 bg-white p-12 text-center transition-all hover:border-blue-500 hover:bg-blue-50">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm sm:p-6 lg:p-8">
         {error && (
-          <div className="mb-6 rounded-xl border border-red-300 bg-red-50 p-4 text-red-600">
-            {error}
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-left text-sm text-red-700">
+            <AlertCircle size={20} className="mt-0.5 shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
@@ -1206,10 +1672,10 @@ const handleUnlockPdf =
           0 &&
           !isCompleted && (
             <div
-              className={`cursor-pointer rounded-2xl p-4 transition-all ${
+              className={`cursor-pointer rounded-2xl border-2 border-dashed p-6 transition-all sm:p-10 ${
                 isDragging
-                  ? "border-2 border-blue-600 bg-blue-100"
-                  : ""
+                  ? "border-blue-600 bg-blue-50"
+                  : "border-blue-200 bg-blue-50/40 hover:border-blue-400 hover:bg-blue-50"
               }`}
               onClick={() =>
                 fileInputRef.current?.click()
@@ -1237,24 +1703,24 @@ const handleUnlockPdf =
               onDrop={handleDrop}
             >
               <UploadCloud
-                size={70}
+                size={56}
                 className="mx-auto text-blue-600"
               />
 
-              <h2 className="mt-6 text-2xl font-bold">
+              <h2 className="mt-5 text-xl font-bold text-gray-950 sm:text-2xl">
                 {config.title}
               </h2>
 
-              <p className="mt-3 text-gray-600">
+              <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-gray-600 sm:text-base">
                 {config.subtitle}
               </p>
 
-              <p className="mt-4 text-gray-500">
+              <p className="mt-4 text-sm text-gray-500">
                 Click to browse or drag
                 and drop your file here.
               </p>
 
-              <p className="mt-6 text-sm text-gray-500">
+              <p className="mt-5 text-xs font-medium uppercase text-gray-500 sm:text-sm">
                 Supported format:{" "}
                 {config.accept.toUpperCase()}{" "}
                 • Maximum size: 100 MB
@@ -1288,7 +1754,7 @@ const handleUnlockPdf =
           0 &&
           !isCompleted && (
             <>
-              <h2 className="text-2xl font-bold text-green-700">
+              <h2 className="text-xl font-bold text-gray-950 sm:text-2xl">
                 Selected File
                 {selectedFiles.length >
                 1
@@ -1298,6 +1764,7 @@ const handleUnlockPdf =
 
               {previewUrl && (
                 <div className="mt-6">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={previewUrl}
                     alt="Selected image preview"
@@ -1309,7 +1776,7 @@ const handleUnlockPdf =
               {tool ===
                 "image-editor" && (
                 <>
-                  <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+                  <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     {aiActions.map(
                       (action) => (
                         <button
@@ -1419,7 +1886,7 @@ const handleUnlockPdf =
                 </div>
               )}
 
-              <div className="mt-6 space-y-3">
+              <div className="mt-6 space-y-3 text-left">
                 {selectedFiles.map(
                   (
                     file,
@@ -1427,23 +1894,25 @@ const handleUnlockPdf =
                   ) => (
                     <div
                       key={`${file.name}-${file.lastModified}-${index}`}
-                      className="rounded-xl border border-gray-200 bg-gray-50 p-4"
+                      className="flex items-start gap-3 rounded-2xl border border-gray-200 bg-gray-50 p-4"
                     >
-                      <p className="font-medium text-gray-800">
-                        📄{" "}
-                        {file.name}
-                      </p>
+                      <FileText size={20} className="mt-0.5 shrink-0 text-blue-600" />
+                      <div className="min-w-0">
+                        <p className="break-words font-medium text-gray-800">
+                          {file.name}
+                        </p>
 
-                      <p className="text-sm text-gray-500">
-                        {(
-                          file.size /
-                          (1024 *
-                            1024)
-                        ).toFixed(
-                          2
-                        )}{" "}
-                        MB
-                      </p>
+                        <p className="text-sm text-gray-500">
+                          {(
+                            file.size /
+                            (1024 *
+                              1024)
+                          ).toFixed(
+                            2
+                          )}{" "}
+                          MB
+                        </p>
+                      </div>
                     </div>
                   )
                 )}
@@ -1460,13 +1929,13 @@ const handleUnlockPdf =
                 )}
 
               {isConverting && (
-                <div className="mt-6">
-                  <p className="mb-2 font-semibold text-blue-600">
-                    Progress:{" "}
-                    {progress}%
+                <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-left">
+                  <p className="mb-3 flex items-center gap-2 font-semibold text-blue-700">
+                    <Loader2 size={18} className="animate-spin" />
+                    Processing {progress}%
                   </p>
 
-                  <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200">
+                  <div className="h-3 w-full overflow-hidden rounded-full bg-white">
                     <div
                       className="h-full rounded-full bg-blue-600 transition-all duration-500"
                       style={{
@@ -1502,7 +1971,7 @@ const handleUnlockPdf =
                       "unlock-pdf" &&
                       !password.trim())
                   }
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isConverting && (
                     <Loader2
@@ -1530,7 +1999,7 @@ const handleUnlockPdf =
                   disabled={
                     isConverting
                   }
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 px-6 py-3 font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-6 py-3 font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Trash2
                     size={18}
@@ -1545,9 +2014,12 @@ const handleUnlockPdf =
         {isCompleted &&
           convertedFileUrl && (
             <>
-              <h2 className="text-3xl font-bold text-green-700">
-                ✅ Conversion
-                Completed!
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-700">
+                <CheckCircle2 size={34} />
+              </div>
+
+              <h2 className="mt-5 text-2xl font-bold text-gray-950 sm:text-3xl">
+                Conversion Completed
               </h2>
 
               <p className="mt-4 text-gray-600">
@@ -1560,9 +2032,10 @@ const handleUnlockPdf =
                   onClick={
                     handleDownload
                   }
-                  className="rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white transition hover:bg-blue-700"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white transition hover:bg-blue-700"
                 >
-                  ⬇ Download File
+                  <Download size={18} />
+                  Download File
                 </button>
 
                 <button
@@ -1570,25 +2043,50 @@ const handleUnlockPdf =
                   onClick={
                     handleRemoveFile
                   }
-                  className="rounded-xl border border-gray-300 px-8 py-3 font-semibold transition hover:bg-gray-100"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-300 px-8 py-3 font-semibold transition hover:bg-gray-100"
                 >
-                  🔄 Convert Another
-                  File
+                  <RefreshCw size={18} />
+                  Convert Another File
                 </button>
               </div>
             </>
           )}
-
-        {isCompleted &&
-          !convertedFileUrl && (
-            <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-yellow-700">
-              This tool is still in
-              simulation mode. No
-              downloadable file was
-              created.
-            </div>
-          )}
+        
       </div>
+
+      {showGuestAd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 text-center shadow-2xl">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
+              Advertisement
+            </p>
+
+            <div className="mt-5 flex min-h-48 items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-6">
+              <div>
+                <p className="text-lg font-semibold text-gray-800">
+                  Sponsored content will appear here.
+                </p>
+
+                <p className="mt-2 text-sm text-gray-500">
+                  Guest users see one advertisement after each successful conversion.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleContinueAfterAd}
+              className="mt-6 w-full rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
+            >
+              Continue to Download
+            </button>
+
+            <p className="mt-3 text-xs text-gray-500">
+              Create a free account to unlock account features and a better experience.
+            </p>
+          </div>
+        </div>
+      )}
 
       <input
         ref={fileInputRef}
@@ -1610,4 +2108,6 @@ const handleUnlockPdf =
       />
     </motion.div>
   );
+
 }
+

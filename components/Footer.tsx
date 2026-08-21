@@ -1,23 +1,40 @@
+import Image from "next/image";
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="mx-auto max-w-7xl px-6 py-16">
-
         <div className="grid gap-10 md:grid-cols-4">
-
-          {/* Brand */}
           <div>
-            <h2 className="text-2xl font-bold text-white">
-              DocMaster
-            </h2>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-3"
+            >
+              <Image
+                src="/images/logo.png"
+                alt="DocMaster logo"
+                width={56}
+                height={28}
+                className="h-auto w-auto"
+              />
 
-            <p className="mt-4 text-sm leading-7">
+              <div className="leading-tight">
+                <p className="text-2xl font-bold text-white">
+                  DocMaster AI
+                </p>
+                <p className="text-xs text-gray-400">
+                  Smart Document Platform
+                </p>
+              </div>
+            </Link>
+
+            <p className="mt-5 text-sm leading-7">
               Fast, secure and professional document conversion
               platform developed by Yoeln Digital Products.
             </p>
           </div>
 
-          {/* Product */}
           <div>
             <h3 className="font-semibold text-white">
               Product
@@ -31,7 +48,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Company */}
           <div>
             <h3 className="font-semibold text-white">
               Company
@@ -45,7 +61,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Support */}
           <div>
             <h3 className="font-semibold text-white">
               Support
@@ -58,14 +73,12 @@ export default function Footer() {
               <li>Email Support</li>
             </ul>
           </div>
-
         </div>
 
         <div className="mt-12 border-t border-gray-700 pt-8 text-center text-sm">
           © 2026 DocMaster. Built by <strong>Yoeln Digital Products</strong>.
           All rights reserved.
         </div>
-
       </div>
     </footer>
   );

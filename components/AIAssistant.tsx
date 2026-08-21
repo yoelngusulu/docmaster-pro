@@ -5,7 +5,6 @@ import {
   Bot,
   MessageCircle,
   SendHorizontal,
-  Sparkles,
   X,
 } from "lucide-react";
 import {
@@ -16,7 +15,7 @@ import {
 } from "react";
 
 type ChatMessage = {
-  id: number;
+  id: string;
   sender: "user" | "bot";
   text: string;
   link?: {
@@ -46,7 +45,7 @@ export default function AIAssistant() {
     ChatMessage[]
   >([
     {
-      id: 1,
+      id: "welcome",
       sender: "bot",
       text:
         "👋 Welcome to DocMaster AI!\n\nI can help you convert PDFs, Office documents and images.\n\nTell me what you would like to do today.",
@@ -139,7 +138,7 @@ export default function AIAssistant() {
           "You can convert a Word document using the Word to PDF tool.",
         link: {
           label: "Open Word to PDF",
-          href: "/tools/office/word-to-pdf",
+          href: "/tools/pdf/word-to-pdf",
         },
       };
     }
@@ -151,10 +150,10 @@ export default function AIAssistant() {
       return {
         sender: "bot",
         text:
-          "Use Excel to PDF to convert your spreadsheet.",
+          "Excel to PDF is not available yet. You can use PDF to Excel for table extraction.",
         link: {
-          label: "Open Excel to PDF",
-          href: "/tools/office/excel-to-pdf",
+          label: "Open PDF to Excel",
+          href: "/tools/pdf/pdf-to-excel",
         },
       };
     }
@@ -166,11 +165,11 @@ export default function AIAssistant() {
       return {
         sender: "bot",
         text:
-          "Use PowerPoint to PDF to convert your presentation.",
+          "PowerPoint to PDF is not available yet. You can use PDF to PowerPoint for slide generation.",
         link: {
-          label: "Open PowerPoint to PDF",
+          label: "Open PDF to PowerPoint",
           href:
-            "/tools/office/powerpoint-to-pdf",
+            "/tools/pdf/pdf-to-powerpoint",
         },
       };
     }
@@ -349,7 +348,7 @@ export default function AIAssistant() {
     if (!cleanedMessage || isTyping) return;
 
     const userChatMessage: ChatMessage = {
-      id: Date.now(),
+      id: crypto.randomUUID(),
       sender: "user",
       text: cleanedMessage,
     };
@@ -370,7 +369,7 @@ export default function AIAssistant() {
         ...previousMessages,
         {
           ...botReply,
-          id: Date.now() + 1,
+          id: crypto.randomUUID(),
         },
       ]);
 

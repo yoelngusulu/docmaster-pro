@@ -5,7 +5,7 @@ export default function BackgroundRemoverPage() {
     <ToolPage
       tool="background-remover"
       backLink="/tools/ai"
-      backText="← Back to AI Tools"
+      backText="Back to AI Tools"
     />
   );
 }

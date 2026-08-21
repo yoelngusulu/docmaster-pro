@@ -6,7 +6,7 @@ export async function POST() {
       success: true,
       message: "File uploaded successfully.",
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,

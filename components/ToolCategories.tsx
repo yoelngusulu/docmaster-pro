@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  FileSpreadsheet,
   FileText,
   Image as ImageIcon,
 } from "lucide-react";
@@ -13,23 +12,16 @@ const categories = [
     icon: FileText,
     title: "PDF Tools",
     href: "/tools/pdf",
-    tools: "12 Available Tools",
+    tools: "9 Available Tools",
     description:
       "Convert, merge, split, compress and protect PDF documents.",
   },
-  {
-    icon: FileSpreadsheet,
-    title: "Office Tools",
-    href: "/tools/office",
-    tools: "6 Available Tools",
-    description:
-      "Convert Word, Excel and PowerPoint documents quickly and securely.",
-  },
+
   {
     icon: ImageIcon,
     title: "Image Tools",
     href: "/tools/image",
-    tools: "8 Available Tools",
+    tools: "2 Available Tools",
     description:
       "Convert, compress, edit and optimize image files.",
   },
@@ -74,7 +66,7 @@ export default function ToolCategories() {
           </p>
         </motion.div>
 
-        <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-2 max-w-4xl mx-auto">
           {categories.map((category, index) => {
             const Icon = category.icon;
 

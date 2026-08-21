@@ -1,9 +1,11 @@
-import UploadArea from "@/components/UploadArea";
+import ToolPage from "@/components/ToolPage";
 
-export default function WordToPdfPage() {
+export default function ToolRoutePage() {
   return (
-    <main className="mx-auto min-h-screen max-w-6xl px-6 py-12">
-      <UploadArea tool="word-to-pdf" />
-    </main>
+    <ToolPage
+      tool="word-to-pdf"
+      backLink="/tools/pdf"
+      backText="Back to PDF Tools"
+    />
   );
 }

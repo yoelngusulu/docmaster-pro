@@ -5,12 +5,33 @@ import {
 import { PDFDocument } from "pdf-lib";
 import JSZip from "jszip";
 
+import { checkUsageLimit } from "@/lib/supabase/usageLimit";
+import { recordConversionUsage } from "@/lib/supabase/recordUsage";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(
   request: NextRequest
 ) {
+  const usage =
+    await checkUsageLimit();
+
+  if (!usage.allowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: usage.reason,
+        remaining:
+          usage.remaining,
+        limit: usage.limit,
+      },
+      {
+        status: 429,
+      }
+    );
+  }
+
   try {
     const formData =
       await request.formData();
@@ -42,6 +63,25 @@ export async function POST(
         },
         {
           status: 400,
+        }
+      );
+    }
+
+    const maximumFileSize =
+      100 * 1024 * 1024;
+
+    if (
+      uploadedFile.size >
+      maximumFileSize
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Maximum file size is 100 MB.",
+        },
+        {
+          status: 413,
         }
       );
     }
@@ -180,37 +220,43 @@ export async function POST(
         "document"
       }-split-pages.zip`;
 
-    const zipBlob = new Blob(
-      [zipBytes],
-      {
-        type: "application/zip",
-      }
-    );
+    const zipBuffer =
+      Buffer.from(zipBytes);
+
+    await recordConversionUsage({
+      tool: "split-pdf",
+      identityType:
+        usage.identityType,
+      identityId:
+        usage.identityId,
+    });
 
     console.log(
       "Split completed:",
       {
         pageCount,
         zipByteLength:
-          zipBytes.byteLength,
-        blobSize:
-          zipBlob.size,
+          zipBuffer.length,
         outputFileName,
       }
     );
 
     return new Response(
-      zipBlob,
+      zipBuffer,
       {
         status: 200,
         headers: {
           "Content-Type":
             "application/zip",
+
           "Content-Disposition":
             `attachment; filename="${outputFileName}"`,
+
           "Cache-Control":
             "no-store, no-cache, must-revalidate",
+
           Pragma: "no-cache",
+
           Expires: "0",
         },
       }

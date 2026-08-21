@@ -1,0 +1,338 @@
+import {
+  NextRequest,
+  NextResponse,
+} from "next/server";
+import path from "path";
+
+import {
+  type OpenAIContent,
+  createOpenAITextResponse,
+  deleteOpenAIFile,
+  uploadOpenAIFile,
+} from "@/lib/ai/openai";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const MAX_FILE_SIZE = 25 * 1024 * 1024;
+
+const imageTools = new Set([
+  "image-editor",
+  "background-remover",
+  "photo-enhancer",
+  "object-remover",
+  "face-retouch",
+  "image-upscaler",
+  "image-colorizer",
+  "image-to-text",
+]);
+
+const documentTools = new Set([
+  "summarize-pdf",
+  "chat-with-pdf",
+  "translate-document",
+  "resume-builder",
+]);
+
+const allowedImageExtensions = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+]);
+
+const allowedDocumentExtensions = new Set([
+  ".pdf",
+  ".doc",
+  ".docx",
+  ".txt",
+]);
+
+function sanitizeFileName(fileName: string) {
+  return fileName
+    .replace(/[<>:"/\\|?*\x00-\x1F]/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function getPrompt(
+  tool: string,
+  fileName: string,
+  action?: string
+) {
+  const actionText = action
+    ? `Selected action: ${action}.`
+    : "";
+
+  const prompts: Record<string, string> = {
+    "image-editor": `Analyze this image and provide a professional edit plan. ${actionText} Include exact changes, color and lighting guidance, and export recommendations.`,
+
+    "background-remover":
+      "Analyze this image for background removal. Describe the subject boundaries, tricky areas, and the best professional output settings.",
+
+    "photo-enhancer":
+      "Analyze this photo and provide a concise professional enhancement report covering exposure, color, sharpness, noise, and composition.",
+
+    "object-remover":
+      "Analyze this image and identify how to remove unwanted objects cleanly. Include likely masking areas and restoration guidance.",
+
+    "face-retouch":
+      "Analyze this portrait and provide a natural retouching plan. Preserve identity and avoid unrealistic edits.",
+
+    "image-upscaler":
+      "Analyze this image and recommend the best upscaling and sharpening approach. Mention risks such as artifacts or blur.",
+
+    "image-colorizer":
+      "Analyze this image and provide a realistic colorization plan with likely palette choices and areas needing care.",
+
+    "image-to-text":
+      "Extract all readable text from this image. Preserve line breaks where possible. If text is unclear, mark it as [unclear].",
+
+    "summarize-pdf":
+      `Summarize the uploaded document named ${fileName}. Include key points, important details, and a short action list.`,
+
+    "chat-with-pdf":
+      `Read the uploaded document named ${fileName}. Provide a helpful overview, likely questions a user may ask, and concise answers based only on the document.`,
+
+    "translate-document":
+      `Translate or prepare the uploaded document named ${fileName} into clear English. Preserve headings and structure where possible.`,
+
+    "resume-builder":
+      `Use the uploaded file named ${fileName} to create a professional resume draft. Improve clarity, structure, impact bullets, and formatting guidance.`,
+  };
+
+  return (
+    prompts[tool] ||
+    `Analyze the uploaded file named ${fileName} and provide a professional result.`
+  );
+}
+
+
+
+
+ 
+async function fileToDataUrl(file: File) {
+  const buffer = Buffer.from(
+    await file.arrayBuffer()
+  );
+
+  const mimeType =
+    file.type || "application/octet-stream";
+
+  return `data:${mimeType};base64,${buffer.toString("base64")}`;
+}
+
+function textAttachment(
+  text: string,
+  fileName: string
+) {
+  return new NextResponse(text, {
+    status: 200,
+    headers: {
+      "Content-Type":
+        "text/plain; charset=utf-8",
+      "Content-Disposition": `attachment; filename="${fileName}"`,
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+export async function POST(
+  request: NextRequest
+) {
+  let uploadedFileId = "";
+
+  try {
+    const formData =
+      await request.formData();
+
+    const toolValue =
+      formData.get("tool");
+
+    const actionValue =
+      formData.get("action");
+
+    const uploadedFile =
+      formData.get("file");
+
+    if (typeof toolValue !== "string") {
+      return NextResponse.json(
+        {
+          error: "AI tool is required.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    if (!(uploadedFile instanceof File)) {
+      return NextResponse.json(
+        {
+          error: "Please upload one file.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    if (uploadedFile.size === 0) {
+      return NextResponse.json(
+        {
+          error: "The uploaded file is empty.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    if (uploadedFile.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        {
+          error: "Maximum AI file size is 25 MB.",
+        },
+        {
+          status: 413,
+        }
+      );
+    }
+
+    const tool = toolValue;
+    const extension = path
+      .extname(uploadedFile.name)
+      .toLowerCase();
+
+    const isImageTool =
+      imageTools.has(tool);
+
+    const isDocumentTool =
+      documentTools.has(tool);
+
+    if (!isImageTool && !isDocumentTool) {
+      return NextResponse.json(
+        {
+          error: "Unsupported AI tool.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    if (
+      isImageTool &&
+      !allowedImageExtensions.has(extension)
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Only JPG, JPEG, PNG and WEBP images are supported for this AI tool.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    if (
+      isDocumentTool &&
+      !allowedDocumentExtensions.has(extension)
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Only PDF, DOC, DOCX and TXT documents are supported for this AI tool.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    const action =
+      typeof actionValue === "string"
+        ? actionValue.trim()
+        : "";
+
+    const prompt = getPrompt(
+      tool,
+      uploadedFile.name,
+      action
+    );
+
+    const content: OpenAIContent[] = [
+      {
+        type: "input_text" as const,
+        text: prompt,
+      },
+    ];
+
+    if (isImageTool) {
+      content.push({
+        type: "input_image" as const,
+        image_url:
+          await fileToDataUrl(uploadedFile),
+      });
+    } else {
+      uploadedFileId =
+        await uploadOpenAIFile(uploadedFile);
+
+      content.push({
+        type: "input_file" as const,
+        file_id: uploadedFileId,
+      });
+    }
+
+    const result =
+      await createOpenAITextResponse(
+        content
+      );
+
+    const baseName =
+      sanitizeFileName(
+        path.basename(
+          uploadedFile.name,
+          extension
+        )
+      ) || "ai-result";
+
+    return textAttachment(
+      result,
+      `${baseName}-${tool}.txt`
+    );
+  } catch (error) {
+    console.error(
+      "AI processing error:",
+      error
+    );
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unable to process the file with AI.";
+
+    const status = message.includes(
+      "OPENAI_API_KEY"
+    )
+      ? 503
+      : 500;
+
+    return NextResponse.json(
+      {
+        error: message,
+      },
+      {
+        status,
+      }
+    );
+  } finally {
+    if (uploadedFileId) {
+      await deleteOpenAIFile(
+        uploadedFileId
+      );
+    }
+  }
+}

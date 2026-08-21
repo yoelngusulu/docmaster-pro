@@ -5,7 +5,7 @@ export default function ImageToTextPage() {
     <ToolPage
       tool="image-to-text"
       backLink="/tools/ai"
-      backText="← Back to AI Tools"
+      backText="Back to AI Tools"
     />
   );
 }

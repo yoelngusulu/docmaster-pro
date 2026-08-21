@@ -5,7 +5,7 @@ export default function ImageColorizerPage() {
     <ToolPage
       tool="image-colorizer"
       backLink="/tools/ai"
-      backText="← Back to AI Tools"
+      backText="Back to AI Tools"
     />
   );
 }

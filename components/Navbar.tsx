@@ -7,7 +7,14 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+import type { User } from "@supabase/supabase-js";
+
+import { createClient } from "@/lib/supabase/client";
+import { motion} from "framer-motion"
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] =
@@ -15,6 +22,51 @@ export default function Navbar() {
 
   const [isToolsOpen, setIsToolsOpen] =
     useState(false);
+
+  const [user, setUser] =
+    useState<User | null>(null);
+
+  const [isAuthLoading, setIsAuthLoading] =
+    useState(true);
+
+  const [supabase] = useState(() =>
+    createClient()
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadUser = async () => {
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
+
+      if (isMounted) {
+        setUser(currentUser);
+        setIsAuthLoading(false);
+      }
+    };
+
+    loadUser();
+
+    const {
+      data: { subscription },
+    } =
+      supabase.auth.onAuthStateChange(
+        (_event, session) => {
+          setUser(
+            session?.user ?? null
+          );
+
+          setIsAuthLoading(false);
+        }
+      );
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
@@ -24,33 +76,42 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        {/* Logo and branding */}
         <Link
           href="/"
           onClick={closeMobileMenu}
           className="flex min-w-0 shrink-0 items-center gap-3"
         >
-          <Image
+          <motion.div
+  animate={{
+    scale: [1, 1.08, 1],
+  }}
+  transition={{
+    duration: 1.5,
+    delay: 5,
+    repeat: Infinity,
+    repeatDelay: 4.2,
+    ease: "easeInOut",
+  }}
+  >
+              <Image
             src="/images/logo.png"
-            alt="DocMaster AI logo"
-            width={55}
-            height={55}
+            alt="DocMaster logo"
+            width={100}
+            height={50}
             priority
-            className="h-auto w-11 object-contain sm:w-[55px]"
+            className="h-auto w-auto"
           />
-
+</motion.div> 
           <div className="hidden leading-tight sm:block">
             <p className="text-lg font-bold text-gray-900 lg:text-xl">
               DocMaster AI
             </p>
-
             <p className="max-w-48 truncate text-[11px] text-gray-500 lg:max-w-none lg:text-xs">
               The Smartest Document Platform
             </p>
           </div>
         </Link>
 
-        {/* Desktop navigation */}
         <div className="hidden items-center gap-7 font-medium text-gray-700 lg:flex">
           <Link
             href="/"
@@ -59,7 +120,6 @@ export default function Navbar() {
             Home
           </Link>
 
-          {/* Desktop tools dropdown */}
           <div className="group relative">
             <button
               type="button"
@@ -79,13 +139,6 @@ export default function Navbar() {
                 className="block rounded-xl px-4 py-3 transition hover:bg-blue-50 hover:text-blue-600"
               >
                 📄 PDF Tools
-              </Link>
-
-              <Link
-                href="/tools/office"
-                className="block rounded-xl px-4 py-3 transition hover:bg-blue-50 hover:text-blue-600"
-              >
-                📊 Office Tools
               </Link>
 
               <Link
@@ -112,31 +165,60 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Desktop account buttons */}
-        <div className="hidden items-center gap-3 lg:flex">
-          <Link
-            href="/login"
-            className="rounded-lg border border-blue-600 px-4 py-2 font-medium text-blue-600 transition hover:bg-blue-50"
-          >
-            Login
-          </Link>
+        <div className="hidden min-w-[190px] items-center justify-end gap-3 lg:flex">
+          {!isAuthLoading &&
+            (user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="rounded-lg border border-blue-600 px-4 py-2 font-medium text-blue-600 transition hover:bg-blue-50"
+                >
+                  Dashboard
+                </Link>
 
-          <Link
-            href="/signup"
-            className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
-          >
-            Sign Up
-          </Link>
+                <a
+                  href="/logout"
+                  className="rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition hover:bg-red-700"
+                >
+                  Logout
+                </a>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="rounded-lg border border-blue-600 px-4 py-2 font-medium text-blue-600 transition hover:bg-blue-50"
+                >
+                  Login
+                </Link>
+
+                <Link
+                  href="/register"
+                  className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
+                >
+                  Sign Up
+                </Link>
+              </>
+            ))}
         </div>
 
-        {/* Tablet controls */}
         <div className="hidden items-center gap-2 md:flex lg:hidden">
-          <Link
-            href="/login"
-            className="rounded-lg border border-blue-600 px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
-          >
-            Login
-          </Link>
+          {!isAuthLoading &&
+            (user ? (
+              <Link
+                href="/dashboard"
+                className="rounded-lg border border-blue-600 px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="rounded-lg border border-blue-600 px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
+              >
+                Login
+              </Link>
+            ))}
 
           <button
             type="button"
@@ -157,7 +239,6 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile menu button */}
         <button
           type="button"
           onClick={() =>
@@ -177,7 +258,6 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile and tablet menu */}
       {isMobileMenuOpen && (
         <div className="border-t border-gray-200 bg-white px-4 py-5 shadow-lg lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-2">
@@ -189,7 +269,6 @@ export default function Navbar() {
               Home
             </Link>
 
-            {/* Mobile tools dropdown */}
             <div>
               <button
                 type="button"
@@ -223,14 +302,6 @@ export default function Navbar() {
                   </Link>
 
                   <Link
-                    href="/tools/office"
-                    onClick={closeMobileMenu}
-                    className="block rounded-xl px-4 py-3 text-gray-600 transition hover:bg-blue-50 hover:text-blue-600"
-                  >
-                    📊 Office Tools
-                  </Link>
-
-                  <Link
                     href="/tools/image"
                     onClick={closeMobileMenu}
                     className="block rounded-xl px-4 py-3 text-gray-600 transition hover:bg-blue-50 hover:text-blue-600"
@@ -257,33 +328,52 @@ export default function Navbar() {
               About
             </Link>
 
-            {/* Mobile account buttons */}
-            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-gray-200 pt-5 md:hidden">
-              <Link
-                href="/login"
-                onClick={closeMobileMenu}
-                className="rounded-xl border border-blue-600 px-4 py-3 text-center font-semibold text-blue-600 transition hover:bg-blue-50"
-              >
-                Login
-              </Link>
+            {!isAuthLoading && (
+              <div className="mt-4 grid grid-cols-2 gap-3 border-t border-gray-200 pt-5">
+                {user ? (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      onClick={
+                        closeMobileMenu
+                      }
+                      className="rounded-xl border border-blue-600 px-4 py-3 text-center font-semibold text-blue-600 transition hover:bg-blue-50"
+                    >
+                      Dashboard
+                    </Link>
 
-              <Link
-                href="/signup"
-                onClick={closeMobileMenu}
-                className="rounded-xl bg-blue-600 px-4 py-3 text-center font-semibold text-white transition hover:bg-blue-700"
-              >
-                Sign Up
-              </Link>
-            </div>
+                    <a
+                      href="/logout"
+                      className="rounded-xl bg-red-600 px-4 py-3 text-center font-semibold text-white transition hover:bg-red-700"
+                    >
+                      Logout
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={
+                        closeMobileMenu
+                      }
+                      className="rounded-xl border border-blue-600 px-4 py-3 text-center font-semibold text-blue-600 transition hover:bg-blue-50"
+                    >
+                      Login
+                    </Link>
 
-            {/* Tablet signup button */}
-            <Link
-              href="/signup"
-              onClick={closeMobileMenu}
-              className="mt-4 hidden rounded-xl bg-blue-600 px-4 py-3 text-center font-semibold text-white transition hover:bg-blue-700 md:block"
-            >
-              Sign Up
-            </Link>
+                    <Link
+                      href="/register"
+                      onClick={
+                        closeMobileMenu
+                      }
+                      className="rounded-xl bg-blue-600 px-4 py-3 text-center font-semibold text-white transition hover:bg-blue-700"
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

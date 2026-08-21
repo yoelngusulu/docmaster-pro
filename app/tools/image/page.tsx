@@ -1,64 +1,34 @@
-import Link from "next/link";
+import {
+  Archive,
+  FileImage,
+} from "lucide-react";
+
+import ToolHubPage from "@/components/ToolHubPage";
 
 const imageTools = [
   {
-    title: "JPG to PNG",
-    href: "/tools/image/jpg-to-png",
-    icon: "🖼️",
+    title: "Image to PDF",
+    description: "Convert JPG, PNG and other images into one PDF document.",
+    href: "/tools/image/image-to-pdf",
+    icon: FileImage,
+    badge: "Convert",
   },
   {
-    title: "PNG to JPG",
-    href: "/tools/image/png-to-jpg",
-    icon: "🌄",
-  },
-  {
-    title: "WEBP to JPG",
-    href: "/tools/image/webp-to-jpg",
-    icon: "📷",
-  },
-  {
-    title: "JPG to WEBP",
-    href: "/tools/image/jpg-to-webp",
-    icon: "⚡",
-  },
-  {
-    title: "PNG to WEBP",
-    href: "/tools/image/png-to-webp",
-    icon: "🎯",
-  },
-  {
-    title: "WEBP to PNG",
-    href: "/tools/image/webp-to-png",
-    icon: "🖌️",
+    title: "Compress Image",
+    description: "Reduce image file size while keeping good visual quality.",
+    href: "/tools/image/compress-image",
+    icon: Archive,
+    badge: "Optimize",
   },
 ];
 
 export default function ImageToolsPage() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-16">
-      <h1 className="text-center text-4xl font-bold">
-        Image Tools
-      </h1>
-
-      <p className="mt-4 text-center text-gray-600">
-        Convert images between popular formats.
-      </p>
-
-      <div className="mt-12 grid gap-6 md:grid-cols-3">
-        {imageTools.map((tool) => (
-          <Link
-            key={tool.href}
-            href={tool.href}
-            className="rounded-2xl border p-8 text-center transition hover:border-blue-500 hover:shadow-lg"
-          >
-            <div className="text-5xl">{tool.icon}</div>
-
-            <h2 className="mt-5 text-xl font-semibold">
-              {tool.title}
-            </h2>
-          </Link>
-        ))}
-      </div>
-    </main>
+    <ToolHubPage
+      eyebrow="Image Tools"
+      title="Image Tools"
+      subtitle="Convert images into PDFs or reduce image size through the same simple DocMaster workflow."
+      tools={imageTools}
+    />
   );
 }

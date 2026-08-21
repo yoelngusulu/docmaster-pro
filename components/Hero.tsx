@@ -157,7 +157,7 @@ export default function Hero() {
 
           <div className="space-y-4">
             <Link
-              href="/tools/pdf-to-word"
+              href="/tools/pdf/pdf-to-word"
               className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"
             >
               <span className="font-medium text-gray-800">
@@ -170,7 +170,7 @@ export default function Hero() {
             </Link>
 
             <Link
-              href="/tools/word-to-pdf"
+              href="/tools/pdf/word-to-pdf"
               className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"
             >
               <span className="font-medium text-gray-800">
@@ -183,7 +183,7 @@ export default function Hero() {
             </Link>
 
             <Link
-              href="/tools/jpg-to-png"
+              href="/tools/image/image-to-pdf"
               className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"
             >
               <span className="font-medium text-gray-800">
@@ -196,7 +196,7 @@ export default function Hero() {
             </Link>
 
             <Link
-              href="/tools/background-remover"
+              href="/tools/ai/background-remover"
               className="flex items-center justify-between rounded-xl bg-purple-50 p-4 transition hover:bg-purple-100"
             >
               <span className="font-medium text-gray-800">
@@ -209,7 +209,7 @@ export default function Hero() {
             </Link>
 
             <Link
-              href="/tools/image-editor"
+              href="/tools/ai/image-editor"
               className="flex items-center justify-between rounded-xl bg-purple-50 p-4 transition hover:bg-purple-100"
             >
               <span className="font-medium text-gray-800">

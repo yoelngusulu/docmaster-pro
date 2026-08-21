@@ -5,7 +5,7 @@ export default function ImageEditorPage() {
     <ToolPage
       tool="image-editor"
       backLink="/tools/ai"
-      backText="← Back to AI Tools"
+      backText="Back to AI Tools"
     />
   );
 }

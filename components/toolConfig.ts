@@ -16,15 +16,7 @@ export const toolConfig = {
   accept: ".pdf",
   multiple: false,
 },
-  
-  "pdf-to-powerpoint": {
-    title: "PDF to PowerPoint",
-    subtitle: "Convert PDF into editable PowerPoint presentations.",
-    button: "Convert to PowerPoint",
-    success: "Your PowerPoint presentation is ready.",
-    accept: ".pdf",
-    multiple: false,
-  },
+ 
 
   "pdf-to-image": {
     title: "PDF to Image",
@@ -236,5 +228,65 @@ export const toolConfig = {
     accept: ".jpg,.jpeg,.png,.webp",
     multiple: false,
   },
+
+  "summarize-pdf": {
+    title: "Summarize PDF",
+    subtitle:
+      "Upload a PDF and generate a clear, concise summary of the document.",
+    button: "Summarize PDF",
+    success: "Your PDF summary is ready.",
+    accept: ".pdf",
+    multiple: false,
+  },
+
+  "chat-with-pdf": {
+    title: "Chat with PDF",
+    subtitle:
+      "Upload a PDF and ask questions about the document content.",
+    button: "Start Chat",
+    success: "Your PDF is ready for chat.",
+    accept: ".pdf",
+    multiple: false,
+  },
+
+  "translate-document": {
+    title: "Translate Document",
+    subtitle:
+      "Upload a PDF, Word document or text file and prepare it for translation.",
+    button: "Translate Document",
+    success: "Your translated document is ready.",
+    accept: ".pdf,.doc,.docx,.txt",
+    multiple: false,
+  },
+
+  "resume-builder": {
+    title: "Resume Builder",
+    subtitle:
+      "Upload an existing resume or document draft and prepare a polished resume.",
+    button: "Build Resume",
+    success: "Your resume draft is ready.",
+    accept: ".pdf,.doc,.docx,.txt",
+    multiple: false,
+  },
+  "pdf-to-powerpoint": {
+  title: "PDF to PowerPoint",
+  subtitle:
+    "Convert PDF pages into high-quality PowerPoint slides.",
+  button: "Convert to PowerPoint",
+  success:
+    "Your PowerPoint presentation is ready.",
+  accept: ".pdf",
+  multiple: false,
+},
+
+"image-to-pdf": {
+  title: "Image to PDF",
+  subtitle:
+    "Convert JPG and PNG images into a single PDF document.",
+  button: "Convert to PDF",
+  success: "Your PDF is ready.",
+  accept: ".jpg,.jpeg,.png",
+  multiple: true,
+},
 
 } as const;

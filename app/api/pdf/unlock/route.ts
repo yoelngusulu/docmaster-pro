@@ -7,22 +7,51 @@ import {
 
 import os from "os";
 import path from "path";
+import crypto from "crypto";
 
-import { NextRequest, NextResponse } from "next/server";
+import {
+  NextRequest,
+  NextResponse,
+} from "next/server";
 
 import { runQpdf } from "@/lib/pdf/qpdf";
+import { checkUsageLimit } from "@/lib/supabase/usageLimit";
+import { recordConversionUsage } from "@/lib/supabase/recordUsage";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-function sanitizeFileName(fileName: string) {
+function sanitizeFileName(
+  fileName: string
+) {
   return fileName
-    .replace(/[<>:"/\\|?*\x00-\x1F]/g, "-")
+    .replace(
+      /[<>:"/\\|?*\x00-\x1F]/g,
+      "-"
+    )
     .trim();
 }
 
 export async function POST(
   request: NextRequest
 ) {
+  const usage =
+    await checkUsageLimit();
+
+  if (!usage.allowed) {
+    return NextResponse.json(
+      {
+        message: usage.reason,
+        remaining:
+          usage.remaining,
+        limit: usage.limit,
+      },
+      {
+        status: 429,
+      }
+    );
+  }
+
   let temporaryDirectory = "";
 
   try {
@@ -35,7 +64,9 @@ export async function POST(
     const passwordValue =
       formData.get("password");
 
-    if (!(uploadedFile instanceof File)) {
+    if (
+      !(uploadedFile instanceof File)
+    ) {
       return NextResponse.json(
         {
           message:
@@ -75,6 +106,38 @@ export async function POST(
         },
         {
           status: 400,
+        }
+      );
+    }
+
+    if (
+      uploadedFile.size === 0
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            "The uploaded PDF is empty.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    const maximumFileSize =
+      100 * 1024 * 1024;
+
+    if (
+      uploadedFile.size >
+      maximumFileSize
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            "Maximum file size is 100 MB.",
+        },
+        {
+          status: 413,
         }
       );
     }
@@ -140,7 +203,25 @@ export async function POST(
     ]);
 
     const unlockedPdf =
-      await readFile(outputPath);
+      await readFile(
+        outputPath
+      );
+
+    if (
+      unlockedPdf.byteLength === 0
+    ) {
+      throw new Error(
+        "The unlocked PDF is empty."
+      );
+    }
+
+    await recordConversionUsage({
+      tool: "unlock-pdf",
+      identityType:
+        usage.identityType,
+      identityId:
+        usage.identityId,
+    });
 
     return new NextResponse(
       unlockedPdf,
@@ -218,7 +299,9 @@ export async function POST(
           recursive: true,
           force: true,
         }
-      ).catch(() => undefined);
+      ).catch(
+        () => undefined
+      );
     }
   }
 }

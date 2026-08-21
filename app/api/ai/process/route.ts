@@ -310,19 +310,30 @@ export async function POST(
     );
 
     const message =
-      error instanceof Error
-        ? error.message
-        : "Unable to process the file with AI.";
+  error instanceof Error
+    ? error.message
+    : "Unable to process the file with AI.";
 
-    const status = message.includes(
-      "OPENAI_API_KEY"
-    )
-      ? 503
-      : 500;
+const lowerMessage = message.toLowerCase();
+
+const isQuotaError =
+  lowerMessage.includes("quota") ||
+  lowerMessage.includes("billing") ||
+  lowerMessage.includes("insufficient_quota");
+
+const status = message.includes("OPENAI_API_KEY")
+  ? 503
+  : isQuotaError
+    ? 402
+    : 500;
+
+const clientMessage = isQuotaError
+  ? "AI features are temporarily unavailable because API credits are not active. You can continue using PDF and document tools."
+  : message;
 
     return NextResponse.json(
       {
-        error: message,
+        error: clientMessage,
       },
       {
         status,

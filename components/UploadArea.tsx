@@ -141,7 +141,7 @@ export default function UploadArea({
     files: File[]
   ) => {
     const maxSize =
-      100 * 1024 * 1024;
+      200 * 1024 * 1024;
 
     const allowedExtensions =
       config.accept
@@ -178,7 +178,7 @@ export default function UploadArea({
 
       if (file.size > maxSize) {
         setError(
-          "Maximum file size is 100 MB."
+          "Maximum file size is 200 MB."
         );
 
         return false;

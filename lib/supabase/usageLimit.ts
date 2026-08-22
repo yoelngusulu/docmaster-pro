@@ -1,14 +1,113 @@
-import { cookies } from "next/headers";
 import { randomUUID } from "crypto";
+import { cookies } from "next/headers";
 
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
-const FREE_LIMIT = 3;
+const GUEST_LIMIT = 3;
+const REGISTERED_LIMIT = 5;
 const WINDOW_HOURS = 24;
+const UNLIMITED_LIMIT = 999999;
 const GUEST_COOKIE_NAME = "docmaster_guest_id";
 
-export async function checkUsageLimit() {
+const LIMITED_TOOLS = new Set([
+  "pdf-to-word",
+  "pdf-to-excel",
+  "pdf-to-powerpoint",
+  "ai",
+]);
+
+type UsageIdentityType = "user" | "guest";
+
+type UsageLimitResult = {
+  allowed: boolean;
+  reason: string | null;
+  remaining: number;
+  used: number;
+  limit: number;
+  identityType: UsageIdentityType;
+  identityId: string;
+};
+
+type SupabaseUser = {
+  id: string;
+  app_metadata?: Record<string, unknown>;
+  user_metadata?: Record<string, unknown>;
+};
+
+function isLimitedTool(tool?: string) {
+  if (!tool) {
+    return true;
+  }
+
+  return LIMITED_TOOLS.has(tool);
+}
+
+function isPremiumUser(user: SupabaseUser) {
+  return (
+    user.app_metadata?.plan === "premium" ||
+    user.user_metadata?.plan === "premium" ||
+    user.app_metadata?.subscription === "premium" ||
+    user.user_metadata?.subscription === "premium"
+  );
+}
+
+function allowUnlimitedTool(identityId = "free-ad-supported-tool"): UsageLimitResult {
+  return {
+    allowed: true,
+    reason: null,
+    remaining: UNLIMITED_LIMIT,
+    used: 0,
+    limit: UNLIMITED_LIMIT,
+    identityType: "guest",
+    identityId,
+  };
+}
+
+function allowWhenUsageCheckFails(
+  identityType: UsageIdentityType,
+  identityId: string,
+  limit: number
+): UsageLimitResult {
+  return {
+    allowed: true,
+    reason: null,
+    remaining: limit,
+    used: 0,
+    limit,
+    identityType,
+    identityId,
+  };
+}
+
+function buildUsageResult(
+  used: number,
+  limit: number,
+  identityType: UsageIdentityType,
+  identityId: string
+): UsageLimitResult {
+  const allowed = used < limit;
+
+  return {
+    allowed,
+    reason: allowed
+      ? null
+      : `You have reached your ${limit} conversion limit for the last 24 hours.`,
+    remaining: Math.max(limit - used, 0),
+    used,
+    limit,
+    identityType,
+    identityId,
+  };
+}
+
+export async function checkUsageLimit(
+  tool?: string
+): Promise<UsageLimitResult> {
+  if (!isLimitedTool(tool)) {
+    return allowUnlimitedTool();
+  }
+
   const supabase = await createClient();
 
   const {
@@ -16,22 +115,23 @@ export async function checkUsageLimit() {
   } = await supabase.auth.getUser();
 
   const since = new Date(
-    Date.now() -
-      WINDOW_HOURS * 60 * 60 * 1000
+    Date.now() - WINDOW_HOURS * 60 * 60 * 1000
   ).toISOString();
 
-  // Logged-in user
   if (user) {
-    const {
-      count,
-      error,
-    } = await supabase
+    const typedUser = user as SupabaseUser;
+
+    if (isPremiumUser(typedUser)) {
+      return allowUnlimitedTool(typedUser.id);
+    }
+
+    const { count, error } = await supabase
       .from("conversion_usage")
       .select("*", {
         count: "exact",
         head: true,
       })
-      .eq("user_id", user.id)
+      .eq("user_id", typedUser.id)
       .gte("created_at", since);
 
     if (error) {
@@ -40,71 +140,39 @@ export async function checkUsageLimit() {
         error
       );
 
-      return {
-        allowed: false,
-        reason:
-          "Unable to verify your usage limit.",
-        remaining: 0,
-        used: 0,
-        limit: FREE_LIMIT,
-        identityType: "user" as const,
-        identityId: user.id,
-      };
+      return allowWhenUsageCheckFails(
+        "user",
+        typedUser.id,
+        REGISTERED_LIMIT
+      );
     }
 
-    const used = count ?? 0;
-
-    return {
-      allowed: used < FREE_LIMIT,
-      reason:
-        used >= FREE_LIMIT
-          ? "You have reached your free conversion limit for the last 24 hours."
-          : "",
-      remaining: Math.max(
-        FREE_LIMIT - used,
-        0
-      ),
-      used,
-      limit: FREE_LIMIT,
-      identityType: "user" as const,
-      identityId: user.id,
-    };
+    return buildUsageResult(
+      count ?? 0,
+      REGISTERED_LIMIT,
+      "user",
+      typedUser.id
+    );
   }
 
-  // Guest user
   const cookieStore = await cookies();
-
-  let guestId =
-    cookieStore.get(
-      GUEST_COOKIE_NAME
-    )?.value;
+  let guestId = cookieStore.get(GUEST_COOKIE_NAME)?.value;
 
   if (!guestId) {
     guestId = randomUUID();
 
-    cookieStore.set(
-      GUEST_COOKIE_NAME,
-      guestId,
-      {
-        httpOnly: true,
-        sameSite: "lax",
-        secure:
-          process.env.NODE_ENV ===
-          "production",
-        path: "/",
-        maxAge:
-          60 * 60 * 24 * 365,
-      }
-    );
+    cookieStore.set(GUEST_COOKIE_NAME, guestId, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    });
   }
 
-  const admin =
-    createAdminClient();
+  const admin = createAdminClient();
 
-  const {
-    count,
-    error,
-  } = await admin
+  const { count, error } = await admin
     .from("conversion_usage")
     .select("*", {
       count: "exact",
@@ -119,33 +187,17 @@ export async function checkUsageLimit() {
       error
     );
 
-    return {
-      allowed: false,
-      reason:
-        "Unable to verify your usage limit.",
-      remaining: 0,
-      used: 0,
-      limit: FREE_LIMIT,
-      identityType: "guest" as const,
-      identityId: guestId,
-    };
+    return allowWhenUsageCheckFails(
+      "guest",
+      guestId,
+      GUEST_LIMIT
+    );
   }
 
-  const used = count ?? 0;
-
-  return {
-    allowed: used < FREE_LIMIT,
-    reason:
-      used >= FREE_LIMIT
-        ? "You have reached your free conversion limit for the last 24 hours."
-        : "",
-    remaining: Math.max(
-      FREE_LIMIT - used,
-      0
-    ),
-    used,
-    limit: FREE_LIMIT,
-    identityType: "guest" as const,
-    identityId: guestId,
-  };
+  return buildUsageResult(
+    count ?? 0,
+    GUEST_LIMIT,
+    "guest",
+    guestId
+  );
 }

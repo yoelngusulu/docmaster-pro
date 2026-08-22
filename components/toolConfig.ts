@@ -30,7 +30,7 @@ export const toolConfig = {
   title: "Merge PDF",
   subtitle:
     "Combine multiple PDF files into one document.",
-  accept: ".pdf",
+  accept: ".pdf,.zip",
   multiple: true,
   button: "Merge PDFs",
   success:
@@ -52,7 +52,7 @@ export const toolConfig = {
     subtitle: "Reduce the file size of your PDF documents.",
     button: "Compress PDF",
     success: "Your compressed PDF is ready.",
-    accept: ".pdf",
+    accept: ".pdf, .zip",
     multiple: false,
   },
 

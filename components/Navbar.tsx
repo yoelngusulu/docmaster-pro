@@ -103,10 +103,7 @@ export default function Navbar() {
           />
 </motion.div> 
           <div className="hidden leading-tight sm:block">
-            <p className="text-lg font-bold text-gray-900 lg:text-xl">
-              DocMaster AI
-            </p>
-            <p className="max-w-48 truncate text-[11px] text-gray-500 lg:max-w-none lg:text-xs">
+                     <p className="max-w-48 truncate text-[11px] text-gray-500 lg:max-w-none lg:text-xs">
               The Smartest Document Platform
             </p>
           </div>

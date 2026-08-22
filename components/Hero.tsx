@@ -43,13 +43,10 @@ export default function Hero() {
             AI Powered Document Platform
           </div>
 
-          <h1 className="text-4xl font-extrabold leading-tight text-gray-900 sm:text-5xl md:text-6xl">
-            DocMaster AI
-          </h1>
-
-          <h2 className="mt-4 text-2xl font-bold text-blue-600 sm:text-3xl md:text-4xl">
+         
+          <h1 className="mt-4 text-4xl font-bold text-blue-600 sm:text-3xl md:text-5xl">
             The Smartest Document Platform
-          </h2>
+          </h1>
 
           <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-gray-600 sm:text-lg lg:mx-0">
             Convert, edit and enhance PDF, Office

@@ -96,8 +96,8 @@ export default function Navbar() {
               <Image
             src="/images/logo.png"
             alt="DocMaster logo"
-            width={100}
-            height={50}
+            width={96}
+            height={48}
             priority
             className="h-auto w-auto"
           />

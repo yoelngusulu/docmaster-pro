@@ -17,10 +17,18 @@ type BulkType =
   | "dms-to-utm"
   | "utm-to-dms";
 
+type CrsOption =
+  | "EPSG:32736"
+  | "EPSG:32737"
+  | "EPSG:21036"
+  | "EPSG:21037"
+  | "custom";
+
 type BulkRow = Record<string, string | number | null | undefined>;
 
 type ConvertedRow = {
   input: string;
+  id?: string;
   latitude?: string;
   longitude?: string;
   dmsLatitude?: string;
@@ -29,6 +37,7 @@ type ConvertedRow = {
   northing?: string;
   zone?: string;
   hemisphere?: string;
+  elevation?: string;
   error?: string;
 };
 
@@ -38,6 +47,29 @@ const modes: { key: Mode; label: string }[] = [
   { key: "dms-to-utm", label: "DMS to UTM" },
   { key: "utm-to-dms", label: "UTM to DMS" },
   { key: "bulk-file", label: "CSV / Excel Bulk" },
+];
+
+const crsOptions: { value: CrsOption; label: string }[] = [
+  {
+    value: "EPSG:32736",
+    label: "WGS84 / UTM Zone 36S (EPSG:32736)",
+  },
+  {
+    value: "EPSG:32737",
+    label: "WGS84 / UTM Zone 37S (EPSG:32737)",
+  },
+  {
+    value: "EPSG:21036",
+    label: "Arc 1960 / UTM Zone 36S (EPSG:21036)",
+  },
+  {
+    value: "EPSG:21037",
+    label: "Arc 1960 / UTM Zone 37S (EPSG:21037)",
+  },
+  {
+    value: "custom",
+    label: "Custom Proj4 definition",
+  },
 ];
 
 function toDms(value: number, type: "lat" | "lng") {
@@ -65,8 +97,7 @@ function dmsToDecimal(
   seconds: number,
   direction: string
 ) {
-  const decimal =
-    Math.abs(degrees) + minutes / 60 + seconds / 3600;
+  const decimal = Math.abs(degrees) + minutes / 60 + seconds / 3600;
 
   return ["S", "W"].includes(direction.toUpperCase())
     ? -decimal
@@ -78,10 +109,38 @@ function getUtmZone(longitude: number) {
 }
 
 function getUtmProjection(zone: number, hemisphere: string) {
-  const south =
-    hemisphere.toUpperCase() === "S" ? " +south" : "";
+  const south = hemisphere.toUpperCase() === "S" ? " +south" : "";
 
   return `+proj=utm +zone=${zone} +datum=WGS84 +units=m +no_defs${south}`;
+}
+
+function getInputProjection(
+  inputCrs: CrsOption,
+  customProj4: string,
+  zone: string,
+  hemisphere: string
+) {
+  if (inputCrs === "custom") {
+    return customProj4;
+  }
+
+  if (inputCrs === "EPSG:32736") {
+    return "+proj=utm +zone=36 +south +datum=WGS84 +units=m +no_defs";
+  }
+
+  if (inputCrs === "EPSG:32737") {
+    return "+proj=utm +zone=37 +south +datum=WGS84 +units=m +no_defs";
+  }
+
+  if (inputCrs === "EPSG:21036") {
+    return "+proj=utm +zone=36 +south +a=6378249.145 +b=6356514.966398753 +towgs84=-160,-6,-302,0,0,0,0 +units=m +no_defs";
+  }
+
+  if (inputCrs === "EPSG:21037") {
+    return "+proj=utm +zone=37 +south +a=6378249.145 +b=6356514.966398753 +towgs84=-160,-6,-302,0,0,0,0 +units=m +no_defs";
+  }
+
+  return getUtmProjection(Number(zone), hemisphere);
 }
 
 function decimalToUtm(latitude: number, longitude: number) {
@@ -101,14 +160,12 @@ function decimalToUtm(latitude: number, longitude: number) {
   };
 }
 
-function utmToDecimal(
+function projectedToDecimal(
   easting: number,
   northing: number,
-  zone: number,
-  hemisphere: string
+  inputProjection: string
 ) {
-  const projection = getUtmProjection(zone, hemisphere);
-  const [longitude, latitude] = proj4(projection, "WGS84", [
+  const [longitude, latitude] = proj4(inputProjection, "WGS84", [
     easting,
     northing,
   ]);
@@ -128,6 +185,10 @@ function isValidLatLng(latitude: number, longitude: number) {
   );
 }
 
+function isNormalUtmEasting(easting: number) {
+  return easting >= 100000 && easting <= 900000;
+}
+
 function numberValue(value: unknown) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
@@ -144,6 +205,7 @@ function getValue(row: BulkRow, keys: string[]) {
 
   for (const key of keys) {
     const value = normalized[key.toLowerCase()];
+
     if (value !== undefined && value !== null && value !== "") {
       return value;
     }
@@ -155,6 +217,7 @@ function getValue(row: BulkRow, keys: string[]) {
 function rowsToCsv(rows: ConvertedRow[]) {
   const headers = [
     "input",
+    "id",
     "latitude",
     "longitude",
     "dmsLatitude",
@@ -163,6 +226,7 @@ function rowsToCsv(rows: ConvertedRow[]) {
     "northing",
     "zone",
     "hemisphere",
+    "elevation",
     "error",
   ];
 
@@ -206,6 +270,13 @@ export default function CoordinatesConverterPage() {
   const [northing, setNorthing] = useState("");
   const [zone, setZone] = useState("37");
   const [hemisphere, setHemisphere] = useState("S");
+  const [eastingOffset, setEastingOffset] = useState("0");
+const [northingOffset, setNorthingOffset] = useState("0");
+
+  const [inputCrs, setInputCrs] = useState<CrsOption>("EPSG:32737");
+  const [customProj4, setCustomProj4] = useState(
+    "+proj=utm +zone=37 +south +datum=WGS84 +units=m +no_defs"
+  );
 
   const [bulkRows, setBulkRows] = useState<ConvertedRow[]>([]);
   const [bulkError, setBulkError] = useState("");
@@ -219,10 +290,7 @@ export default function CoordinatesConverterPage() {
         return "";
       }
 
-      if (
-        Number.isNaN(latNumber) ||
-        Number.isNaN(lngNumber)
-      ) {
+      if (Number.isNaN(latNumber) || Number.isNaN(lngNumber)) {
         return "Enter valid latitude and longitude numbers.";
       }
 
@@ -271,6 +339,10 @@ export default function CoordinatesConverterPage() {
     }
 
     if (mode === "dms-to-utm") {
+      if (!latD || !latM || !latS || !lngD || !lngM || !lngS) {
+        return "";
+      }
+
       const latitude = dmsToDecimal(
         Number(latD),
         Number(latM),
@@ -284,10 +356,6 @@ export default function CoordinatesConverterPage() {
         Number(lngS),
         lngDir
       );
-
-      if (!latD || !latM || !latS || !lngD || !lngM || !lngS) {
-        return "";
-      }
 
       if (!isValidLatLng(latitude, longitude)) {
         return "Converted latitude or longitude is outside valid range.";
@@ -313,15 +381,31 @@ export default function CoordinatesConverterPage() {
         return "";
       }
 
-      if (
-        Number.isNaN(e) ||
-        Number.isNaN(n) ||
-        Number.isNaN(z)
-      ) {
+      if (Number.isNaN(e) || Number.isNaN(n) || Number.isNaN(z)) {
         return "Enter valid UTM values.";
       }
 
-      const decimal = utmToDecimal(e, n, z, hemisphere);
+      if (inputCrs !== "custom" && !isNormalUtmEasting(e)) {
+        return "Easting is outside the normal UTM range. Check the source CRS/projection or use Custom Proj4.";
+      }
+
+      const inputProjection = getInputProjection(
+        inputCrs,
+        customProj4,
+        zone,
+        hemisphere
+      );
+
+      const correctedEasting =
+  e - (Number(eastingOffset) || 0);
+const correctedNorthing =
+  n - (Number(northingOffset) || 0);
+
+const decimal = projectedToDecimal(
+  correctedEasting,
+  correctedNorthing,
+  inputProjection
+);
 
       return [
         `Latitude: ${decimal.latitude.toFixed(8)}`,
@@ -352,6 +436,8 @@ export default function CoordinatesConverterPage() {
     northing,
     zone,
     hemisphere,
+    inputCrs,
+    customProj4,
   ]);
 
   async function copyResult() {
@@ -379,6 +465,12 @@ export default function CoordinatesConverterPage() {
     setNorthing("");
     setZone("37");
     setHemisphere("S");
+    setEastingOffset("0");
+setNorthingOffset("0");
+    setInputCrs("EPSG:32737");
+    setCustomProj4(
+      "+proj=utm +zone=37 +south +datum=WGS84 +units=m +no_defs"
+    );
     setBulkRows([]);
     setBulkError("");
   }
@@ -392,6 +484,7 @@ export default function CoordinatesConverterPage() {
       const workbook = XLSX.read(buffer, {
         type: "array",
       });
+
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<BulkRow>(sheet);
 
@@ -402,38 +495,65 @@ export default function CoordinatesConverterPage() {
 
       const converted = rows.map<ConvertedRow>((row, index) => {
         try {
+          const id = getValue(row, ["id", "name", "point", "point_id"]);
+          const elevation = getValue(row, ["elevation", "height", "z"]);
+
           if (bulkType === "utm-to-dms") {
             const e = numberValue(
-              getValue(row, ["easting", "x"])
+              getValue(row, ["easting", "east", "x"])
             );
             const n = numberValue(
-              getValue(row, ["northing", "y"])
+              getValue(row, ["northing", "north", "y"])
             );
-            const z = numberValue(
-              getValue(row, ["zone", "utm_zone"])
-            );
-            const hemi = String(
-              getValue(row, ["hemisphere", "hemi"]) || "S"
+
+            const selectedZone =
+              numberValue(getValue(row, ["zone", "utm_zone"])) ??
+              Number(zone);
+
+            const selectedHemisphere = String(
+              getValue(row, ["hemisphere", "hemi", "hem"]) || hemisphere
             ).toUpperCase();
 
-            if (e === null || n === null || z === null) {
+            if (e === null || n === null || Number.isNaN(selectedZone)) {
+              throw new Error("Missing easting, northing or UTM zone.");
+            }
+
+            if (inputCrs !== "custom" && !isNormalUtmEasting(e)) {
               throw new Error(
-                "Missing easting, northing or zone."
+                "Easting is outside the normal UTM range. Check the source CRS/projection or use Custom Proj4."
               );
             }
 
-            const decimal = utmToDecimal(e, n, z, hemi);
+            const inputProjection = getInputProjection(
+              inputCrs,
+              customProj4,
+              String(selectedZone),
+              selectedHemisphere
+            );
+
+   const correctedEasting =
+  e - (Number(eastingOffset) || 0);
+const correctedNorthing =
+  n - (Number(northingOffset) || 0);
+
+const decimal = projectedToDecimal(
+  correctedEasting,
+  correctedNorthing,
+  inputProjection
+);
 
             return {
               input: `Row ${index + 2}`,
+              id: id ? String(id) : "",
               latitude: decimal.latitude.toFixed(8),
               longitude: decimal.longitude.toFixed(8),
               dmsLatitude: toDms(decimal.latitude, "lat"),
               dmsLongitude: toDms(decimal.longitude, "lng"),
-              easting: e.toFixed(3),
-              northing: n.toFixed(3),
-              zone: String(z),
-              hemisphere: hemi,
+              easting: correctedEasting.toFixed(3),
+              northing: correctedNorthing.toFixed(3),
+              zone: String(selectedZone),
+              hemisphere: selectedHemisphere,
+              elevation: elevation ? String(elevation) : "",
             };
           }
 
@@ -444,13 +564,17 @@ export default function CoordinatesConverterPage() {
             const latDeg = numberValue(getValue(row, ["lat_deg"]));
             const latMin = numberValue(getValue(row, ["lat_min"]));
             const latSec = numberValue(getValue(row, ["lat_sec"]));
-            const latDirection = String(
-              getValue(row, ["lat_dir"]) || "S"
-            );
+            const latDirection = String(getValue(row, ["lat_dir"]) || "S");
 
-            const lngDeg = numberValue(getValue(row, ["lng_deg", "lon_deg"]));
-            const lngMin = numberValue(getValue(row, ["lng_min", "lon_min"]));
-            const lngSec = numberValue(getValue(row, ["lng_sec", "lon_sec"]));
+            const lngDeg = numberValue(
+              getValue(row, ["lng_deg", "lon_deg"])
+            );
+            const lngMin = numberValue(
+              getValue(row, ["lng_min", "lon_min"])
+            );
+            const lngSec = numberValue(
+              getValue(row, ["lng_sec", "lon_sec"])
+            );
             const lngDirection = String(
               getValue(row, ["lng_dir", "lon_dir"]) || "E"
             );
@@ -466,30 +590,16 @@ export default function CoordinatesConverterPage() {
               throw new Error("Missing DMS columns.");
             }
 
-            latitude = dmsToDecimal(
-              latDeg,
-              latMin,
-              latSec,
-              latDirection
-            );
-            longitude = dmsToDecimal(
-              lngDeg,
-              lngMin,
-              lngSec,
-              lngDirection
-            );
+            latitude = dmsToDecimal(latDeg, latMin, latSec, latDirection);
+            longitude = dmsToDecimal(lngDeg, lngMin, lngSec, lngDirection);
           } else {
-            const latValue = numberValue(
-              getValue(row, ["latitude", "lat"])
-            );
+            const latValue = numberValue(getValue(row, ["latitude", "lat"]));
             const lngValue = numberValue(
               getValue(row, ["longitude", "lng", "lon"])
             );
 
             if (latValue === null || lngValue === null) {
-              throw new Error(
-                "Missing latitude or longitude."
-              );
+              throw new Error("Missing latitude or longitude.");
             }
 
             latitude = latValue;
@@ -504,6 +614,7 @@ export default function CoordinatesConverterPage() {
 
           return {
             input: `Row ${index + 2}`,
+            id: id ? String(id) : "",
             latitude: latitude.toFixed(8),
             longitude: longitude.toFixed(8),
             dmsLatitude: toDms(latitude, "lat"),
@@ -512,6 +623,7 @@ export default function CoordinatesConverterPage() {
             northing: utm.northing.toFixed(3),
             zone: String(utm.zone),
             hemisphere: utm.hemisphere,
+            elevation: elevation ? String(elevation) : "",
           };
         } catch (error) {
           return {
@@ -561,11 +673,14 @@ export default function CoordinatesConverterPage() {
           <p className="text-sm font-semibold text-blue-600">
             GIS Utility
           </p>
+
           <h1 className="mt-2 text-3xl font-bold text-gray-900">
             Coordinates Converter
           </h1>
+
           <p className="mt-3 max-w-3xl text-gray-600">
-            Convert coordinates between Decimal Degrees, DMS and UTM. Upload CSV or Excel files for bulk conversion.
+            Convert coordinates between Decimal Degrees, DMS and UTM. Upload CSV
+            or Excel files for bulk conversion.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -587,8 +702,18 @@ export default function CoordinatesConverterPage() {
 
           {mode === "dd-to-dms" && (
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <Field label="Latitude" value={lat} setValue={setLat} placeholder="-6.7924" />
-              <Field label="Longitude" value={lng} setValue={setLng} placeholder="39.2083" />
+              <Field
+                label="Latitude"
+                value={lat}
+                setValue={setLat}
+                placeholder="-6.7924"
+              />
+              <Field
+                label="Longitude"
+                value={lng}
+                setValue={setLng}
+                placeholder="39.2083"
+              />
             </div>
           )}
 
@@ -635,11 +760,40 @@ export default function CoordinatesConverterPage() {
           )}
 
           {mode === "utm-to-dms" && (
-            <div className="mt-6 grid gap-4 md:grid-cols-4">
-              <Field label="Easting" value={easting} setValue={setEasting} placeholder="522988" />
-              <Field label="Northing" value={northing} setValue={setNorthing} placeholder="9249043" />
-              <Field label="Zone" value={zone} setValue={setZone} placeholder="37" />
-              <SelectField label="Hemisphere" value={hemisphere} setValue={setHemisphere} options={["N", "S"]} />
+            <div className="mt-6 space-y-5">
+              <ProjectionFields
+                inputCrs={inputCrs}
+                setInputCrs={setInputCrs}
+                customProj4={customProj4}
+                setCustomProj4={setCustomProj4}
+              />
+
+              <div className="grid gap-4 md:grid-cols-4">
+                <Field
+                  label="Easting"
+                  value={easting}
+                  setValue={setEasting}
+                  placeholder="324570"
+                />
+                <Field
+                  label="Northing"
+                  value={northing}
+                  setValue={setNorthing}
+                  placeholder="9628362"
+                />
+                <Field
+                  label="Zone"
+                  value={zone}
+                  setValue={setZone}
+                  placeholder="37"
+                />
+                <SelectField
+                  label="Hemisphere"
+                  value={hemisphere}
+                  setValue={setHemisphere}
+                  options={["N", "S"]}
+                />
+              </div>
             </div>
           )}
 
@@ -668,11 +822,38 @@ export default function CoordinatesConverterPage() {
                 </select>
               </label>
 
+              {bulkType === "utm-to-dms" && (
+                <>
+                  <ProjectionFields
+                    inputCrs={inputCrs}
+                    setInputCrs={setInputCrs}
+                    customProj4={customProj4}
+                    setCustomProj4={setCustomProj4}
+                  />
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field
+                      label="Default UTM Zone"
+                      value={zone}
+                      setValue={setZone}
+                      placeholder="37"
+                    />
+                    <SelectField
+                      label="Default Hemisphere"
+                      value={hemisphere}
+                      setValue={setHemisphere}
+                      options={["N", "S"]}
+                    />
+                  </div>
+                </>
+              )}
+
               <input
                 type="file"
                 accept=".csv,.xlsx,.xls"
                 onChange={(event) => {
                   const file = event.target.files?.[0];
+
                   if (file) {
                     void handleBulkFile(file);
                   }
@@ -681,7 +862,11 @@ export default function CoordinatesConverterPage() {
               />
 
               <p className="text-sm text-gray-600">
-                CSV/Excel columns: latitude, longitude or lat, lng. For DMS use lat_deg, lat_min, lat_sec, lat_dir, lng_deg, lng_min, lng_sec, lng_dir. For UTM use easting, northing, zone, hemisphere.
+                CSV/Excel columns: latitude, longitude or lat, lng. For DMS use
+                lat_deg, lat_min, lat_sec, lat_dir, lng_deg, lng_min, lng_sec,
+                lng_dir. For UTM use easting/northing or x/y. Column z is
+                treated as elevation, not UTM zone. If zone and hemisphere are
+                missing, the default fields above will be used.
               </p>
 
               {bulkError && (
@@ -695,7 +880,9 @@ export default function CoordinatesConverterPage() {
           {mode !== "bulk-file" && (
             <>
               <div className="mt-6 rounded-md bg-gray-900 p-4 text-white">
-                <p className="text-sm font-semibold text-gray-300">Result</p>
+                <p className="text-sm font-semibold text-gray-300">
+                  Result
+                </p>
                 <pre className="mt-2 whitespace-pre-wrap text-lg">
                   {result || "Enter coordinates to see the result."}
                 </pre>
@@ -743,6 +930,7 @@ export default function CoordinatesConverterPage() {
                     <tr>
                       {[
                         "Input",
+                        "ID",
                         "Latitude",
                         "Longitude",
                         "DMS Latitude",
@@ -751,6 +939,7 @@ export default function CoordinatesConverterPage() {
                         "Northing",
                         "Zone",
                         "Hemisphere",
+                        "Elevation",
                         "Error",
                       ].map((header) => (
                         <th
@@ -767,6 +956,7 @@ export default function CoordinatesConverterPage() {
                       <tr key={row.input}>
                         {[
                           row.input,
+                          row.id,
                           row.latitude,
                           row.longitude,
                           row.dmsLatitude,
@@ -775,6 +965,7 @@ export default function CoordinatesConverterPage() {
                           row.northing,
                           row.zone,
                           row.hemisphere,
+                          row.elevation,
                           row.error,
                         ].map((value, index) => (
                           <td
@@ -852,6 +1043,60 @@ function SelectField({
   );
 }
 
+function CrsSelectField({
+  value,
+  setValue,
+}: {
+  value: CrsOption;
+  setValue: (value: CrsOption) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="text-sm font-medium text-gray-700">
+        Input CRS / Projection
+      </span>
+      <select
+        value={value}
+        onChange={(event) => setValue(event.target.value as CrsOption)}
+        className="mt-2 w-full rounded-md border border-gray-300 px-4 py-3"
+      >
+        {crsOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function ProjectionFields({
+  inputCrs,
+  setInputCrs,
+  customProj4,
+  setCustomProj4,
+}: {
+  inputCrs: CrsOption;
+  setInputCrs: (value: CrsOption) => void;
+  customProj4: string;
+  setCustomProj4: (value: string) => void;
+}) {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <CrsSelectField value={inputCrs} setValue={setInputCrs} />
+
+      {inputCrs === "custom" && (
+        <Field
+          label="Custom Proj4"
+          value={customProj4}
+          setValue={setCustomProj4}
+          placeholder="+proj=utm +zone=37 +south +datum=WGS84 +units=m +no_defs"
+        />
+      )}
+    </div>
+  );
+}
+
 function DmsSingleForm(props: {
   d: string;
   m: string;
@@ -864,10 +1109,30 @@ function DmsSingleForm(props: {
 }) {
   return (
     <div className="mt-6 grid gap-4 md:grid-cols-4">
-      <Field label="Degrees" value={props.d} setValue={props.setD} placeholder="6" />
-      <Field label="Minutes" value={props.m} setValue={props.setM} placeholder="47" />
-      <Field label="Seconds" value={props.s} setValue={props.setS} placeholder="32.64" />
-      <SelectField label="Direction" value={props.dir} setValue={props.setDir} options={["N", "S", "E", "W"]} />
+      <Field
+        label="Degrees"
+        value={props.d}
+        setValue={props.setD}
+        placeholder="6"
+      />
+      <Field
+        label="Minutes"
+        value={props.m}
+        setValue={props.setM}
+        placeholder="47"
+      />
+      <Field
+        label="Seconds"
+        value={props.s}
+        setValue={props.setS}
+        placeholder="32.64"
+      />
+      <SelectField
+        label="Direction"
+        value={props.dir}
+        setValue={props.setDir}
+        options={["N", "S", "E", "W"]}
+      />
     </div>
   );
 }
@@ -887,11 +1152,32 @@ function DmsPairForm(props: {
   return (
     <div className="rounded-md border border-gray-200 p-4">
       <h2 className="font-semibold text-gray-900">{props.title}</h2>
+
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <Field label="Degrees" value={props.d} setValue={props.setD} placeholder="6" />
-        <Field label="Minutes" value={props.m} setValue={props.setM} placeholder="47" />
-        <Field label="Seconds" value={props.s} setValue={props.setS} placeholder="32.64" />
-        <SelectField label="Direction" value={props.dir} setValue={props.setDir} options={props.directions} />
+        <Field
+          label="Degrees"
+          value={props.d}
+          setValue={props.setD}
+          placeholder="6"
+        />
+        <Field
+          label="Minutes"
+          value={props.m}
+          setValue={props.setM}
+          placeholder="47"
+        />
+        <Field
+          label="Seconds"
+          value={props.s}
+          setValue={props.setS}
+          placeholder="32.64"
+        />
+        <SelectField
+          label="Direction"
+          value={props.dir}
+          setValue={props.setDir}
+          options={props.directions}
+        />
       </div>
     </div>
   );

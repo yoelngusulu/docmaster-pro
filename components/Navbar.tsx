@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ChevronDown,
+  FileText,
+  Image as ImageIcon,
+  MapPinned,
   Menu,
   X,
 } from "lucide-react";
@@ -12,9 +15,27 @@ import {
   useState,
 } from "react";
 import type { User } from "@supabase/supabase-js";
+import { motion } from "framer-motion";
 
 import { createClient } from "@/lib/supabase/client";
-import { motion} from "framer-motion"
+
+const toolLinks = [
+  {
+    href: "/tools/pdf",
+    label: "PDF Tools",
+    icon: FileText,
+  },
+  {
+    href: "/tools/image",
+    label: "Image Tools",
+    icon: ImageIcon,
+  },
+  {
+    href: "/tools/coordinates-converter",
+    label: "Coordinates Converter",
+    icon: MapPinned,
+  },
+];
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] =
@@ -82,28 +103,32 @@ export default function Navbar() {
           className="flex min-w-0 shrink-0 items-center gap-3"
         >
           <motion.div
-  animate={{
-    scale: [1, 1.08, 1],
-  }}
-  transition={{
-    duration: 1.5,
-    delay: 5,
-    repeat: Infinity,
-    repeatDelay: 4.2,
-    ease: "easeInOut",
-  }}
-  >
-              <Image
-            src="/images/logo.png"
-            alt="DocMaster logo"
-            width={96}
-            height={48}
-            priority
-            className="h-auto w-auto"
-          />
-</motion.div> 
+            animate={{
+              scale: [1, 1.08, 1],
+            }}
+            transition={{
+              duration: 1.5,
+              delay: 5,
+              repeat: Infinity,
+              repeatDelay: 4.2,
+              ease: "easeInOut",
+            }}
+          >
+            <Image
+              src="/images/logo.png"
+              alt="DocMaster logo"
+              width={96}
+              height={48}
+              priority
+              style={{
+                width: "96px",
+                height: "auto",
+              }}
+            />
+          </motion.div>
+
           <div className="hidden leading-tight sm:block">
-                     <p className="max-w-48 truncate text-[11px] text-gray-500 lg:max-w-none lg:text-xs">
+            <p className="max-w-48 truncate text-[11px] text-gray-500 lg:max-w-none lg:text-xs">
               The Smartest Document Platform
             </p>
           </div>
@@ -130,20 +155,24 @@ export default function Navbar() {
               />
             </button>
 
-            <div className="invisible absolute left-1/2 top-full z-50 mt-3 w-60 -translate-x-1/2 rounded-2xl border border-gray-200 bg-white p-2 opacity-0 shadow-xl transition-all group-hover:visible group-hover:opacity-100">
-              <Link
-                href="/tools/pdf"
-                className="block rounded-xl px-4 py-3 transition hover:bg-blue-50 hover:text-blue-600"
-              >
-                📄 PDF Tools
-              </Link>
+            <div className="invisible absolute left-1/2 top-full z-50 mt-3 w-72 -translate-x-1/2 rounded-2xl border border-gray-200 bg-white p-2 opacity-0 shadow-xl transition-all group-hover:visible group-hover:opacity-100">
+              {toolLinks.map((tool) => {
+                const Icon = tool.icon;
 
-              <Link
-                href="/tools/image"
-                className="block rounded-xl px-4 py-3 transition hover:bg-blue-50 hover:text-blue-600"
-              >
-                🖼️ Image Tools
-              </Link>
+                return (
+                  <Link
+                    key={tool.href}
+                    href={tool.href}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-gray-700 transition hover:bg-blue-50 hover:text-blue-600"
+                  >
+                    <Icon size={18} />
+
+                    <span>
+                      {tool.label}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
@@ -290,21 +319,24 @@ export default function Navbar() {
 
               {isToolsOpen && (
                 <div className="ml-4 mt-1 space-y-1 border-l-2 border-blue-100 pl-3">
-                  <Link
-                    href="/tools/pdf"
-                    onClick={closeMobileMenu}
-                    className="block rounded-xl px-4 py-3 text-gray-600 transition hover:bg-blue-50 hover:text-blue-600"
-                  >
-                    📄 PDF Tools
-                  </Link>
+                  {toolLinks.map((tool) => {
+                    const Icon = tool.icon;
 
-                  <Link
-                    href="/tools/image"
-                    onClick={closeMobileMenu}
-                    className="block rounded-xl px-4 py-3 text-gray-600 transition hover:bg-blue-50 hover:text-blue-600"
-                  >
-                    🖼️ Image Tools
-                  </Link>
+                    return (
+                      <Link
+                        key={tool.href}
+                        href={tool.href}
+                        onClick={closeMobileMenu}
+                        className="flex items-center gap-3 rounded-xl px-4 py-3 text-gray-600 transition hover:bg-blue-50 hover:text-blue-600"
+                      >
+                        <Icon size={18} />
+
+                        <span>
+                          {tool.label}
+                        </span>
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -331,9 +363,7 @@ export default function Navbar() {
                   <>
                     <Link
                       href="/dashboard"
-                      onClick={
-                        closeMobileMenu
-                      }
+                      onClick={closeMobileMenu}
                       className="rounded-xl border border-blue-600 px-4 py-3 text-center font-semibold text-blue-600 transition hover:bg-blue-50"
                     >
                       Dashboard
@@ -350,9 +380,7 @@ export default function Navbar() {
                   <>
                     <Link
                       href="/login"
-                      onClick={
-                        closeMobileMenu
-                      }
+                      onClick={closeMobileMenu}
                       className="rounded-xl border border-blue-600 px-4 py-3 text-center font-semibold text-blue-600 transition hover:bg-blue-50"
                     >
                       Login
@@ -360,9 +388,7 @@ export default function Navbar() {
 
                     <Link
                       href="/register"
-                      onClick={
-                        closeMobileMenu
-                      }
+                      onClick={closeMobileMenu}
                       className="rounded-xl bg-blue-600 px-4 py-3 text-center font-semibold text-white transition hover:bg-blue-700"
                     >
                       Sign Up

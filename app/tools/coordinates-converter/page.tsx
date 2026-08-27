@@ -552,70 +552,71 @@ export default function CoordinatesConverterPage() {
           <p className="mt-3 max-w-3xl text-gray-600">
             Convert coordinates between Decimal Degrees, DMS and UTM. Upload CSV or Excel files for bulk conversion.
           </p>
-<div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/70 p-5">
-  <h2 className="text-lg font-bold text-gray-900">
-    How to use this converter
-  </h2>
+<div className="mt-8 border-y border-gray-200 py-8">
+  <div className="text-center">
+    <h2 className="text-2xl font-bold text-gray-900">
+      How Coordinates Converter Works
+    </h2>
 
-  <div className="mt-4 grid gap-4 text-sm leading-6 text-gray-700 md:grid-cols-2">
-    <div className="rounded-xl bg-white p-4 shadow-sm">
-      <h3 className="font-semibold text-gray-900">
-        Decimal to DMS
-      </h3>
-      <p className="mt-2">
-        Enter latitude and longitude in decimal degrees. Use negative values
-        for south and west coordinates, for example -5.61175089 and
-        36.58575522.
-      </p>
-    </div>
-
-    <div className="rounded-xl bg-white p-4 shadow-sm">
-      <h3 className="font-semibold text-gray-900">
-        DMS to Decimal
-      </h3>
-      <p className="mt-2">
-        Enter degrees, minutes, seconds and direction. Choose S or W when the
-        coordinate is south or west so the decimal result becomes negative.
-      </p>
-    </div>
-
-    <div className="rounded-xl bg-white p-4 shadow-sm">
-      <h3 className="font-semibold text-gray-900">
-        DMS to UTM
-      </h3>
-      <p className="mt-2">
-        Convert DMS latitude and longitude into UTM easting and northing. Choose
-        the correct UTM zone and hemisphere for your project area.
-      </p>
-    </div>
-
-    <div className="rounded-xl bg-white p-4 shadow-sm">
-      <h3 className="font-semibold text-gray-900">
-        UTM to DMS
-      </h3>
-      <p className="mt-2">
-        Enter easting, northing, UTM zone and hemisphere. If your easting has a
-        local offset such as 900000, enter that offset before converting.
-      </p>
-    </div>
-
-    <div className="rounded-xl bg-white p-4 shadow-sm md:col-span-2">
-      <h3 className="font-semibold text-gray-900">
-        CSV / Excel Bulk Conversion
-      </h3>
-      <p className="mt-2">
-        Upload CSV or Excel files with columns such as latitude, longitude,
-        lat, lng, easting, northing, x, y, zone, hemisphere, band or elevation.
-        After conversion, review the results and download the converted CSV.
-      </p>
-    </div>
+    <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-gray-600">
+      Convert single coordinates or bulk CSV/Excel files by selecting the
+      correct coordinate format, projection, UTM zone and hemisphere.
+    </p>
   </div>
 
-  <p className="mt-4 rounded-xl bg-white px-4 py-3 text-sm leading-6 text-gray-600">
-    Tip: for standard UTM data, keep Easting Offset and Northing Offset as 0.
-    Use an offset only when your source data has local grid values, for example
-    easting 1132556 that should be treated as 232556 after subtracting 900000.
-  </p>
+  <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+    {[
+      {
+        step: "01",
+        title: "Choose Mode",
+        text:
+          "Select Decimal, DMS, UTM or CSV/Excel bulk conversion depending on your source data.",
+      },
+      {
+        step: "02",
+        title: "Enter Data",
+        text:
+          "Type coordinates manually or upload a CSV/Excel file with latitude, longitude, easting or northing columns.",
+      },
+      {
+        step: "03",
+        title: "Set Projection",
+        text:
+          "Choose the correct CRS, UTM zone and hemisphere. Use offsets only for local grid coordinates.",
+      },
+      {
+        step: "04",
+        title: "Convert",
+        text:
+          "Review the converted results instantly, then copy the output or download the converted CSV file.",
+      },
+    ].map((item) => (
+      <div
+        key={item.step}
+        className="rounded-2xl border border-gray-200 bg-gray-50 p-5 text-center"
+      >
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white">
+          {item.step}
+        </div>
+
+        <h3 className="mt-4 text-lg font-bold text-gray-900">
+          {item.title}
+        </h3>
+
+        <p className="mt-3 text-sm leading-6 text-gray-600">
+          {item.text}
+        </p>
+      </div>
+    ))}
+  </div>
+
+  <div className="mt-6 rounded-xl bg-blue-50 px-5 py-4 text-sm leading-6 text-gray-700">
+    <strong className="text-gray-900">Important:</strong>{" "}
+    For standard UTM coordinates, keep offsets at 0. Use Easting Offset or
+    Northing Offset only when your source data uses a local grid value, for
+    example easting 1132556 that should be converted as 232556 after subtracting
+    900000.
+  </div>
 </div>
           
           <div className="mt-8 flex flex-wrap gap-3">

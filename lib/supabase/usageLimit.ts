@@ -15,7 +15,21 @@ const LIMITED_TOOLS = new Set([
   "pdf-to-excel",
   "pdf-to-powerpoint",
   "ai",
+  "image-editor",
+  "background-remover",
+  "photo-enhancer",
+  "object-remover",
+  "face-retouch",
+  "image-upscaler",
+  "image-colorizer",
+  "image-to-text",
+  "summarize-pdf",
+  "chat-with-pdf",
+  "translate-document",
+  "resume-builder",
 ]);
+
+const LIMITED_TOOL_NAMES = Array.from(LIMITED_TOOLS);
 
 type UsageIdentityType = "user" | "guest";
 
@@ -29,37 +43,56 @@ type UsageLimitResult = {
   identityId: string;
 };
 
-type SupabaseUser = {
+type SupabasePlanUser = {
   id: string;
   app_metadata?: Record<string, unknown>;
   user_metadata?: Record<string, unknown>;
 };
 
+function normalizeTool(tool?: string) {
+  return tool?.trim().toLowerCase();
+}
+
 function isLimitedTool(tool?: string) {
-  if (!tool) {
+  const toolName = normalizeTool(tool);
+
+  if (!toolName) {
     return true;
   }
 
-  return LIMITED_TOOLS.has(tool);
+  return LIMITED_TOOLS.has(toolName);
 }
 
-function isPremiumUser(user: SupabaseUser) {
-  return (
-    user.app_metadata?.plan === "premium" ||
-    user.user_metadata?.plan === "premium" ||
-    user.app_metadata?.subscription === "premium" ||
-    user.user_metadata?.subscription === "premium"
+function isPremiumValue(value: unknown) {
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  return ["premium", "pro", "paid"].includes(
+    value.toLowerCase()
   );
 }
 
-function allowUnlimitedTool(identityId = "free-ad-supported-tool"): UsageLimitResult {
+function isPremiumUser(user: SupabasePlanUser) {
+  return (
+    isPremiumValue(user.app_metadata?.plan) ||
+    isPremiumValue(user.user_metadata?.plan) ||
+    isPremiumValue(user.app_metadata?.subscription) ||
+    isPremiumValue(user.user_metadata?.subscription)
+  );
+}
+
+function buildUnlimitedResult(
+  identityType: UsageIdentityType,
+  identityId: string
+): UsageLimitResult {
   return {
     allowed: true,
     reason: null,
     remaining: UNLIMITED_LIMIT,
     used: 0,
     limit: UNLIMITED_LIMIT,
-    identityType: "guest",
+    identityType,
     identityId,
   };
 }
@@ -101,60 +134,7 @@ function buildUsageResult(
   };
 }
 
-export async function checkUsageLimit(
-  tool?: string
-): Promise<UsageLimitResult> {
-  if (!isLimitedTool(tool)) {
-    return allowUnlimitedTool();
-  }
-
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const since = new Date(
-    Date.now() - WINDOW_HOURS * 60 * 60 * 1000
-  ).toISOString();
-
-  if (user) {
-    const typedUser = user as SupabaseUser;
-
-    if (isPremiumUser(typedUser)) {
-      return allowUnlimitedTool(typedUser.id);
-    }
-
-    const { count, error } = await supabase
-      .from("conversion_usage")
-      .select("*", {
-        count: "exact",
-        head: true,
-      })
-      .eq("user_id", typedUser.id)
-      .gte("created_at", since);
-
-    if (error) {
-      console.error(
-        "Unable to check logged-in usage:",
-        error
-      );
-
-      return allowWhenUsageCheckFails(
-        "user",
-        typedUser.id,
-        REGISTERED_LIMIT
-      );
-    }
-
-    return buildUsageResult(
-      count ?? 0,
-      REGISTERED_LIMIT,
-      "user",
-      typedUser.id
-    );
-  }
-
+async function getOrCreateGuestId() {
   const cookieStore = await cookies();
   let guestId = cookieStore.get(GUEST_COOKIE_NAME)?.value;
 
@@ -170,34 +150,115 @@ export async function checkUsageLimit(
     });
   }
 
-  const admin = createAdminClient();
+  return guestId;
+}
 
-  const { count, error } = await admin
-    .from("conversion_usage")
-    .select("*", {
-      count: "exact",
-      head: true,
-    })
-    .eq("guest_id", guestId)
-    .gte("created_at", since);
+export async function checkUsageLimit(
+  tool?: string
+): Promise<UsageLimitResult> {
+  const shouldLimit = isLimitedTool(tool);
 
-  if (error) {
+  const since = new Date(
+    Date.now() - WINDOW_HOURS * 60 * 60 * 1000
+  ).toISOString();
+
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!shouldLimit) {
+      if (user) {
+        return buildUnlimitedResult("user", user.id);
+      }
+
+      const guestId = await getOrCreateGuestId();
+
+      return buildUnlimitedResult("guest", guestId);
+    }
+
+    if (user) {
+      const typedUser = user as SupabasePlanUser;
+
+      if (isPremiumUser(typedUser)) {
+        return buildUnlimitedResult("user", typedUser.id);
+      }
+
+      const { count, error } = await supabase
+        .from("conversion_usage")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("user_id", typedUser.id)
+        .in("tool", LIMITED_TOOL_NAMES)
+        .gte("created_at", since);
+
+      if (error) {
+        console.error(
+          "Unable to check logged-in usage:",
+          error
+        );
+
+        return allowWhenUsageCheckFails(
+          "user",
+          typedUser.id,
+          REGISTERED_LIMIT
+        );
+      }
+
+      return buildUsageResult(
+        count ?? 0,
+        REGISTERED_LIMIT,
+        "user",
+        typedUser.id
+      );
+    }
+
+    const guestId = await getOrCreateGuestId();
+    const admin = createAdminClient();
+
+    const { count, error } = await admin
+      .from("conversion_usage")
+      .select("*", {
+        count: "exact",
+        head: true,
+      })
+      .eq("guest_id", guestId)
+      .in("tool", LIMITED_TOOL_NAMES)
+      .gte("created_at", since);
+
+    if (error) {
+      console.error(
+        "Unable to check guest usage:",
+        error
+      );
+
+      return allowWhenUsageCheckFails(
+        "guest",
+        guestId,
+        GUEST_LIMIT
+      );
+    }
+
+    return buildUsageResult(
+      count ?? 0,
+      GUEST_LIMIT,
+      "guest",
+      guestId
+    );
+  } catch (error) {
     console.error(
-      "Unable to check guest usage:",
+      "Usage limit check failed:",
       error
     );
 
     return allowWhenUsageCheckFails(
       "guest",
-      guestId,
-      GUEST_LIMIT
+      "usage-check-failed",
+      shouldLimit ? GUEST_LIMIT : UNLIMITED_LIMIT
     );
   }
-
-  return buildUsageResult(
-    count ?? 0,
-    GUEST_LIMIT,
-    "guest",
-    guestId
-  );
 }

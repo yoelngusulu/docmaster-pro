@@ -18,6 +18,29 @@ import {
   useRef,
   useState,
 } from "react";
+const AD_WAIT_SECONDS = 7;
+
+const AD_SUPPORTED_TOOLS = new Set([
+  "merge-pdf",
+  "split-pdf",
+  "compress-pdf",
+  "protect-pdf",
+  "unlock-pdf",
+  "word-to-pdf",
+  "pdf-to-image",
+  "image-to-pdf",
+  "compress-image",
+]);
+
+function isAdSupportedTool(tool: string) {
+  return AD_SUPPORTED_TOOLS.has(tool);
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
 
 type UploadAreaProps = {
   tool: keyof typeof toolConfig;
@@ -43,6 +66,11 @@ export default function UploadArea({
     isConverting,
     setIsConverting,
   ] = useState(false);
+    const [isAdWaiting, setIsAdWaiting] =
+    useState(false);
+
+  const [adCountdown, setAdCountdown] =
+    useState(0);
 
   const [progress, setProgress] =
     useState(0);
@@ -1321,7 +1349,23 @@ const handleCompressImage = async () => {
     };
 
 
-  const handleConvert =
+  
+  async function runAdWait() {
+    setIsAdWaiting(true);
+
+    for (
+      let seconds = AD_WAIT_SECONDS;
+      seconds > 0;
+      seconds -= 1
+    ) {
+      setAdCountdown(seconds);
+      await sleep(1000);
+    }
+
+    setAdCountdown(0);
+    setIsAdWaiting(false);
+  }
+const handleConvert =
     async () => {
       if (isConverting) {
         return;
@@ -1515,7 +1559,11 @@ if (
       }
 
       setError("");
-      setIsConverting(true);
+      if (isAdSupportedTool(tool)) {
+      await runAdWait();
+    }
+
+    setIsConverting(true);
       setIsCompleted(false);
       setProgress(10);
 
@@ -1660,6 +1708,27 @@ if (
       }}
       className="mt-0"
     >
+      {isAdWaiting && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
+            <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
+              Sponsored Free Tool
+            </p>
+
+            <h2 className="mt-3 text-2xl font-bold text-gray-900">
+              Conversion starts in {adCountdown}s
+            </h2>
+
+            <div className="mt-5 flex min-h-32 items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
+              Google AdSense placement will appear here
+            </div>
+
+            <p className="mt-4 text-sm leading-6 text-gray-600">
+              Free tools are supported by ads so more users can access DocMaster AI.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm sm:p-6 lg:p-8">
         {error && (
           <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-left text-sm text-red-700">

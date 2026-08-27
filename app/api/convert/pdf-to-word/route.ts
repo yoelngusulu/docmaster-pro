@@ -22,7 +22,7 @@ export async function POST(
 ) {
   // Check usage limit before starting conversion.
   const usage =
-    await checkUsageLimit();
+    await checkUsageLimit("pdf-to-word");
 
   if (!usage.allowed) {
     return NextResponse.json(

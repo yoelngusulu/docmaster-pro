@@ -69,7 +69,7 @@ export async function POST(
   request: NextRequest
 ) {
   const usage =
-    await checkUsageLimit();
+    await checkUsageLimit("pdf-to-powerpoint");
 
   if (!usage.allowed) {
     return NextResponse.json(

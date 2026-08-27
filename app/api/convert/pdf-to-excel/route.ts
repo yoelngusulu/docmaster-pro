@@ -18,7 +18,7 @@ export async function POST(
   req: NextRequest
 ) {
   const usage =
-    await checkUsageLimit();
+    await checkUsageLimit("pdf-to-excel");
 
   if (!usage.allowed) {
     return NextResponse.json(
@@ -119,7 +119,7 @@ export async function POST(
           spawn(
             "python",
             [
-              "scripts/pdf_to_excel.py",
+              path.join(process.cwd(), "scripts", "pdf_to_excel.py"),
               inputPath,
               outputPath,
             ]

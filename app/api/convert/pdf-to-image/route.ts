@@ -119,7 +119,7 @@ export async function POST(
   request: NextRequest
 ) {
   const usage =
-    await checkUsageLimit();
+    await checkUsageLimit("pdf-to-image");
 
   if (!usage.allowed) {
     return NextResponse.json(

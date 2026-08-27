@@ -134,7 +134,7 @@ export async function POST(
   request: NextRequest
 ) {
   const usage =
-    await checkUsageLimit();
+    await checkUsageLimit("compress-image");
 
   if (!usage.allowed) {
     return NextResponse.json(

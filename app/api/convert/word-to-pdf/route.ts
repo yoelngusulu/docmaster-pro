@@ -34,7 +34,7 @@ export async function POST(
   request: NextRequest
 ) {
   const usage =
-    await checkUsageLimit();
+    await checkUsageLimit("word-to-pdf");
 
   if (!usage.allowed) {
     return NextResponse.json(

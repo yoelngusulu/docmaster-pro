@@ -49,7 +49,7 @@ export async function POST(
   request: Request
 ) {
   const usage =
-    await checkUsageLimit();
+    await checkUsageLimit("image-to-pdf");
 
   if (!usage.allowed) {
     return Response.json(

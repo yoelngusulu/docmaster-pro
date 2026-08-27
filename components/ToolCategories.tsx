@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 import {
   FileText,
   Image as ImageIcon,
+  MapPinned,
 } from "lucide-react";
-
 const categories = [
   {
     icon: FileText,
@@ -17,6 +17,14 @@ const categories = [
       "Convert, merge, split, compress and protect PDF documents.",
   },
 
+    {
+    icon: MapPinned,
+    title: "GIS Tools",
+    href: "/tools/coordinates-converter",
+    tools: "1 Available Tool",
+    description:
+      "Convert latitude and longitude between decimal degrees and DMS format.",
+  },
   {
     icon: ImageIcon,
     title: "Image Tools",
@@ -66,7 +74,7 @@ export default function ToolCategories() {
           </p>
         </motion.div>
 
-        <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-2 max-w-4xl mx-auto">
+       <div className="mx-auto mt-12 grid max-w-6xl gap-8 md:grid-cols-2 lg:grid-cols-3">
           {categories.map((category, index) => {
             const Icon = category.icon;
 

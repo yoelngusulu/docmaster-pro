@@ -16,12 +16,13 @@ export default function Footer() {
                 alt="DocMaster logo"
                 width={36}
                 height={18}
-                className="h-auto w-auto"
-              />
-
+                style={{width:"36px",
+                  height:"auto"}}
+                  />
+             
               <div className="leading-tight">
                 <p className="text-2xl font-bold text-white">
-                  DocMaster AI
+                  DocMaster
                 </p>
                 <p className="text-xs text-gray-400">
                   Smart Document Platform
@@ -45,6 +46,9 @@ export default function Footer() {
               <li>Word to PDF</li>
               <li>Merge PDF</li>
               <li>Compress PDF</li>
+              <li>Unlock PDF</li>
+              <li>Image to PDF</li>
+              <li>Coordinate Convertor</li>
             </ul>
           </div>
 

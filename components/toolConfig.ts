@@ -17,7 +17,6 @@ export const toolConfig = {
   multiple: false,
 },
  
-
   "pdf-to-image": {
     title: "PDF to Image",
     subtitle: "Convert PDF pages into high-quality image files.",
@@ -134,7 +133,6 @@ export const toolConfig = {
   accept: ".jpg,.jpeg,.png,.webp",
   multiple: false,
 },
-
 
 "png-to-jpg": {
   title: "PNG to JPG",
@@ -287,6 +285,17 @@ export const toolConfig = {
   success: "Your PDF is ready.",
   accept: ".jpg,.jpeg,.png",
   multiple: true,
+},
+
+"coordinates-converter": {
+  title: "Coordinates Converter",
+  subtitle:
+    "Convert coordinates between decimal degrees and DMS format.",
+  accept: "",
+  multiple: false,
+  button: "Convert Coordinates",
+  success:
+    "Your coordinates are ready.",
 },
 
 } as const;

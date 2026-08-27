@@ -852,6 +852,28 @@ function DmsPairForm(props: { title: string; d: string; m: string; s: string; di
         <Field label="Seconds" value={props.s} setValue={props.setS} placeholder="32.64" />
         <SelectField label="Direction" value={props.dir} setValue={props.setDir} options={props.directions} />
       </div>
+      <div className="mt-10 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center">
+  <h2 className="text-2xl font-bold text-gray-900">
+    Support This Free GIS Tool
+  </h2>
+
+  <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-gray-700">
+    If this coordinate converter helps your GIS, survey or mapping work,
+    you can support DocMaster AI so we can keep improving free tools for
+    more users.
+  </p>
+
+  <div className="mt-5">
+    <a
+      href="mailto:yoelngusulu@gmail.com?subject=Support%20DocMaster%20AI"
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+    >
+      Donate to Support
+    </a>
+  </div>
+</div>
     </div>
   );
 }

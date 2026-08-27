@@ -552,7 +552,72 @@ export default function CoordinatesConverterPage() {
           <p className="mt-3 max-w-3xl text-gray-600">
             Convert coordinates between Decimal Degrees, DMS and UTM. Upload CSV or Excel files for bulk conversion.
           </p>
+<div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/70 p-5">
+  <h2 className="text-lg font-bold text-gray-900">
+    How to use this converter
+  </h2>
 
+  <div className="mt-4 grid gap-4 text-sm leading-6 text-gray-700 md:grid-cols-2">
+    <div className="rounded-xl bg-white p-4 shadow-sm">
+      <h3 className="font-semibold text-gray-900">
+        Decimal to DMS
+      </h3>
+      <p className="mt-2">
+        Enter latitude and longitude in decimal degrees. Use negative values
+        for south and west coordinates, for example -5.61175089 and
+        36.58575522.
+      </p>
+    </div>
+
+    <div className="rounded-xl bg-white p-4 shadow-sm">
+      <h3 className="font-semibold text-gray-900">
+        DMS to Decimal
+      </h3>
+      <p className="mt-2">
+        Enter degrees, minutes, seconds and direction. Choose S or W when the
+        coordinate is south or west so the decimal result becomes negative.
+      </p>
+    </div>
+
+    <div className="rounded-xl bg-white p-4 shadow-sm">
+      <h3 className="font-semibold text-gray-900">
+        DMS to UTM
+      </h3>
+      <p className="mt-2">
+        Convert DMS latitude and longitude into UTM easting and northing. Choose
+        the correct UTM zone and hemisphere for your project area.
+      </p>
+    </div>
+
+    <div className="rounded-xl bg-white p-4 shadow-sm">
+      <h3 className="font-semibold text-gray-900">
+        UTM to DMS
+      </h3>
+      <p className="mt-2">
+        Enter easting, northing, UTM zone and hemisphere. If your easting has a
+        local offset such as 900000, enter that offset before converting.
+      </p>
+    </div>
+
+    <div className="rounded-xl bg-white p-4 shadow-sm md:col-span-2">
+      <h3 className="font-semibold text-gray-900">
+        CSV / Excel Bulk Conversion
+      </h3>
+      <p className="mt-2">
+        Upload CSV or Excel files with columns such as latitude, longitude,
+        lat, lng, easting, northing, x, y, zone, hemisphere, band or elevation.
+        After conversion, review the results and download the converted CSV.
+      </p>
+    </div>
+  </div>
+
+  <p className="mt-4 rounded-xl bg-white px-4 py-3 text-sm leading-6 text-gray-600">
+    Tip: for standard UTM data, keep Easting Offset and Northing Offset as 0.
+    Use an offset only when your source data has local grid values, for example
+    easting 1132556 that should be treated as 232556 after subtracting 900000.
+  </p>
+</div>
+          
           <div className="mt-8 flex flex-wrap gap-3">
             {modes.map((item) => (
               <button

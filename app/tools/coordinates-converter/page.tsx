@@ -10,6 +10,7 @@ import {
   type ChangeEvent,
 } from "react";
 import * as XLSX from "xlsx";
+import { saveConversionHistory } from "@/lib/supabase/conversionHistory";
 
 type Mode =
   | "dd-to-dms"
@@ -20,6 +21,7 @@ type Mode =
 
 type BulkType =
   | "decimal-to-dms-utm"
+  | "decimal-to-utm"
   | "dms-to-utm"
   | "utm-to-dms";
 
@@ -73,6 +75,7 @@ const modes: {
   label: string;
 }[] = [
   { key: "dd-to-dms", label: "Decimal to DMS" },
+  { key: "dd-to-utm", label: "Decimal to UTM" },
   { key: "dms-to-dd", label: "DMS to Decimal" },
   { key: "dms-to-utm", label: "DMS to UTM" },
   { key: "utm-to-dms", label: "UTM to DMS" },
@@ -1585,7 +1588,8 @@ export default function CoordinatesConverterPage() {
 
   const result = useMemo(() => {
     try {
-      if (mode === "dd-to-dms") {
+     if (mode === "dd-to-dms" || 
+         mode === "dd-to-utm") {
         const latitude = parseNumber(lat);
         const longitude = parseNumber(lng);
 
@@ -2176,7 +2180,17 @@ export default function CoordinatesConverterPage() {
       }
 
       setBulkRows(rows);
-      setBulkFileName(file.name);
+setBulkFileName(file.name);
+
+await saveConversionHistory({
+  tool: "coordinates-bulk",
+  originalFileName: file.name,
+  outputFileName: `${
+    file.name.replace(/\.[^.]+$/, "") ||
+    "coordinates"
+  }-converted.csv`,
+});
+
     } catch (error) {
       setBulkRows([]);
       setBulkFileName("");
@@ -2482,7 +2496,7 @@ export default function CoordinatesConverterPage() {
             </div>
           )}
 
-          {mode === "dd-to-dms" && (
+          {(mode === "dd-to-dms" || mode === "dd-to-utm") && (
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <Field
                 label="Latitude"

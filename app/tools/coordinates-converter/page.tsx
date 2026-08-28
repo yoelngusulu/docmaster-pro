@@ -3,7 +3,9 @@
 import Link from "next/link";
 import proj4 from "proj4";
 import {
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ChangeEvent,
 } from "react";
@@ -37,6 +39,7 @@ type BulkRow = Record<
 >;
 
 type ConvertedRow = {
+  original: BulkRow;
   input: string;
   id?: string;
   latitude?: string;
@@ -51,33 +54,29 @@ type ConvertedRow = {
   band?: string;
   hemisphere?: string;
   elevation?: string;
+  status?: string;
   error?: string;
 };
+
+type PreviewPoint = {
+  label: string;
+  latitude: number;
+  longitude: number;
+};
+
+type LeafletModule = typeof import("leaflet");
+type LeafletMap = ReturnType<LeafletModule["map"]>;
+type LeafletLayerGroup = ReturnType<LeafletModule["featureGroup"]>;
 
 const modes: {
   key: Mode;
   label: string;
 }[] = [
-  {
-    key: "dd-to-dms",
-    label: "Decimal to DMS",
-  },
-  {
-    key: "dms-to-dd",
-    label: "DMS to Decimal",
-  },
-  {
-    key: "dms-to-utm",
-    label: "DMS to UTM",
-  },
-  {
-    key: "utm-to-dms",
-    label: "UTM to DMS",
-  },
-  {
-    key: "bulk-file",
-    label: "CSV / Excel Bulk",
-  },
+  { key: "dd-to-dms", label: "Decimal to DMS" },
+  { key: "dms-to-dd", label: "DMS to Decimal" },
+  { key: "dms-to-utm", label: "DMS to UTM" },
+  { key: "utm-to-dms", label: "UTM to DMS" },
+  { key: "bulk-file", label: "CSV / Excel Bulk" },
 ];
 
 const bulkTypes: {
@@ -102,18 +101,9 @@ const crsOptions: {
   key: CrsType;
   label: string;
 }[] = [
-  {
-    key: "wgs84-utm",
-    label: "WGS84 / UTM",
-  },
-  {
-    key: "arc1960-utm",
-    label: "Arc 1960 / UTM",
-  },
-  {
-    key: "custom",
-    label: "Custom Proj4 definition",
-  },
+  { key: "wgs84-utm", label: "WGS84 / UTM" },
+  { key: "arc1960-utm", label: "Arc 1960 / UTM" },
+  { key: "custom", label: "Custom Proj4 definition" },
 ];
 
 const WGS84_GEOGRAPHIC =
@@ -125,78 +115,32 @@ const ARC1960_GEOGRAPHIC =
 const DEFAULT_CUSTOM_PROJ4 =
   "+proj=utm +zone=37 +south +datum=WGS84 +units=m +no_defs";
 
-const EXPORT_COLUMNS: {
-  key: keyof ConvertedRow;
+const CONVERTED_COLUMNS: {
+  key: keyof Omit<ConvertedRow, "original">;
   label: string;
 }[] = [
-  {
-    key: "input",
-    label: "Input",
-  },
-  {
-    key: "id",
-    label: "ID",
-  },
-  {
-    key: "latitude",
-    label: "Latitude",
-  },
-  {
-    key: "longitude",
-    label: "Longitude",
-  },
-  {
-    key: "dmsLatitude",
-    label: "DMS Latitude",
-  },
-  {
-    key: "dmsLongitude",
-    label: "DMS Longitude",
-  },
-  {
-    key: "rawEasting",
-    label: "Raw Easting",
-  },
-  {
-    key: "rawNorthing",
-    label: "Raw Northing",
-  },
-  {
-    key: "correctedEasting",
-    label: "Corrected Easting",
-  },
-  {
-    key: "correctedNorthing",
-    label: "Corrected Northing",
-  },
-  {
-    key: "zone",
-    label: "Zone",
-  },
-  {
-    key: "band",
-    label: "Band",
-  },
-  {
-    key: "hemisphere",
-    label: "Hemisphere",
-  },
-  {
-    key: "elevation",
-    label: "Elevation",
-  },
-  {
-    key: "error",
-    label: "Error",
-  },
+  { key: "input", label: "Result Row" },
+  { key: "id", label: "Detected ID" },
+  { key: "latitude", label: "Converted Latitude" },
+  { key: "longitude", label: "Converted Longitude" },
+  { key: "dmsLatitude", label: "DMS Latitude" },
+  { key: "dmsLongitude", label: "DMS Longitude" },
+  { key: "rawEasting", label: "Raw Easting" },
+  { key: "rawNorthing", label: "Raw Northing" },
+  { key: "correctedEasting", label: "Corrected Easting" },
+  { key: "correctedNorthing", label: "Corrected Northing" },
+  { key: "zone", label: "UTM Zone" },
+  { key: "band", label: "UTM Band" },
+  { key: "hemisphere", label: "Hemisphere" },
+  { key: "elevation", label: "Elevation" },
+  { key: "status", label: "Status" },
+  { key: "error", label: "Error" },
 ];
 
 async function checkCoordinateBulkUsage(): Promise<UsageCheckResult> {
   const response = await fetch(
     "/api/tools/coordinates-bulk-usage",
-    {
-      method: "POST",
-    }
+    { method: "POST" }
   );
 
   if (response.ok) {
@@ -206,7 +150,9 @@ async function checkCoordinateBulkUsage(): Promise<UsageCheckResult> {
     };
   }
 
-  const data = await response.json().catch(() => null);
+  const data = await response
+    .json()
+    .catch(() => null);
 
   return {
     allowed: false,
@@ -435,7 +381,6 @@ function decimalToUtm(
 ) {
   const sourceProjection =
     getGeographicProjection(crs);
-
   const targetProjection = getUtmProjection(
     crs,
     zone,
@@ -482,6 +427,95 @@ function utmToDecimal(
   };
 }
 
+function validateDecimalCoordinates(
+  latitude: number,
+  longitude: number
+) {
+  if (
+    latitude < -90 ||
+    latitude > 90
+  ) {
+    return "Latitude must be between -90 and 90.";
+  }
+
+  if (
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return "Longitude must be between -180 and 180.";
+  }
+
+  return null;
+}
+
+function validateDmsParts(
+  latD: number,
+  latM: number,
+  latS: number,
+  lngD: number,
+  lngM: number,
+  lngS: number
+) {
+  if (
+    Math.abs(latD) > 90 ||
+    Math.abs(lngD) > 180
+  ) {
+    return "DMS degrees are outside the valid latitude or longitude range.";
+  }
+
+  if (
+    latM < 0 ||
+    latM >= 60 ||
+    latS < 0 ||
+    latS >= 60 ||
+    lngM < 0 ||
+    lngM >= 60 ||
+    lngS < 0 ||
+    lngS >= 60
+  ) {
+    return "Minutes and seconds must be between 0 and 59.";
+  }
+
+  return null;
+}
+
+function validateUtmInput(
+  easting: number,
+  northing: number,
+  zone: number,
+  crs: CrsType
+) {
+  if (
+    zone < 1 ||
+    zone > 60
+  ) {
+    return "UTM zone must be between 1 and 60.";
+  }
+
+  if (
+    easting <= 0 ||
+    northing < 0
+  ) {
+    return "Easting and northing must be positive numbers.";
+  }
+
+  if (
+    crs !== "custom" &&
+    (easting < 100000 || easting > 900000)
+  ) {
+    return "Corrected easting is outside the normal UTM range. Check the source CRS or use Easting Offset.";
+  }
+
+  if (
+    crs !== "custom" &&
+    northing > 10000000
+  ) {
+    return "Corrected northing is outside the normal UTM range. Check the source CRS or use Northing Offset.";
+  }
+
+  return null;
+}
+
 function normalizeHeader(header: string) {
   return header
     .toLowerCase()
@@ -496,16 +530,11 @@ function getValue(
     normalizeHeader
   );
 
-  for (const [key, value] of Object.entries(
-    row
-  )) {
-    const normalizedKey =
-      normalizeHeader(key);
+  for (const [key, value] of Object.entries(row)) {
+    const normalizedKey = normalizeHeader(key);
 
     if (
-      normalizedAliases.includes(
-        normalizedKey
-      ) &&
+      normalizedAliases.includes(normalizedKey) &&
       value !== null &&
       value !== undefined &&
       String(value).trim() !== ""
@@ -521,9 +550,7 @@ function getNumber(
   row: BulkRow,
   aliases: string[]
 ) {
-  return parseNumber(
-    getValue(row, aliases)
-  );
+  return parseNumber(getValue(row, aliases));
 }
 
 function getText(
@@ -692,6 +719,267 @@ async function readRowsFromFile(file: File) {
     });
 }
 
+function getBulkOriginalColumns(rows: BulkRow[]) {
+  const columns: string[] = [];
+  const seen = new Set<string>();
+
+  rows.forEach((row) => {
+    Object.keys(row).forEach((key) => {
+      if (!seen.has(key)) {
+        seen.add(key);
+        columns.push(key);
+      }
+    });
+  });
+
+  return columns;
+}
+
+function resolveOutputZone(
+  longitude: number,
+  rowZone: number | null,
+  fallbackZone: number,
+  autoDetectUtm: boolean
+) {
+  if (
+    rowZone !== null &&
+    rowZone >= 1 &&
+    rowZone <= 60
+  ) {
+    return Math.round(rowZone);
+  }
+
+  if (autoDetectUtm) {
+    return zoneFromLongitude(longitude);
+  }
+
+  return fallbackZone;
+}
+
+function getProjectionName(
+  crs: CrsType,
+  zone: number,
+  hemi: string,
+  customProj4: string
+) {
+  if (crs === "custom") {
+    return customProj4.trim() || "Custom Proj4";
+  }
+
+  const datum =
+    crs === "arc1960-utm"
+      ? "Arc 1960"
+      : "WGS84";
+
+  return `${datum} / UTM Zone ${zone}${hemi}`;
+}
+
+function getGeographicName(crs: CrsType) {
+  if (crs === "arc1960-utm") {
+    return "Arc 1960 Geographic";
+  }
+
+  return "WGS84 Geographic";
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function ensureLeafletCss() {
+  if (
+    typeof document === "undefined" ||
+    document.getElementById("leaflet-css")
+  ) {
+    return;
+  }
+
+  const link = document.createElement("link");
+  link.id = "leaflet-css";
+  link.rel = "stylesheet";
+  link.href =
+    "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+  link.integrity =
+    "sha256-p4NxAoJBhIINfQtsVEJCigE3fS9gP5HGp0y6Jt/03JQ=";
+  link.crossOrigin = "";
+
+  document.head.appendChild(link);
+}
+
+function MapPreview({
+  points,
+}: {
+  points: PreviewPoint[];
+}) {
+  const containerRef =
+    useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const markerLayerRef =
+    useRef<LeafletLayerGroup | null>(null);
+  const [mapError, setMapError] =
+    useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMap() {
+      if (!containerRef.current) {
+        return;
+      }
+
+      try {
+        ensureLeafletCss();
+
+        const L = await import("leaflet");
+
+        if (
+          cancelled ||
+          !containerRef.current
+        ) {
+          return;
+        }
+
+        if (!mapRef.current) {
+          mapRef.current = L.map(
+            containerRef.current,
+            {
+              scrollWheelZoom: false,
+            }
+          ).setView([-6.7924, 39.2083], 6);
+
+          L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+              maxZoom: 19,
+              attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            }
+          ).addTo(mapRef.current);
+        }
+
+        if (markerLayerRef.current) {
+          markerLayerRef.current.remove();
+        }
+
+        const group = L.featureGroup();
+
+        points.forEach((point) => {
+          const marker = L.circleMarker(
+            [point.latitude, point.longitude],
+            {
+              radius: 7,
+              color: "#1d4ed8",
+              weight: 2,
+              fillColor: "#2563eb",
+              fillOpacity: 0.8,
+            }
+          ).bindPopup(
+            `<strong>${escapeHtml(
+              point.label
+            )}</strong><br/>Lat: ${formatDecimal(
+              point.latitude
+            )}<br/>Lng: ${formatDecimal(
+              point.longitude
+            )}`
+          );
+
+          group.addLayer(marker);
+        });
+
+        group.addTo(mapRef.current);
+        markerLayerRef.current = group;
+
+        if (points.length === 1) {
+          mapRef.current.setView(
+            [
+              points[0].latitude,
+              points[0].longitude,
+            ],
+            14
+          );
+        } else if (points.length > 1) {
+          const bounds = group.getBounds();
+
+          if (bounds.isValid()) {
+            mapRef.current.fitBounds(
+              bounds.pad(0.25)
+            );
+          }
+        } else {
+          mapRef.current.setView(
+            [-6.7924, 39.2083],
+            6
+          );
+        }
+
+        window.setTimeout(() => {
+          mapRef.current?.invalidateSize();
+        }, 50);
+
+        setMapError(null);
+      } catch {
+        setMapError(
+          "Map preview could not be loaded."
+        );
+      }
+    }
+
+    void loadMap();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [points]);
+
+  useEffect(() => {
+    return () => {
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  return (
+    <div className="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-4 py-3">
+        <div>
+          <h2 className="text-base font-bold text-gray-900">
+            Result Preview Map
+          </h2>
+          <p className="text-sm text-gray-600">
+            OpenStreetMap preview for valid converted coordinates.
+          </p>
+        </div>
+
+        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+          {points.length} point{points.length === 1 ? "" : "s"}
+        </span>
+      </div>
+
+      <div
+        ref={containerRef}
+        className="h-[320px] w-full bg-slate-100"
+      />
+
+      {points.length === 0 && (
+        <p className="border-t border-gray-200 px-4 py-3 text-sm text-gray-600">
+          Enter or upload valid coordinates to show them on the map.
+        </p>
+      )}
+
+      {mapError && (
+        <p className="border-t border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {mapError}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function convertBulkRow(
   row: BulkRow,
   index: number,
@@ -701,7 +989,8 @@ function convertBulkRow(
   defaultZone: string,
   defaultHemisphere: string,
   eastingOffset: string,
-  northingOffset: string
+  northingOffset: string,
+  autoDetectUtm: boolean
 ): ConvertedRow {
   const input = `Row ${index + 2}`;
   const id = getText(row, [
@@ -733,6 +1022,13 @@ function convertBulkRow(
       defaultHemisphere,
       "S"
     );
+
+  const baseRow: ConvertedRow = {
+    original: row,
+    input,
+    id,
+    elevation,
+  };
 
   try {
     if (bulkType === "utm-to-dms") {
@@ -792,12 +1088,11 @@ function convertBulkRow(
         rawNorthing === null
       ) {
         return {
-          input,
-          id,
+          ...baseRow,
           zone: String(resolvedZone),
           band,
           hemisphere,
-          elevation,
+          status: "Error",
           error:
             "Missing easting or northing column.",
         };
@@ -811,6 +1106,30 @@ function convertBulkRow(
         rawNorthing -
         (parseNumber(northingOffset) ?? 0);
 
+      const validationError = validateUtmInput(
+        correctedEasting,
+        correctedNorthing,
+        resolvedZone,
+        crs
+      );
+
+      if (validationError) {
+        return {
+          ...baseRow,
+          rawEasting: formatMeter(rawEasting),
+          rawNorthing: formatMeter(rawNorthing),
+          correctedEasting:
+            formatMeter(correctedEasting),
+          correctedNorthing:
+            formatMeter(correctedNorthing),
+          zone: String(resolvedZone),
+          band,
+          hemisphere,
+          status: "Error",
+          error: validationError,
+        };
+      }
+
       const point = utmToDecimal(
         correctedEasting,
         correctedNorthing,
@@ -820,41 +1139,49 @@ function convertBulkRow(
         customProj4
       );
 
-      return {
-        input,
-        id,
-        latitude: formatDecimal(
-          point.latitude
-        ),
-        longitude: formatDecimal(
-          point.longitude
-        ),
-        dmsLatitude: toDms(
+      const coordinateError =
+        validateDecimalCoordinates(
           point.latitude,
-          "lat"
-        ),
-        dmsLongitude: toDms(
-          point.longitude,
-          "lng"
-        ),
-        rawEasting: formatMeter(
-          rawEasting
-        ),
-        rawNorthing: formatMeter(
-          rawNorthing
-        ),
-        correctedEasting: formatMeter(
-          correctedEasting
-        ),
-        correctedNorthing: formatMeter(
-          correctedNorthing
-        ),
+          point.longitude
+        );
+
+      if (coordinateError) {
+        return {
+          ...baseRow,
+          latitude: formatDecimal(point.latitude),
+          longitude: formatDecimal(point.longitude),
+          rawEasting: formatMeter(rawEasting),
+          rawNorthing: formatMeter(rawNorthing),
+          correctedEasting:
+            formatMeter(correctedEasting),
+          correctedNorthing:
+            formatMeter(correctedNorthing),
+          zone: String(resolvedZone),
+          band,
+          hemisphere,
+          status: "Error",
+          error: coordinateError,
+        };
+      }
+
+      return {
+        ...baseRow,
+        latitude: formatDecimal(point.latitude),
+        longitude: formatDecimal(point.longitude),
+        dmsLatitude: toDms(point.latitude, "lat"),
+        dmsLongitude: toDms(point.longitude, "lng"),
+        rawEasting: formatMeter(rawEasting),
+        rawNorthing: formatMeter(rawNorthing),
+        correctedEasting:
+          formatMeter(correctedEasting),
+        correctedNorthing:
+          formatMeter(correctedNorthing),
         zone: String(resolvedZone),
         band:
           band ||
           getUtmBand(point.latitude),
         hemisphere,
-        elevation,
+        status: "OK",
       };
     }
 
@@ -948,11 +1275,27 @@ function convertBulkRow(
         lngSec === null
       ) {
         return {
-          input,
-          id,
-          elevation,
+          ...baseRow,
+          status: "Error",
           error:
             "Missing DMS latitude or longitude columns.",
+        };
+      }
+
+      const dmsError = validateDmsParts(
+        latDeg,
+        latMin,
+        latSec,
+        lngDeg,
+        lngMin,
+        lngSec
+      );
+
+      if (dmsError) {
+        return {
+          ...baseRow,
+          status: "Error",
+          error: dmsError,
         };
       }
 
@@ -976,28 +1319,26 @@ function convertBulkRow(
       longitude === null
     ) {
       return {
-        input,
-        id,
-        elevation,
+        ...baseRow,
+        status: "Error",
         error:
           "Missing latitude or longitude columns.",
       };
     }
 
-    if (
-      latitude < -90 ||
-      latitude > 90 ||
-      longitude < -180 ||
-      longitude > 180
-    ) {
+    const coordinateError =
+      validateDecimalCoordinates(
+        latitude,
+        longitude
+      );
+
+    if (coordinateError) {
       return {
-        input,
-        id,
+        ...baseRow,
         latitude: String(latitude),
         longitude: String(longitude),
-        elevation,
-        error:
-          "Latitude or longitude is outside the valid range.",
+        status: "Error",
+        error: coordinateError,
       };
     }
 
@@ -1007,10 +1348,11 @@ function convertBulkRow(
       "utmzone",
     ]);
 
-    const resolvedZone = normalizeZone(
+    const resolvedZone = resolveOutputZone(
+      longitude,
       rowZone,
-      fallbackZone ||
-        zoneFromLongitude(longitude)
+      fallbackZone,
+      autoDetectUtm
     );
 
     const hemisphere =
@@ -1026,18 +1368,11 @@ function convertBulkRow(
     );
 
     return {
-      input,
-      id,
+      ...baseRow,
       latitude: formatDecimal(latitude),
       longitude: formatDecimal(longitude),
-      dmsLatitude: toDms(
-        latitude,
-        "lat"
-      ),
-      dmsLongitude: toDms(
-        longitude,
-        "lng"
-      ),
+      dmsLatitude: toDms(latitude, "lat"),
+      dmsLongitude: toDms(longitude, "lng"),
       rawEasting: "",
       rawNorthing: "",
       correctedEasting: formatMeter(
@@ -1049,13 +1384,12 @@ function convertBulkRow(
       zone: String(resolvedZone),
       band: getUtmBand(latitude),
       hemisphere,
-      elevation,
+      status: "OK",
     };
   } catch (error) {
     return {
-      input,
-      id,
-      elevation,
+      ...baseRow,
+      status: "Error",
       error:
         error instanceof Error
           ? error.message
@@ -1064,7 +1398,10 @@ function convertBulkRow(
   }
 }
 
-function rowsToCsv(rows: ConvertedRow[]) {
+function rowsToCsv(
+  rows: ConvertedRow[],
+  originalColumns: string[]
+) {
   const escapeCsv = (value: unknown) => {
     const text = String(value ?? "");
 
@@ -1079,17 +1416,23 @@ function rowsToCsv(rows: ConvertedRow[]) {
     return text;
   };
 
-  const header = EXPORT_COLUMNS.map(
-    (column) => column.label
-  ).join(",");
+  const header = [
+    ...originalColumns,
+    ...CONVERTED_COLUMNS.map(
+      (column) => column.label
+    ),
+  ].map(escapeCsv);
 
-  const body = rows.map((row) =>
-    EXPORT_COLUMNS.map((column) =>
-      escapeCsv(row[column.key])
-    ).join(",")
-  );
+  const body = rows.map((row) => [
+    ...originalColumns.map(
+      (column) => row.original[column]
+    ),
+    ...CONVERTED_COLUMNS.map(
+      (column) => row[column.key]
+    ),
+  ].map(escapeCsv).join(","));
 
-  return [header, ...body].join("\n");
+  return [header.join(","), ...body].join("\n");
 }
 
 function Field({
@@ -1140,6 +1483,9 @@ export default function CoordinatesConverterPage() {
   const [hemisphere, setHemisphere] =
     useState("S");
 
+  const [autoDetectUtm, setAutoDetectUtm] =
+    useState(true);
+
   const [eastingOffset, setEastingOffset] =
     useState("0");
 
@@ -1188,6 +1534,55 @@ export default function CoordinatesConverterPage() {
     mode === "utm-to-dms" ||
     mode === "bulk-file";
 
+  const showAutoDetection =
+    mode === "dms-to-utm" ||
+    (mode === "bulk-file" &&
+      bulkType !== "utm-to-dms");
+
+  const normalizedDefaultZone = normalizeZone(
+    defaultZone,
+    37
+  );
+
+  const normalizedHemisphere =
+    normalizeHemisphere(hemisphere, "S");
+
+  const projectionSummary = useMemo(() => {
+    const utmName = getProjectionName(
+      inputCrs,
+      normalizedDefaultZone,
+      normalizedHemisphere,
+      customProj4
+    );
+
+    if (
+      mode === "utm-to-dms" ||
+      (mode === "bulk-file" &&
+        bulkType === "utm-to-dms")
+    ) {
+      return {
+        source: utmName,
+        target:
+          "WGS84 Geographic latitude / longitude",
+      };
+    }
+
+    return {
+      source: getGeographicName(inputCrs),
+      target: autoDetectUtm
+        ? "Auto-detected UTM zone and hemisphere per coordinate"
+        : utmName,
+    };
+  }, [
+    mode,
+    bulkType,
+    inputCrs,
+    normalizedDefaultZone,
+    normalizedHemisphere,
+    customProj4,
+    autoDetectUtm,
+  ]);
+
   const result = useMemo(() => {
     try {
       if (mode === "dd-to-dms") {
@@ -1201,18 +1596,14 @@ export default function CoordinatesConverterPage() {
           return "";
         }
 
-        if (
-          latitude < -90 ||
-          latitude > 90
-        ) {
-          return "Latitude must be between -90 and 90.";
-        }
+        const coordinateError =
+          validateDecimalCoordinates(
+            latitude,
+            longitude
+          );
 
-        if (
-          longitude < -180 ||
-          longitude > 180
-        ) {
-          return "Longitude must be between -180 and 180.";
+        if (coordinateError) {
+          return coordinateError;
         }
 
         return [
@@ -1224,6 +1615,12 @@ export default function CoordinatesConverterPage() {
             longitude,
             "lng"
           )}`,
+          `Auto UTM Zone: ${zoneFromLongitude(
+            longitude
+          )}`,
+          `Auto Hemisphere: ${
+            latitude < 0 ? "S" : "N"
+          }`,
         ].join("\n");
       }
 
@@ -1249,17 +1646,17 @@ export default function CoordinatesConverterPage() {
           return "";
         }
 
-        if (
-          latM < 0 ||
-          latM >= 60 ||
-          latS < 0 ||
-          latS >= 60 ||
-          lngM < 0 ||
-          lngM >= 60 ||
-          lngS < 0 ||
-          lngS >= 60
-        ) {
-          return "Minutes and seconds must be between 0 and 59.";
+        const dmsError = validateDmsParts(
+          latD,
+          latM,
+          latS,
+          lngD,
+          lngM,
+          lngS
+        );
+
+        if (dmsError) {
+          return dmsError;
         }
 
         const latitude = dmsToDecimal(
@@ -1276,6 +1673,16 @@ export default function CoordinatesConverterPage() {
           lngDir
         );
 
+        const coordinateError =
+          validateDecimalCoordinates(
+            latitude,
+            longitude
+          );
+
+        if (coordinateError) {
+          return coordinateError;
+        }
+
         if (mode === "dms-to-dd") {
           return [
             `Latitude: ${formatDecimal(
@@ -1287,10 +1694,12 @@ export default function CoordinatesConverterPage() {
           ].join("\n");
         }
 
-        const zone = normalizeZone(
-          defaultZone,
-          zoneFromLongitude(longitude)
-        );
+        const zone = autoDetectUtm
+          ? zoneFromLongitude(longitude)
+          : normalizeZone(
+              defaultZone,
+              zoneFromLongitude(longitude)
+            );
 
         const hemi =
           latitude < 0 ? "S" : "N";
@@ -1355,6 +1764,18 @@ export default function CoordinatesConverterPage() {
             "S"
           );
 
+        const validationError =
+          validateUtmInput(
+            correctedEasting,
+            correctedNorthing,
+            zone,
+            inputCrs
+          );
+
+        if (validationError) {
+          return validationError;
+        }
+
         const point = utmToDecimal(
           correctedEasting,
           correctedNorthing,
@@ -1363,6 +1784,16 @@ export default function CoordinatesConverterPage() {
           hemi,
           customProj4
         );
+
+        const coordinateError =
+          validateDecimalCoordinates(
+            point.latitude,
+            point.longitude
+          );
+
+        if (coordinateError) {
+          return coordinateError;
+        }
 
         return [
           `Latitude: ${formatDecimal(
@@ -1419,6 +1850,7 @@ export default function CoordinatesConverterPage() {
     hemisphere,
     eastingOffset,
     northingOffset,
+    autoDetectUtm,
   ]);
 
   const convertedRows = useMemo(
@@ -1433,7 +1865,8 @@ export default function CoordinatesConverterPage() {
           defaultZone,
           hemisphere,
           eastingOffset,
-          northingOffset
+          northingOffset,
+          autoDetectUtm
         )
       ),
     [
@@ -1445,8 +1878,238 @@ export default function CoordinatesConverterPage() {
       hemisphere,
       eastingOffset,
       northingOffset,
+      autoDetectUtm,
     ]
   );
+
+  const originalColumns = useMemo(
+    () => getBulkOriginalColumns(bulkRows),
+    [bulkRows]
+  );
+
+  const singlePreviewPoints = useMemo(() => {
+    try {
+      if (mode === "dd-to-dms") {
+        const latitude = parseNumber(lat);
+        const longitude = parseNumber(lng);
+
+        if (
+          latitude === null ||
+          longitude === null ||
+          validateDecimalCoordinates(
+            latitude,
+            longitude
+          )
+        ) {
+          return [];
+        }
+
+        return [
+          {
+            label: "Manual coordinate",
+            latitude,
+            longitude,
+          },
+        ];
+      }
+
+      if (
+        mode === "dms-to-dd" ||
+        mode === "dms-to-utm"
+      ) {
+        const latD = parseNumber(latDeg);
+        const latM = parseNumber(latMin);
+        const latS = parseNumber(latSec);
+        const lngD = parseNumber(lngDeg);
+        const lngM = parseNumber(lngMin);
+        const lngS = parseNumber(lngSec);
+
+        if (
+          latD === null ||
+          latM === null ||
+          latS === null ||
+          lngD === null ||
+          lngM === null ||
+          lngS === null ||
+          validateDmsParts(
+            latD,
+            latM,
+            latS,
+            lngD,
+            lngM,
+            lngS
+          )
+        ) {
+          return [];
+        }
+
+        const latitude = dmsToDecimal(
+          latD,
+          latM,
+          latS,
+          latDir
+        );
+        const longitude = dmsToDecimal(
+          lngD,
+          lngM,
+          lngS,
+          lngDir
+        );
+
+        if (
+          validateDecimalCoordinates(
+            latitude,
+            longitude
+          )
+        ) {
+          return [];
+        }
+
+        return [
+          {
+            label: "Manual coordinate",
+            latitude,
+            longitude,
+          },
+        ];
+      }
+
+      if (mode === "utm-to-dms") {
+        const easting =
+          parseNumber(utmEasting);
+        const northing =
+          parseNumber(utmNorthing);
+
+        if (
+          easting === null ||
+          northing === null
+        ) {
+          return [];
+        }
+
+        const correctedEasting =
+          easting -
+          (parseNumber(eastingOffset) ?? 0);
+        const correctedNorthing =
+          northing -
+          (parseNumber(northingOffset) ?? 0);
+        const zone = normalizeZone(
+          defaultZone,
+          37
+        );
+        const hemi =
+          normalizeHemisphere(
+            hemisphere,
+            "S"
+          );
+
+        if (
+          validateUtmInput(
+            correctedEasting,
+            correctedNorthing,
+            zone,
+            inputCrs
+          )
+        ) {
+          return [];
+        }
+
+        const point = utmToDecimal(
+          correctedEasting,
+          correctedNorthing,
+          inputCrs,
+          zone,
+          hemi,
+          customProj4
+        );
+
+        if (
+          validateDecimalCoordinates(
+            point.latitude,
+            point.longitude
+          )
+        ) {
+          return [];
+        }
+
+        return [
+          {
+            label: "Manual coordinate",
+            latitude: point.latitude,
+            longitude: point.longitude,
+          },
+        ];
+      }
+
+      return [];
+    } catch {
+      return [];
+    }
+  }, [
+    mode,
+    lat,
+    lng,
+    latDeg,
+    latMin,
+    latSec,
+    latDir,
+    lngDeg,
+    lngMin,
+    lngSec,
+    lngDir,
+    utmEasting,
+    utmNorthing,
+    defaultZone,
+    hemisphere,
+    eastingOffset,
+    northingOffset,
+    inputCrs,
+    customProj4,
+  ]);
+
+  const bulkPreviewPoints = useMemo(
+    () =>
+      convertedRows
+        .filter((row) => !row.error)
+        .map((row) => {
+          const latitude =
+            parseNumber(row.latitude);
+          const longitude =
+            parseNumber(row.longitude);
+
+          if (
+            latitude === null ||
+            longitude === null
+          ) {
+            return null;
+          }
+
+          return {
+            label:
+              row.id ||
+              row.input ||
+              "Converted point",
+            latitude,
+            longitude,
+          };
+        })
+        .filter(
+          (point): point is PreviewPoint =>
+            point !== null
+        ),
+    [convertedRows]
+  );
+
+  const previewPoints =
+    mode === "bulk-file"
+      ? bulkPreviewPoints
+      : singlePreviewPoints;
+
+  const validRowCount = convertedRows.filter(
+    (row) => !row.error
+  ).length;
+  const errorRowCount =
+    convertedRows.length - validRowCount;
 
   async function copyResult() {
     if (result) {
@@ -1485,6 +2148,8 @@ export default function CoordinatesConverterPage() {
       return;
     }
 
+    setIsBulkChecking(true);
+
     try {
       const rows =
         await readRowsFromFile(file);
@@ -1498,8 +2163,6 @@ export default function CoordinatesConverterPage() {
         event.target.value = "";
         return;
       }
-
-      setIsBulkChecking(true);
 
       const usage =
         await checkCoordinateBulkUsage();
@@ -1533,7 +2196,10 @@ export default function CoordinatesConverterPage() {
       return;
     }
 
-    const csv = rowsToCsv(convertedRows);
+    const csv = rowsToCsv(
+      convertedRows,
+      originalColumns
+    );
     const blob = new Blob([csv], {
       type: "text/csv;charset=utf-8",
     });
@@ -1579,8 +2245,7 @@ export default function CoordinatesConverterPage() {
             </h1>
 
             <p className="mt-3 max-w-3xl text-gray-600">
-              Convert coordinates between Decimal Degrees, DMS and UTM. Upload
-              CSV or Excel files for bulk conversion.
+              Convert coordinates between Decimal Degrees, DMS and UTM. Upload CSV or Excel files for bulk conversion, preview valid results on OpenStreetMap, and export the original columns with converted coordinate fields appended.
             </p>
           </div>
 
@@ -1591,18 +2256,16 @@ export default function CoordinatesConverterPage() {
                   1. Choose format
                 </h2>
                 <p className="mt-1">
-                  Select Decimal, DMS, UTM or CSV/Excel Bulk depending on your
-                  source data.
+                  Select Decimal, DMS, UTM or CSV/Excel Bulk depending on your source data.
                 </p>
               </div>
 
               <div>
                 <h2 className="font-bold text-gray-900">
-                  2. Set projection
+                  2. Set CRS
                 </h2>
                 <p className="mt-1">
-                  For UTM data, choose the correct CRS, zone and hemisphere
-                  before converting.
+                  Choose Source CRS and confirm Target CRS. Geographic inputs can auto-detect UTM zone and hemisphere.
                 </p>
               </div>
 
@@ -1611,17 +2274,13 @@ export default function CoordinatesConverterPage() {
                   3. Review output
                 </h2>
                 <p className="mt-1">
-                  Check the converted results, then copy a single result or
-                  download the converted CSV.
+                  Check row-level errors, preview valid points on the map, then copy or download the converted CSV.
                 </p>
               </div>
             </div>
 
             <p className="mt-4 border-t border-gray-200 pt-4 text-sm leading-6 text-gray-600">
-              For normal UTM data, keep offsets at 0. Use Easting/Northing
-              Offset only when your source uses a local grid, for example
-              easting 1132556 that should become 232556 after subtracting
-              900000.
+              For normal UTM data, keep offsets at 0. Use Easting/Northing Offset only when your source uses a local grid, for example easting 1132556 that should become 232556 after subtracting 900000.
             </p>
           </div>
 
@@ -1678,7 +2337,7 @@ export default function CoordinatesConverterPage() {
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <label className="block">
                 <span className="text-sm font-medium text-gray-700">
-                  Input CRS / Projection
+                  Source CRS / Projection
                 </span>
 
                 <select
@@ -1700,7 +2359,20 @@ export default function CoordinatesConverterPage() {
                     </option>
                   ))}
                 </select>
+
+                <p className="mt-2 text-xs text-gray-500">
+                  Source: {projectionSummary.source}
+                </p>
               </label>
+
+              <div>
+                <span className="text-sm font-medium text-gray-700">
+                  Target CRS / Output
+                </span>
+                <div className="mt-2 min-h-[50px] rounded-md border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+                  {projectionSummary.target}
+                </div>
+              </div>
 
               {inputCrs === "custom" && (
                 <Field
@@ -1736,6 +2408,29 @@ export default function CoordinatesConverterPage() {
                   <option value="N">N</option>
                 </select>
               </label>
+
+              {showAutoDetection && (
+                <label className="flex items-start gap-3 rounded-md border border-blue-100 bg-blue-50 px-4 py-3 md:col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={autoDetectUtm}
+                    onChange={(event) =>
+                      setAutoDetectUtm(
+                        event.target.checked
+                      )
+                    }
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600"
+                  />
+                  <span>
+                    <span className="block text-sm font-semibold text-gray-900">
+                      Auto-detect UTM zone and hemisphere
+                    </span>
+                    <span className="mt-1 block text-sm leading-6 text-gray-600">
+                      Recommended for latitude/longitude inputs. The converter calculates zone from longitude and hemisphere from latitude for each coordinate.
+                    </span>
+                  </span>
+                </label>
+              )}
 
               {(mode === "utm-to-dms" ||
                 mode === "bulk-file") && (
@@ -1941,14 +2636,12 @@ export default function CoordinatesConverterPage() {
               </label>
 
               <p className="mt-3 text-sm leading-6 text-gray-600">
-                CSV/Excel columns supported: latitude, longitude, lat, lng,
-                easting, northing, x, y, zone, hemisphere, band, elevation.
-                Column z is treated as elevation, not UTM zone.
+                CSV/Excel columns supported: latitude, longitude, lat, lng, easting, northing, x, y, zone, hemisphere, band, elevation. Column z is treated as elevation, not UTM zone. Original columns are preserved in the downloaded CSV.
               </p>
 
               {isBulkChecking && (
                 <p className="mt-3 text-sm font-medium text-blue-600">
-                  Checking your bulk conversion limit...
+                  Checking your bulk conversion limit and reading file...
                 </p>
               )}
 
@@ -1959,6 +2652,8 @@ export default function CoordinatesConverterPage() {
               )}
             </div>
           )}
+
+          <MapPreview points={previewPoints} />
 
           {mode !== "bulk-file" && (
             <>
@@ -2007,6 +2702,20 @@ export default function CoordinatesConverterPage() {
                       Source file: {bulkFileName}
                     </p>
                   )}
+
+                  {convertedRows.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+                      <span className="rounded-full bg-gray-100 px-3 py-1 text-gray-700">
+                        {convertedRows.length} total rows
+                      </span>
+                      <span className="rounded-full bg-green-50 px-3 py-1 text-green-700">
+                        {validRowCount} valid
+                      </span>
+                      <span className="rounded-full bg-red-50 px-3 py-1 text-red-700">
+                        {errorRowCount} errors
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <button
@@ -2027,14 +2736,25 @@ export default function CoordinatesConverterPage() {
                     Upload a CSV or Excel file to see converted rows here.
                   </p>
                 ) : (
-                  <table className="min-w-[1200px] divide-y divide-gray-200 text-left text-sm">
+                  <table className="min-w-[1600px] divide-y divide-gray-200 text-left text-sm">
                     <thead className="bg-gray-50 text-gray-700">
                       <tr>
-                        {EXPORT_COLUMNS.map(
+                        {originalColumns.map(
+                          (column) => (
+                            <th
+                              key={`original-${column}`}
+                              className="px-4 py-3 font-semibold"
+                            >
+                              {column}
+                            </th>
+                          )
+                        )}
+
+                        {CONVERTED_COLUMNS.map(
                           (column) => (
                             <th
                               key={column.key}
-                              className="px-4 py-3 font-semibold"
+                              className="px-4 py-3 font-semibold text-blue-800"
                             >
                               {column.label}
                             </th>
@@ -2046,16 +2766,45 @@ export default function CoordinatesConverterPage() {
                     <tbody className="divide-y divide-gray-100 bg-white text-gray-700">
                       {convertedRows.map(
                         (row, index) => (
-                          <tr key={`${row.input}-${index}`}>
-                            {EXPORT_COLUMNS.map(
+                          <tr
+                            key={`${row.input}-${index}`}
+                            className={
+                              row.error
+                                ? "bg-red-50/40"
+                                : ""
+                            }
+                          >
+                            {originalColumns.map(
                               (column) => (
                                 <td
-                                  key={column.key}
+                                  key={`original-${column}-${index}`}
+                                  className="px-4 py-3"
+                                >
+                                  {String(
+                                    row.original[
+                                      column
+                                    ] ?? ""
+                                  )}
+                                </td>
+                              )
+                            )}
+
+                            {CONVERTED_COLUMNS.map(
+                              (column) => (
+                                <td
+                                  key={`${column.key}-${index}`}
                                   className={`px-4 py-3 ${
+                                    column.key ===
+                                      "status" &&
+                                    row.status ===
+                                      "OK"
+                                      ? "font-semibold text-green-700"
+                                      : ""
+                                  } ${
                                     column.key ===
                                       "error" &&
                                     row.error
-                                      ? "font-medium text-red-600"
+                                      ? "font-medium text-red-700"
                                       : ""
                                   }`}
                                 >
@@ -2080,9 +2829,7 @@ export default function CoordinatesConverterPage() {
             </h2>
 
             <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-gray-600">
-              If this coordinates converter helps your GIS, survey or mapping
-              work, you can support DocMaster AI so we can keep improving free
-              tools.
+              If this coordinates converter helps your GIS, survey or mapping work, you can support DocMaster AI so we can keep improving free tools.
             </p>
 
             <a

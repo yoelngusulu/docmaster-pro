@@ -14,6 +14,7 @@ const LIMITED_TOOLS = new Set([
   "pdf-to-word",
   "pdf-to-excel",
   "pdf-to-powerpoint",
+  "coordinates-bulk",
   "ai",
   "image-editor",
   "background-remover",

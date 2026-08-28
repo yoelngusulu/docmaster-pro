@@ -191,6 +191,27 @@ function rowsToCsv(rows: ConvertedRow[]) {
   ].join("\n");
 }
 
+async function checkCoordinateBulkUsage() {
+  const response = await fetch(
+    "/api/tools/coordinates-bulk-usage",
+    {
+      method: "POST",
+    }
+  );
+
+  if (response.ok) {
+    return true;
+  }
+
+  const data = await response.json().catch(() => null);
+
+  window.alert(
+    data?.message ||
+      "You have reached your CSV/Excel bulk conversion limit for today."
+  );
+
+  return false;
+}
 export default function CoordinatesConverterPage() {
   const [mode, setMode] = useState<Mode>("dd-to-dms");
   const [bulkType, setBulkType] = useState<BulkType>("decimal-to-dms-utm");

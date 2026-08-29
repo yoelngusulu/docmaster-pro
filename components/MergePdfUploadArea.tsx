@@ -13,7 +13,6 @@ import {
   GripVertical,
   Loader2,
   RefreshCw,
-  Replace,
   Trash2,
   UploadCloud,
 } from "lucide-react";
@@ -92,9 +91,7 @@ function parsePositiveInteger(value: string) {
 
   const number = Number(text);
 
-  return Number.isSafeInteger(number) && number > 0
-    ? number
-    : null;
+  return Number.isSafeInteger(number) && number > 0 ? number : null;
 }
 
 function createRange(start: number, end: number): PageRange {
@@ -243,16 +240,6 @@ function validateFileBeforeReading(file: File) {
   }
 
   return "";
-}
-
-function cleanOutputFileName(fileName: string) {
-  return (
-    fileName
-      .replace(/\.pdf$/i, "")
-      .replace(/[^a-zA-Z0-9-_]/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "") || "DocMaster"
-  );
 }
 
 export default function MergePdfUploadArea() {
@@ -546,7 +533,10 @@ export default function MergePdfUploadArea() {
     addFiles(Array.from(event.dataTransfer.files));
   };
 
-  const handleDropOnFile = (event: DragEvent<HTMLDivElement>, targetId: string) => {
+  const handleDropOnFile = (
+    event: DragEvent<HTMLDivElement>,
+    targetId: string
+  ) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -700,13 +690,11 @@ export default function MergePdfUploadArea() {
     const formData = new FormData();
 
     readyItems.forEach((item) => {
-      const selection = getSelectionPreview(item);
       formData.append("files", item.file, item.file.name);
       formData.append(
         "pageRanges",
         item.selectionMode === "all" ? "all" : item.pageRanges.trim()
       );
-      formData.append("selectedPageCount", String(selection.pageCount));
     });
 
     setProgress(25);
@@ -721,15 +709,19 @@ export default function MergePdfUploadArea() {
       setProgressMessage(`Merging PDF ${activeIndex} of ${readyItems.length}...`);
     }, 700);
 
-    const response = await fetch("/api/pdf/merge", {
-      method: "POST",
-      body: formData,
-      cache: "no-store",
-    });
-
-    if (progressTimer !== null) {
-      window.clearInterval(progressTimer);
-    }
+    const response = await (async () => {
+      try {
+        return await fetch("/api/pdf/merge", {
+          method: "POST",
+          body: formData,
+          cache: "no-store",
+        });
+      } finally {
+        if (progressTimer !== null) {
+          window.clearInterval(progressTimer);
+        }
+      }
+    })();
 
     setProgress(90);
     setProgressMessage("Finalizing document...");
@@ -749,10 +741,12 @@ export default function MergePdfUploadArea() {
       type: contentType,
     });
     const fileName = getFilenameFromResponse(response, "DocMaster_Merged.pdf");
-    const serverPageCount = Number(response.headers.get("x-merged-page-count"));
-    const finalPageCount = Number.isFinite(serverPageCount)
-      ? serverPageCount
-      : mergePreview.totalPages;
+    const pageCountHeader = response.headers.get("x-merged-page-count");
+    const serverPageCount = pageCountHeader ? Number(pageCountHeader) : NaN;
+    const finalPageCount =
+      Number.isFinite(serverPageCount) && serverPageCount > 0
+        ? serverPageCount
+        : mergePreview.totalPages;
 
     await completeMergeConversion(
       mergedBlob,
@@ -957,7 +951,7 @@ export default function MergePdfUploadArea() {
                   disabled={isConverting}
                   className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-blue-200 px-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <Replace size={16} />
+                  <RefreshCw size={16} />
                   Replace
                 </button>
                 <button

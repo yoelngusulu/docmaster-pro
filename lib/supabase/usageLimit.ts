@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 
 const GUEST_LIMIT = 3;
 const REGISTERED_LIMIT = 5;
+const COORDINATES_BULK_GUEST_LIMIT = 1;
+const COORDINATES_BULK_REGISTERED_LIMIT = 1;
 const WINDOW_HOURS = 24;
 const UNLIMITED_LIMIT = 999999;
 const GUEST_COOKIE_NAME = "docmaster_guest_id";
@@ -30,8 +32,6 @@ const LIMITED_TOOLS = new Set([
   "resume-builder",
 ]);
 
-const LIMITED_TOOL_NAMES = Array.from(LIMITED_TOOLS);
-
 type UsageIdentityType = "user" | "guest";
 
 type UsageLimitResult = {
@@ -44,7 +44,7 @@ type UsageLimitResult = {
   identityId: string;
 };
 
-type SupabasePlanUser = {
+type SupabaseUser = {
   id: string;
   app_metadata?: Record<string, unknown>;
   user_metadata?: Record<string, unknown>;
@@ -55,37 +55,51 @@ function normalizeTool(tool?: string) {
 }
 
 function isLimitedTool(tool?: string) {
-  const toolName = normalizeTool(tool);
+  const normalizedTool = normalizeTool(tool);
 
-  if (!toolName) {
+  if (!normalizedTool) {
     return true;
   }
 
-  return LIMITED_TOOLS.has(toolName);
+  return LIMITED_TOOLS.has(normalizedTool);
 }
 
-function isPremiumValue(value: unknown) {
+function getToolLimits(tool?: string) {
+  const normalizedTool = normalizeTool(tool);
+
+  if (normalizedTool === "coordinates-bulk") {
+    return {
+      guest: COORDINATES_BULK_GUEST_LIMIT,
+      registered: COORDINATES_BULK_REGISTERED_LIMIT,
+    };
+  }
+
+  return {
+    guest: GUEST_LIMIT,
+    registered: REGISTERED_LIMIT,
+  };
+}
+
+function hasPremiumValue(value: unknown) {
   if (typeof value !== "string") {
     return false;
   }
 
-  return ["premium", "pro", "paid"].includes(
-    value.toLowerCase()
-  );
+  return ["premium", "pro", "paid"].includes(value.toLowerCase());
 }
 
-function isPremiumUser(user: SupabasePlanUser) {
+function isPremiumUser(user: SupabaseUser) {
   return (
-    isPremiumValue(user.app_metadata?.plan) ||
-    isPremiumValue(user.user_metadata?.plan) ||
-    isPremiumValue(user.app_metadata?.subscription) ||
-    isPremiumValue(user.user_metadata?.subscription)
+    hasPremiumValue(user.app_metadata?.plan) ||
+    hasPremiumValue(user.user_metadata?.plan) ||
+    hasPremiumValue(user.app_metadata?.subscription) ||
+    hasPremiumValue(user.user_metadata?.subscription)
   );
 }
 
-function buildUnlimitedResult(
-  identityType: UsageIdentityType,
-  identityId: string
+function allowUnlimitedTool(
+  identityType: UsageIdentityType = "guest",
+  identityId = "free-ad-supported-tool"
 ): UsageLimitResult {
   return {
     allowed: true,
@@ -113,20 +127,34 @@ function allowWhenUsageCheckFails(
     identityId,
   };
 }
+function buildLimitReason(
+  tool: string | undefined,
+  limit: number,
+  identityType?: UsageIdentityType
+) {
+  if (normalizeTool(tool) === "coordinates-bulk") {
+    if (identityType === "guest") {
+      return "You have reached your CSV/Excel bulk limit of 1 conversion per day. Create a free account to get 3 bulk conversions per day.";
+    }
+
+    return "You have reached your CSV/Excel bulk limit of 3 conversions per day. Upgrade to premium for unlimited bulk conversions.";
+  }
+
+  return `You have reached your ${limit} conversion limit for the last 24 hours.`;
+}
 
 function buildUsageResult(
   used: number,
   limit: number,
   identityType: UsageIdentityType,
-  identityId: string
+  identityId: string,
+  tool?: string
 ): UsageLimitResult {
   const allowed = used < limit;
 
   return {
     allowed,
-    reason: allowed
-      ? null
-      : `You have reached your ${limit} conversion limit for the last 24 hours.`,
+    reason: allowed ? null : buildLimitReason(tool, limit, identityType),
     remaining: Math.max(limit - used, 0),
     used,
     limit,
@@ -135,7 +163,70 @@ function buildUsageResult(
   };
 }
 
-async function getOrCreateGuestId() {
+export async function checkUsageLimit(
+  tool?: string
+): Promise<UsageLimitResult> {
+  const normalizedTool = normalizeTool(tool);
+
+  if (!isLimitedTool(normalizedTool)) {
+    return allowUnlimitedTool();
+  }
+
+  const limits = getToolLimits(normalizedTool);
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const since = new Date(
+    Date.now() - WINDOW_HOURS * 60 * 60 * 1000
+  ).toISOString();
+
+  if (user) {
+    const typedUser = user as SupabaseUser;
+
+    if (isPremiumUser(typedUser)) {
+      return allowUnlimitedTool("user", typedUser.id);
+    }
+
+    let query = supabase
+      .from("conversion_usage")
+      .select("*", {
+        count: "exact",
+        head: true,
+      })
+      .eq("user_id", typedUser.id)
+      .gte("created_at", since);
+
+    if (normalizedTool) {
+      query = query.eq("tool", normalizedTool);
+    }
+
+    const { count, error } = await query;
+
+    if (error) {
+      console.error(
+        "Unable to check logged-in usage:",
+        error
+      );
+
+      return allowWhenUsageCheckFails(
+        "user",
+        typedUser.id,
+        limits.registered
+      );
+    }
+
+    return buildUsageResult(
+      count ?? 0,
+      limits.registered,
+      "user",
+      typedUser.id,
+      normalizedTool
+    );
+  }
+
   const cookieStore = await cookies();
   let guestId = cookieStore.get(GUEST_COOKIE_NAME)?.value;
 
@@ -151,115 +242,41 @@ async function getOrCreateGuestId() {
     });
   }
 
-  return guestId;
-}
+  const admin = createAdminClient();
 
-export async function checkUsageLimit(
-  tool?: string
-): Promise<UsageLimitResult> {
-  const shouldLimit = isLimitedTool(tool);
+  let query = admin
+    .from("conversion_usage")
+    .select("*", {
+      count: "exact",
+      head: true,
+    })
+    .eq("guest_id", guestId)
+    .gte("created_at", since);
 
-  const since = new Date(
-    Date.now() - WINDOW_HOURS * 60 * 60 * 1000
-  ).toISOString();
+  if (normalizedTool) {
+    query = query.eq("tool", normalizedTool);
+  }
 
-  try {
-    const supabase = await createClient();
+  const { count, error } = await query;
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!shouldLimit) {
-      if (user) {
-        return buildUnlimitedResult("user", user.id);
-      }
-
-      const guestId = await getOrCreateGuestId();
-
-      return buildUnlimitedResult("guest", guestId);
-    }
-
-    if (user) {
-      const typedUser = user as SupabasePlanUser;
-
-      if (isPremiumUser(typedUser)) {
-        return buildUnlimitedResult("user", typedUser.id);
-      }
-
-      const { count, error } = await supabase
-        .from("conversion_usage")
-        .select("*", {
-          count: "exact",
-          head: true,
-        })
-        .eq("user_id", typedUser.id)
-        .in("tool", LIMITED_TOOL_NAMES)
-        .gte("created_at", since);
-
-      if (error) {
-        console.error(
-          "Unable to check logged-in usage:",
-          error
-        );
-
-        return allowWhenUsageCheckFails(
-          "user",
-          typedUser.id,
-          REGISTERED_LIMIT
-        );
-      }
-
-      return buildUsageResult(
-        count ?? 0,
-        REGISTERED_LIMIT,
-        "user",
-        typedUser.id
-      );
-    }
-
-    const guestId = await getOrCreateGuestId();
-    const admin = createAdminClient();
-
-    const { count, error } = await admin
-      .from("conversion_usage")
-      .select("*", {
-        count: "exact",
-        head: true,
-      })
-      .eq("guest_id", guestId)
-      .in("tool", LIMITED_TOOL_NAMES)
-      .gte("created_at", since);
-
-    if (error) {
-      console.error(
-        "Unable to check guest usage:",
-        error
-      );
-
-      return allowWhenUsageCheckFails(
-        "guest",
-        guestId,
-        GUEST_LIMIT
-      );
-    }
-
-    return buildUsageResult(
-      count ?? 0,
-      GUEST_LIMIT,
-      "guest",
-      guestId
-    );
-  } catch (error) {
+  if (error) {
     console.error(
-      "Usage limit check failed:",
+      "Unable to check guest usage:",
       error
     );
 
     return allowWhenUsageCheckFails(
       "guest",
-      "usage-check-failed",
-      shouldLimit ? GUEST_LIMIT : UNLIMITED_LIMIT
+      guestId,
+      limits.guest
     );
   }
+
+  return buildUsageResult(
+    count ?? 0,
+    limits.guest,
+    "guest",
+    guestId,
+    normalizedTool
+  );
 }

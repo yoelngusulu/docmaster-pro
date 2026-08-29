@@ -18,8 +18,6 @@ export async function saveConversionHistory({
     error: userError,
   } = await supabase.auth.getUser();
 
-  // Guest user:
-  // conversion works, but no dashboard history.
   if (userError || !user) {
     return {
       isAuthenticated: false,
@@ -31,10 +29,8 @@ export async function saveConversionHistory({
     .insert({
       user_id: user.id,
       tool,
-      original_file_name:
-        originalFileName,
-      output_file_name:
-        outputFileName,
+      original_file_name: originalFileName,
+      output_file_name: outputFileName,
     });
 
   if (error) {

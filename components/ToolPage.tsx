@@ -5,6 +5,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import SplitPdfUploadArea from "./SplitPdfUploadArea";
 import UploadArea from "./UploadArea";
 import { toolConfig } from "./toolConfig";
 
@@ -80,7 +81,11 @@ export default function ToolPage({
             </div>
           </div>
 
-          <UploadArea tool={tool} />
+          {tool === "split-pdf" ? (
+            <SplitPdfUploadArea />
+          ) : (
+            <UploadArea tool={tool} />
+          )}
         </section>
       </div>
     </main>

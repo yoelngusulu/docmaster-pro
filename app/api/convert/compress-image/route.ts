@@ -259,12 +259,11 @@ export async function POST(
     );
 
     const scriptPath =
-      path.join(
-        process.cwd(),
-        "scripts",
-        "compress_image.py"
-      );
-
+  path.join(
+    /*turbopackIgnore: true*/ process.cwd(),
+    "scripts",
+    "compress_image.py"
+  );
     try {
       await fs.access(
         scriptPath

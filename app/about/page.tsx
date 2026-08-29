@@ -23,7 +23,7 @@ export default function AboutPage() {
     <main className="min-h-screen bg-gray-50 px-6 py-14">
       <section className="mx-auto max-w-6xl rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
         <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-          About DocMaster AI
+          About DocMaster Platform
         </p>
 
         <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-gray-900">
@@ -31,9 +31,8 @@ export default function AboutPage() {
         </h1>
 
         <p className="mt-5 max-w-3xl text-lg leading-8 text-gray-600">
-          DocMaster AI is a document productivity platform created by Yoeln
-          Digital Products. It brings together PDF conversion, image tools,
-          AI-assisted workflows and GIS utilities in one clean workspace.
+          DocMaster is a document productivity platform created by Yoeln
+          Digital Products. It brings together PDF conversion, image tools,GIS utilities and  AI-assisted workflows in one clean workspace.
         </p>
 
         <div className="mt-10 grid gap-5 md:grid-cols-3">

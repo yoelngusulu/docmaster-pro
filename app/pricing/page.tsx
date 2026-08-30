@@ -1,52 +1,75 @@
 import Link from "next/link";
 
-const plans = [
-  {
-    name: "Guest",
-    price: "Free",
-    description:
-      "Start converting documents without creating an account.",
-    features: [
-      "3 limited conversions per day",
-      "Unlimited ad-supported basic tools",
-      "PDF split, merge and compress",
-      "Image and GIS tools",
-    ],
-    cta: "Start Free",
-    href: "/tools",
-    featured: false,
-  },
-  {
-    name: "Registered",
-    price: "Free Account",
-    description:
-      "Create an account and get a higher daily conversion limit.",
-    features: [
-      "5 limited conversions per day",
-      "Conversion history",
-      "Unlimited ad-supported basic tools",
-      "Access from dashboard",
-    ],
-    cta: "Create Account",
-    href: "/register",
-    featured: true,
-  },
-  {
-    name: "Premium",
-    price: "Coming Soon",
-    description:
-      "Unlimited productivity for teams and heavy document workflows.",
-    features: [
-      "Unlimited conversions",
-      "No free-tool waiting screen",
-      "Priority processing",
-      "Advanced AI document tools",
-    ],
-    cta: "View Tools",
-    href: "/tools",
-    featured: false,
-  },
-];
+import {
+  formatTzs,
+  getPremiumPlanConfig,
+} from "@/lib/billing/config";
+
+type Plan = {
+  name: string;
+  price: string;
+  description: string;
+  features: string[];
+  cta: string;
+  href: string;
+  featured: boolean;
+};
+
+function getPlans(): Plan[] {
+  const premiumPlan = getPremiumPlanConfig();
+  const premiumReady = premiumPlan.checkoutConfigured;
+
+  return [
+    {
+      name: "Guest",
+      price: "Free",
+      description:
+        "Start converting documents without creating an account.",
+      features: [
+        "3 limited conversions per day",
+        "Unlimited ad-supported basic tools",
+        "PDF split, merge and compress",
+        "Image and GIS tools",
+      ],
+      cta: "Start Free",
+      href: "/tools",
+      featured: false,
+    },
+    {
+      name: "Registered",
+      price: "Free Account",
+      description:
+        "Create an account and get a higher daily conversion limit.",
+      features: [
+        "5 limited conversions per day",
+        "Conversion history",
+        "Unlimited ad-supported basic tools",
+        "Access from dashboard",
+      ],
+      cta: "Create Account",
+      href: "/register",
+      featured: true,
+    },
+    {
+      name: "Premium",
+      price: premiumReady
+        ? `${formatTzs(premiumPlan.amountTzs)} / ${premiumPlan.billingPeriod.toLowerCase()}`
+        : "Coming Soon",
+      description: premiumReady
+        ? "Unlimited productivity for users with heavy document workflows."
+        : "Unlimited productivity for teams and heavy document workflows.",
+      features: [
+        "Unlimited limited-tool conversions",
+        "No free-tool waiting screen",
+        "Priority processing",
+        "Advanced AI document tools",
+      ],
+      cta: premiumReady ? "Upgrade to Premium" : "View Tools",
+      href: premiumReady ? "/checkout/premium" : "/tools",
+      featured: false,
+    },
+  ];
+}
 
 export const metadata = {
   title: "Pricing | DocMaster AI",
@@ -55,6 +78,9 @@ export const metadata = {
 };
 
 export default function PricingPage() {
+  const plans = getPlans();
+  const premiumReady = getPremiumPlanConfig().checkoutConfigured;
+
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-16">
       <section className="mx-auto max-w-6xl">
@@ -68,10 +94,17 @@ export default function PricingPage() {
           </h1>
 
           <p className="mt-4 text-lg leading-8 text-gray-600">
-            Use DocMaster AI free with daily limits, then upgrade later when
-            premium tools are ready.
+            Use DocMaster AI free with daily limits, then upgrade to
+            Premium when your workflow needs more power.
           </p>
         </div>
+
+        {!premiumReady && (
+          <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center text-sm leading-6 text-amber-800">
+            Premium checkout is waiting for server payment settings.
+            Free and registered plans remain available.
+          </div>
+        )}
 
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
           {plans.map((plan) => (
@@ -97,9 +130,7 @@ export default function PricingPage() {
 
               <ul className="mt-6 flex-1 space-y-3 text-gray-700">
                 {plan.features.map((feature) => (
-                  <li key={feature}>
-                    ✓ {feature}
-                  </li>
+                  <li key={feature}>- {feature}</li>
                 ))}
               </ul>
 

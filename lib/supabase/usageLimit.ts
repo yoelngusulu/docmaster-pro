@@ -128,13 +128,15 @@ function allowWhenUsageCheckFails(
     identityId,
   };
 }
+
 function buildLimitReason(
   tool: string | undefined,
   limit: number,
   identityType?: UsageIdentityType
 ) {
   if (normalizeTool(tool) === "coordinates-bulk") {
-    const conversionText = limit === 1 ? "conversion" : "conversions";
+    const conversionText =
+      limit === 1 ? "conversion" : "conversions";
 
     if (identityType === "guest") {
       return `You have reached your CSV/Excel bulk limit of ${limit} ${conversionText} per day. Log in or upgrade to Premium for more access.`;
@@ -280,7 +282,7 @@ export async function checkUsageLimit(
   return buildUsageResult(
     count ?? 0,
     limits.guest,
-    guestId ? "guest" : "guest",
+    "guest",
     guestId,
     normalizedTool
   );

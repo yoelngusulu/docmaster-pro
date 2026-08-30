@@ -1,33 +1,54 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
 
+function getSafeNextPath() {
+  if (typeof window === "undefined") {
+    return "/dashboard";
+  }
+
+  const nextPath = new URLSearchParams(
+    window.location.search
+  ).get("next");
+
+  if (
+    nextPath &&
+    nextPath.startsWith("/") &&
+    !nextPath.startsWith("//")
+  ) {
+    return nextPath;
+  }
+
+  return "/dashboard";
+}
+
 export default function RegisterPage() {
+  const router = useRouter();
   const supabase = createClient();
 
-  const [name, setName] =
-    useState("");
-
-  const [email, setEmail] =
-    useState("");
-
-  const [password, setPassword] =
-    useState("");
-
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] =
     useState("");
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginHref, setLoginHref] = useState("/login");
 
-  const [error, setError] =
-    useState("");
+  useEffect(() => {
+    const nextPath = getSafeNextPath();
 
-  const [message, setMessage] =
-    useState("");
-
-  const [isLoading, setIsLoading] =
-    useState(false);
+    if (nextPath !== "/dashboard") {
+      setLoginHref(
+        `/login?next=${encodeURIComponent(nextPath)}`
+      );
+    }
+  }, []);
 
   const handleRegister = async (
     event: React.FormEvent<HTMLFormElement>
@@ -57,7 +78,8 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const { error: signUpError } =
+      const nextPath = getSafeNextPath();
+      const { data, error: signUpError } =
         await supabase.auth.signUp({
           email: email.trim(),
           password,
@@ -65,8 +87,9 @@ export default function RegisterPage() {
             data: {
               full_name: name.trim(),
             },
-            emailRedirectTo:
-              `${window.location.origin}/auth/callback`,
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+              nextPath
+            )}`,
           },
         });
 
@@ -74,8 +97,14 @@ export default function RegisterPage() {
         throw signUpError;
       }
 
+      if (data.session) {
+        router.push(nextPath);
+        router.refresh();
+        return;
+      }
+
       setMessage(
-        "Account created. Please check your email to confirm your account."
+        "Account created. Please check your email to confirm your account, then log in to continue."
       );
 
       setName("");
@@ -201,9 +230,7 @@ export default function RegisterPage() {
               type="password"
               value={confirmPassword}
               onChange={(event) =>
-                setConfirmPassword(
-                  event.target.value
-                )
+                setConfirmPassword(event.target.value)
               }
               placeholder="Enter password again"
               autoComplete="new-password"
@@ -226,7 +253,7 @@ export default function RegisterPage() {
         <p className="mt-6 text-center text-sm text-gray-600">
           Already have an account?{" "}
           <Link
-            href="/login"
+            href={loginHref}
             className="font-semibold text-blue-600 hover:underline"
           >
             Log in

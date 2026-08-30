@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { cookies } from "next/headers";
 
+import { getActivePremiumSubscription } from "@/lib/billing/subscriptions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -133,11 +134,13 @@ function buildLimitReason(
   identityType?: UsageIdentityType
 ) {
   if (normalizeTool(tool) === "coordinates-bulk") {
+    const conversionText = limit === 1 ? "conversion" : "conversions";
+
     if (identityType === "guest") {
-      return "You have reached your CSV/Excel bulk limit of 1 conversion per day. Create a free account to get 3 bulk conversions per day.";
+      return `You have reached your CSV/Excel bulk limit of ${limit} ${conversionText} per day. Log in or upgrade to Premium for more access.`;
     }
 
-    return "You have reached your CSV/Excel bulk limit of 3 conversions per day. Upgrade to premium for unlimited bulk conversions.";
+    return `You have reached your CSV/Excel bulk limit of ${limit} ${conversionText} per day. Upgrade to Premium for unlimited bulk conversions.`;
   }
 
   return `You have reached your ${limit} conversion limit for the last 24 hours.`;
@@ -185,8 +188,10 @@ export async function checkUsageLimit(
 
   if (user) {
     const typedUser = user as SupabaseUser;
+    const activePremiumSubscription =
+      await getActivePremiumSubscription(typedUser.id);
 
-    if (isPremiumUser(typedUser)) {
+    if (activePremiumSubscription || isPremiumUser(typedUser)) {
       return allowUnlimitedTool("user", typedUser.id);
     }
 
@@ -275,7 +280,7 @@ export async function checkUsageLimit(
   return buildUsageResult(
     count ?? 0,
     limits.guest,
-    "guest",
+    guestId ? "guest" : "guest",
     guestId,
     normalizedTool
   );

@@ -10,14 +10,27 @@ export const metadata: Metadata = {
   description: "The Smartest Document Platform",
 };
 
+const themeScript = `
+(function () {
+  try {
+    var storedTheme = localStorage.getItem("docmaster-theme");
+    var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var useDark = storedTheme ? storedTheme === "dark" : prefersDark;
+    document.documentElement.classList.toggle("dark", useDark);
+  } catch (error) {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-white text-black">
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen bg-white text-black dark:bg-slate-950 dark:text-gray-100">
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+
         <Navbar />
 
         {children}

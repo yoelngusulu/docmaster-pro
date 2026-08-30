@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { getPremiumPlanConfig } from "@/lib/billing/config";
+import { getUserBillingSummary } from "@/lib/billing/subscriptions";
 import { createClient } from "@/lib/supabase/server";
 
 type Conversion = {
@@ -35,18 +37,20 @@ function getToolLabel(tool: string) {
   return toolLabels[tool] ?? tool;
 }
 
-function getAccountPlan(userMetadata: Record<string, unknown> | undefined) {
-  const plan = userMetadata?.plan;
-
-  if (typeof plan === "string" && plan.trim()) {
-    return plan.charAt(0).toUpperCase() + plan.slice(1);
+function formatDate(value: string | null) {
+  if (!value) {
+    return "Not set";
   }
 
-  return "Free";
+  return new Date(value).toLocaleString();
 }
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleString();
+function formatStatus(status: string | null | undefined) {
+  if (!status || status === "NONE") {
+    return "Not active";
+  }
+
+  return status.charAt(0) + status.slice(1).toLowerCase();
 }
 
 export default async function DashboardPage() {
@@ -65,7 +69,14 @@ export default async function DashboardPage() {
     user.user_metadata?.name ||
     "DocMaster User";
 
-  const accountPlan = getAccountPlan(user.user_metadata);
+  const billingSummary = await getUserBillingSummary(user.id);
+  const premiumPlan = getPremiumPlanConfig();
+  const accountPlan =
+    billingSummary.plan === "PREMIUM" ? "Premium" : "Free";
+  const billingCta =
+    billingSummary.plan === "PREMIUM"
+      ? "Renew Premium"
+      : "Upgrade to Premium";
 
   const {
     data: conversions,
@@ -148,6 +159,80 @@ export default async function DashboardPage() {
               {accountPlan}
             </p>
           </div>
+        </div>
+
+        <div className="mt-8 rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Subscription / Billing
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Premium access is activated after payment verification.
+              </p>
+            </div>
+
+            <Link
+              href="/checkout/premium"
+              className="inline-flex w-full justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 sm:w-auto"
+            >
+              {billingCta}
+            </Link>
+          </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-4">
+            <div className="rounded-2xl bg-gray-50 p-5">
+              <p className="text-sm text-gray-500">Current plan</p>
+              <p className="mt-2 text-xl font-bold text-gray-900">
+                {accountPlan}
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-gray-50 p-5">
+              <p className="text-sm text-gray-500">Status</p>
+              <p className="mt-2 text-xl font-bold text-gray-900">
+                {formatStatus(billingSummary.subscriptionStatus)}
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-gray-50 p-5">
+              <p className="text-sm text-gray-500">Expiry date</p>
+              <p className="mt-2 text-sm font-semibold leading-6 text-gray-900">
+                {formatDate(billingSummary.expiresAt)}
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-gray-50 p-5">
+              <p className="text-sm text-gray-500">Premium price</p>
+              <p className="mt-2 text-xl font-bold text-gray-900">
+                {premiumPlan.checkoutConfigured
+                  ? premiumPlan.billingPeriod
+                  : "Setup pending"}
+              </p>
+            </div>
+          </div>
+
+          {billingSummary.pendingPayment ? (
+            <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-800">
+              <p className="font-bold">
+                Payment submitted for verification
+              </p>
+              <p className="mt-1">
+                Your Premium request is pending admin verification.
+                Submitted on {formatDate(
+                  billingSummary.pendingPayment.submitted_at
+                )}.
+              </p>
+            </div>
+          ) : billingSummary.latestPayment ? (
+            <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 p-5 text-sm leading-6 text-gray-700">
+              Latest payment request status: {" "}
+              <span className="font-bold">
+                {formatStatus(billingSummary.latestPayment.status)}
+              </span>
+              .
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-8 rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">

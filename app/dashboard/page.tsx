@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { getPremiumPlanConfig } from "@/lib/billing/config";
+import {
+  formatTzs,
+  getPremiumPlanConfig,
+} from "@/lib/billing/config";
 import { getUserBillingSummary } from "@/lib/billing/subscriptions";
 import { createClient } from "@/lib/supabase/server";
 
@@ -204,9 +207,9 @@ export default async function DashboardPage() {
 
             <div className="rounded-2xl bg-gray-50 p-5">
               <p className="text-sm text-gray-500">Premium price</p>
-              <p className="mt-2 text-xl font-bold text-gray-900">
+              <p className="mt-2 text-sm font-bold leading-6 text-gray-900">
                 {premiumPlan.checkoutConfigured
-                  ? premiumPlan.billingPeriod
+                  ? `${formatTzs(premiumPlan.amountTzs)} / ${premiumPlan.billingPeriod}`
                   : "Setup pending"}
               </p>
             </div>

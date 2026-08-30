@@ -6,8 +6,8 @@ import { formatTzs } from "@/lib/billing/config";
 import {
   expirePendingPaymentRequests,
   isBillingSchemaMissingError,
-  PaymentRequestRow,
 } from "@/lib/billing/subscriptions";
+import type { PaymentRequestRow } from "@/lib/billing/subscriptions";
 import { requireAdmin } from "@/lib/admin/authorization";
 import { createAdminClient } from "@/lib/supabase/admin";
 

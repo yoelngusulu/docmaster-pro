@@ -86,9 +86,10 @@ export default async function AdminPaymentsPage() {
               Premium payment tables are not ready yet
             </h1>
             <p className="mt-4 leading-7 text-gray-600">
-              Run the Supabase migration in
-              supabase/migrations/202608300700_premium_payment_flow.sql,
-              then refresh this page.
+              Run both Supabase migrations under supabase/migrations:
+              202608300700_premium_payment_flow.sql and
+              202608300710_premium_payment_admin_functions.sql, then
+              refresh this page.
             </p>
             <Link
               href="/dashboard"

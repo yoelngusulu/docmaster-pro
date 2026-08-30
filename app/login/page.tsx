@@ -2,25 +2,49 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
+
+function getSafeNextPath() {
+  if (typeof window === "undefined") {
+    return "/dashboard";
+  }
+
+  const nextPath = new URLSearchParams(
+    window.location.search
+  ).get("next");
+
+  if (
+    nextPath &&
+    nextPath.startsWith("/") &&
+    !nextPath.startsWith("//")
+  ) {
+    return nextPath;
+  }
+
+  return "/dashboard";
+}
 
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [email, setEmail] =
-    useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [registerHref, setRegisterHref] = useState("/register");
 
-  const [password, setPassword] =
-    useState("");
+  useEffect(() => {
+    const nextPath = getSafeNextPath();
 
-  const [error, setError] =
-    useState("");
-
-  const [isLoading, setIsLoading] =
-    useState(false);
+    if (nextPath !== "/dashboard") {
+      setRegisterHref(
+        `/register?next=${encodeURIComponent(nextPath)}`
+      );
+    }
+  }, []);
 
   const handleLogin = async (
     event: React.FormEvent<HTMLFormElement>
@@ -31,9 +55,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const {
-        error: signInError,
-      } =
+      const { error: signInError } =
         await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
@@ -43,7 +65,7 @@ export default function LoginPage() {
         throw signInError;
       }
 
-      router.push("/dashboard");
+      router.push(getSafeNextPath());
       router.refresh();
     } catch (loginError) {
       setError(
@@ -137,16 +159,14 @@ export default function LoginPage() {
             disabled={isLoading}
             className="w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isLoading
-              ? "Logging in..."
-              : "Log In"}
+            {isLoading ? "Logging in..." : "Log In"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-600">
           Don&apos;t have an account?{" "}
           <Link
-            href="/register"
+            href={registerHref}
             className="font-semibold text-blue-600 hover:underline"
           >
             Create account

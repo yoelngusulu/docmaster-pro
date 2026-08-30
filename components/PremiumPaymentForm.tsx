@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { maskPhoneNumber } from "@/lib/billing/subscriptions";
+import { maskPhoneNumber } from "@/lib/billing/format";
 
 type SubmittedPayment = {
   id: string;

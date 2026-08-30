@@ -11,25 +11,25 @@ const capabilities = [
   {
     title: "PDF & Document Tools",
     description:
-      "Convert, compress, merge, split, protect and manage documents through practical workflows designed for everyday productivity.",
+      "Convert, compress, merge, split, protect and manage PDF files without jumping between different apps.",
     icon: FileText,
   },
   {
     title: "Image Tools",
     description:
-      "Convert, compress and enhance images using simple image-processing and AI-assisted tools.",
+      "Convert, compress and improve images with simple tools built for everyday work.",
     icon: ImageIcon,
   },
   {
     title: "GIS & Coordinate Tools",
     description:
-      "Convert coordinates, process coordinate datasets in bulk and use practical geospatial utilities designed for GIS, surveying, engineering and mapping workflows.",
+      "Convert coordinates and process coordinate files for GIS, surveying, engineering and mapping tasks.",
     icon: MapPinned,
   },
   {
     title: "AI-Powered Tools",
     description:
-      "Use AI-assisted workflows for OCR, document summarization, translation, image enhancement and other productivity tasks.",
+      "Use AI for helpful tasks like OCR, summaries, translation and image enhancement.",
     icon: Bot,
   },
 ];
@@ -37,30 +37,27 @@ const capabilities = [
 const reasons = [
   {
     title: "Practical",
-    description:
-      "Built around real document, image and data workflows.",
+    description: "Focused on common file, image and data tasks.",
   },
   {
     title: "Simple",
-    description:
-      "Complex processing presented through an easy-to-use interface.",
+    description: "Tools are easy to find and straightforward to use.",
   },
   {
     title: "Accessible",
     description:
-      "Essential tools remain available for free, with advanced capabilities for professional users.",
+      "Free tools are available, with Premium for users who need more.",
   },
   {
-    title: "Growing Platform",
-    description:
-      "Continuously expanding with useful document, GIS and AI-powered workflows.",
+    title: "Growing",
+    description: "New document, GIS and AI tools are added over time.",
   },
 ];
 
 export const metadata = {
   title: "About DocMaster | Yoeln Digital Products",
   description:
-    "Learn about DocMaster, a productivity platform for documents, images, GIS and AI-powered workflows.",
+    "Learn about DocMaster, a workspace for documents, images, GIS and AI-powered tools.",
 };
 
 export default function AboutPage() {
@@ -74,24 +71,23 @@ export default function AboutPage() {
             </p>
 
             <h1 className="mt-3 max-w-4xl text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">
-              One smart workspace for documents, images, GIS and AI-powered productivity.
+              Useful tools for documents, images, GIS and AI work.
             </h1>
 
             <p className="mt-6 max-w-3xl text-lg leading-8 text-gray-600">
-              DocMaster is a productivity platform developed by {" "}
+              DocMaster is built by {" "}
               <strong className="font-semibold text-gray-900">
                 Yoeln Digital Products
               </strong>
-              , bringing together powerful PDF tools, image processing,
-              GIS utilities and AI-assisted workflows in one simple and
-              professional workspace.
+              . It brings PDF tools, image tools, coordinate utilities
+              and AI-assisted features into one clean workspace.
             </p>
 
             <p className="mt-4 max-w-3xl leading-7 text-gray-600">
-              Our mission is to simplify everyday digital tasks by
-              providing practical tools that help individuals,
-              professionals and businesses work with documents, images
-              and spatial data faster and more efficiently.
+              The goal is simple: make daily digital work easier. Whether
+              you are handling documents, preparing images or working
+              with location data, DocMaster gives you practical tools in
+              one place.
             </p>
           </div>
 
@@ -101,13 +97,13 @@ export default function AboutPage() {
             </div>
 
             <h2 className="mt-5 text-2xl font-bold text-gray-900">
-              Built as a practical platform
+              Made for everyday work
             </h2>
 
             <p className="mt-3 leading-7 text-gray-600">
-              DocMaster brings everyday file, data and AI workflows into
-              one organized product experience for people who need useful
-              tools without unnecessary complexity.
+              DocMaster is designed for people who regularly work with
+              files and data, and want tools that feel clear, organized
+              and ready to use.
             </p>
           </div>
         </div>
@@ -144,7 +140,7 @@ export default function AboutPage() {
             </p>
 
             <h2 className="mt-3 text-3xl font-bold text-gray-900">
-              Practical tools, simple workflows and room to grow.
+              Simple tools for real work.
             </h2>
           </div>
 
@@ -172,10 +168,9 @@ export default function AboutPage() {
           </h2>
 
           <p className="mt-4 max-w-4xl leading-7 text-blue-50">
-            Whether you&apos;re converting a PDF, processing an image,
-            transforming coordinate data or using AI to understand a
-            document, DocMaster brings practical productivity tools
-            together in one workspace.
+            From converting PDFs to cleaning up images, working with
+            coordinates or using AI to understand a document, DocMaster
+            keeps useful tools together in one workspace.
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">

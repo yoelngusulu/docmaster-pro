@@ -48,7 +48,6 @@ type UsageLimitResult = {
 type SupabaseUser = {
   id: string;
   app_metadata?: Record<string, unknown>;
-  user_metadata?: Record<string, unknown>;
 };
 
 function normalizeTool(tool?: string) {
@@ -89,12 +88,10 @@ function hasPremiumValue(value: unknown) {
   return ["premium", "pro", "paid"].includes(value.toLowerCase());
 }
 
-function isPremiumUser(user: SupabaseUser) {
+function isServerControlledPremiumUser(user: SupabaseUser) {
   return (
     hasPremiumValue(user.app_metadata?.plan) ||
-    hasPremiumValue(user.user_metadata?.plan) ||
-    hasPremiumValue(user.app_metadata?.subscription) ||
-    hasPremiumValue(user.user_metadata?.subscription)
+    hasPremiumValue(user.app_metadata?.subscription)
   );
 }
 
@@ -193,7 +190,10 @@ export async function checkUsageLimit(
     const activePremiumSubscription =
       await getActivePremiumSubscription(typedUser.id);
 
-    if (activePremiumSubscription || isPremiumUser(typedUser)) {
+    if (
+      activePremiumSubscription ||
+      isServerControlledPremiumUser(typedUser)
+    ) {
       return allowUnlimitedTool("user", typedUser.id);
     }
 

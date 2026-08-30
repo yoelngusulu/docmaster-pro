@@ -23,6 +23,8 @@ type PremiumPaymentFormProps = {
   checkoutConfigured: boolean;
 };
 
+type InstructionLanguage = "en" | "sw";
+
 function formatDate(value: string) {
   return new Date(value).toLocaleString();
 }
@@ -46,6 +48,8 @@ export default function PremiumPaymentForm({
   const [submittedPayment, setSubmittedPayment] =
     useState<SubmittedPayment | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [instructionLanguage, setInstructionLanguage] =
+    useState<InstructionLanguage>("en");
 
   const maskedPhoneNumber = useMemo(
     () => maskPhoneNumber(phoneNumber),
@@ -143,48 +147,123 @@ export default function PremiumPaymentForm({
           </div>
         ) : (
           <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-5">
-            <h2 className="font-bold text-gray-900">
-              Airtel Money Payment Instructions
-            </h2>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="font-bold text-gray-900">
+                {instructionLanguage === "en"
+                  ? "Airtel Money Payment Instructions"
+                  : "Maelekezo ya Malipo kwa Airtel Money"}
+              </h2>
 
-            <ol className="mt-4 space-y-3 text-sm leading-6 text-gray-700">
-              <li>
-                1. Dial <strong>*150*60#</strong> on your Airtel line.
-              </li>
-              <li>
-                2. Select <strong>5 - Lipa Bili</strong>.
-              </li>
-              <li>
-                3. Select <strong>1 - Lipa kwa Simu</strong>.
-              </li>
-              <li>
-                4. Select <strong>1 - Weka Lipa Namba</strong>.
-              </li>
-              <li>
-                5. Enter the <strong>DocMaster Airtel Lipa Namba</strong> displayed below.
-              </li>
-              <li>
-                6. Enter the required payment amount shown on the checkout page.
-              </li>
-              <li>
-                7. Enter your <strong>Airtel Money PIN</strong> on your phone to confirm the payment.
-              </li>
-              <li>
-                8. After payment is completed, copy the <strong>Airtel Money Transaction ID</strong> from the confirmation SMS.
-              </li>
-              <li>
-                9. Enter the Transaction ID, amount paid and phone number in the DocMaster payment form.
-              </li>
-              <li>
-                10. Click <strong>Submit Payment for Verification</strong>.
-              </li>
-            </ol>
+              <div className="inline-flex rounded-lg border border-blue-200 bg-white p-1 text-xs font-semibold text-gray-700">
+                <button
+                  type="button"
+                  onClick={() => setInstructionLanguage("en")}
+                  className={`rounded-md px-3 py-1.5 transition ${
+                    instructionLanguage === "en"
+                      ? "bg-blue-600 text-white"
+                      : "hover:bg-blue-50"
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInstructionLanguage("sw")}
+                  className={`rounded-md px-3 py-1.5 transition ${
+                    instructionLanguage === "sw"
+                      ? "bg-blue-600 text-white"
+                      : "hover:bg-blue-50"
+                  }`}
+                >
+                  Kiswahili
+                </button>
+              </div>
+            </div>
+
+            {instructionLanguage === "en" ? (
+              <ol className="mt-4 space-y-3 text-sm leading-6 text-gray-700">
+                <li>
+                  1. Dial <strong>*150*60#</strong> on your Airtel line.
+                </li>
+                <li>
+                  2. Select <strong>5 - Lipa Bili</strong>.
+                </li>
+                <li>
+                  3. Select <strong>1 - Lipa kwa Simu</strong>.
+                </li>
+                <li>
+                  4. Select <strong>1 - Weka Lipa Namba</strong>.
+                </li>
+                <li>
+                  5. Enter the <strong>DocMaster Airtel Lipa Namba</strong> displayed below.
+                </li>
+                <li>
+                  6. Enter the required payment amount shown on the checkout page.
+                </li>
+                <li>
+                  7. Enter your <strong>Airtel Money PIN</strong> on your phone to confirm the payment.
+                </li>
+                <li>
+                  8. After payment is completed, copy the <strong>Airtel Money Transaction ID</strong> from the confirmation SMS.
+                </li>
+                <li>
+                  9. Enter the Transaction ID, amount paid and phone number in the DocMaster payment form.
+                </li>
+                <li>
+                  10. Click <strong>Submit Payment for Verification</strong>.
+                </li>
+              </ol>
+            ) : (
+              <ol className="mt-4 space-y-3 text-sm leading-6 text-gray-700">
+                <li>
+                  1. Piga <strong>*150*60#</strong> kwenye laini yako ya Airtel.
+                </li>
+                <li>
+                  2. Chagua <strong>5 - Lipa Bili</strong>.
+                </li>
+                <li>
+                  3. Chagua <strong>1 - Lipa kwa Simu</strong>.
+                </li>
+                <li>
+                  4. Chagua <strong>1 - Weka Lipa Namba</strong>.
+                </li>
+                <li>
+                  5. Weka <strong>DocMaster Airtel Lipa Namba</strong> inayoonekana hapa chini.
+                </li>
+                <li>
+                  6. Weka kiasi cha malipo kinachoonyeshwa kwenye ukurasa wa checkout.
+                </li>
+                <li>
+                  7. Weka <strong>Airtel Money PIN</strong> kwenye simu yako kuthibitisha malipo.
+                </li>
+                <li>
+                  8. Baada ya malipo kukamilika, nakili <strong>Airtel Money Transaction ID</strong> kutoka kwenye SMS ya uthibitisho.
+                </li>
+                <li>
+                  9. Weka Transaction ID, kiasi ulicholipa na namba ya simu kwenye fomu ya malipo ya DocMaster.
+                </li>
+                <li>
+                  10. Bonyeza <strong>Submit Payment for Verification</strong>.
+                </li>
+              </ol>
+            )}
 
             <p className="mt-4 rounded-lg border border-blue-200 bg-white px-4 py-3 text-sm leading-6 text-gray-700">
-              <strong className="text-gray-900">Important:</strong>{" "}
-              Never enter your Airtel Money PIN on DocMaster. Your PIN
-              should only be entered through the Airtel Money menu on
-              your phone.
+              {instructionLanguage === "en" ? (
+                <>
+                  <strong className="text-gray-900">Important:</strong>{" "}
+                  Never enter your Airtel Money PIN on DocMaster. Your
+                  PIN should only be entered through the Airtel Money
+                  menu on your phone.
+                </>
+              ) : (
+                <>
+                  <strong className="text-gray-900">Muhimu:</strong>{" "}
+                  Usiweke Airtel Money PIN yako kwenye DocMaster. PIN
+                  yako inapaswa kuwekwa tu kupitia menu ya Airtel Money
+                  kwenye simu yako.
+                </>
+              )}
             </p>
 
             <div className="mt-5 rounded-xl bg-white p-4">

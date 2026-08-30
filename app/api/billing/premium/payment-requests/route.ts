@@ -13,9 +13,9 @@ import {
   isBillingSchemaMissingError,
   normalizePaymentReference,
   normalizePhoneNumber,
-  PaymentRequestRow,
   writePaymentAuditEvent,
 } from "@/lib/billing/subscriptions";
+import type { PaymentRequestRow } from "@/lib/billing/subscriptions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 

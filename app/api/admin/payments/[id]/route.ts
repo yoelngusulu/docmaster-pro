@@ -3,7 +3,10 @@ import {
   NextResponse,
 } from "next/server";
 
-import { isBillingSchemaMissingError } from "@/lib/billing/subscriptions";
+import {
+  expirePendingPaymentRequests,
+  isBillingSchemaMissingError,
+} from "@/lib/billing/subscriptions";
 import { requireAdmin } from "@/lib/admin/authorization";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -143,6 +146,8 @@ export async function PATCH(
       }
     );
   }
+
+  await expirePendingPaymentRequests();
 
   const admin = createAdminClient();
   const functionName =

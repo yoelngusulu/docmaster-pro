@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { siteConfig } from "@/lib/site/config";
+
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300">
@@ -16,13 +18,15 @@ export default function Footer() {
                 alt="DocMaster logo"
                 width={36}
                 height={18}
-                style={{width:"36px",
-                  height:"auto"}}
-                  />
-             
+                style={{
+                  width: "36px",
+                  height: "auto",
+                }}
+              />
+
               <div className="leading-tight">
                 <p className="text-2xl font-bold text-white">
-                  DocMaster
+                  {siteConfig.productName}
                 </p>
                 <p className="text-xs text-gray-400">
                   Smart Document Platform
@@ -32,7 +36,7 @@ export default function Footer() {
 
             <p className="mt-5 text-sm leading-7">
               Fast, secure and professional document conversion
-              platform developed by Yoeln Digital Products.
+              platform developed by {siteConfig.legalOwnerName}.
             </p>
           </div>
 
@@ -54,7 +58,7 @@ export default function Footer() {
 
           <div>
             <h3 className="font-semibold text-white">
-              Company
+              About
             </h3>
 
             <ul className="mt-4 space-y-3">
@@ -80,8 +84,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 border-t border-gray-700 pt-8 text-center text-sm">
-          © 2026 DocMaster. Built by <strong>Yoeln Digital Products</strong>.
-          All rights reserved.
+          {siteConfig.copyrightText}
         </div>
       </div>
     </footer>

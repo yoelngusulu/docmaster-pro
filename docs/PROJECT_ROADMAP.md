@@ -4,7 +4,7 @@
 
 **Project Name:** DocMaster
 
-**Company:** Yoeln Digital Products
+**Current Owner/Developer:** Yoel Ngusulu
 
 **Version:** v0.1.0
 

@@ -7,6 +7,8 @@ import {
   MapPinned,
 } from "lucide-react";
 
+import { siteConfig } from "@/lib/site/config";
+
 const capabilities = [
   {
     title: "PDF & Document Tools",
@@ -55,7 +57,7 @@ const reasons = [
 ];
 
 export const metadata = {
-  title: "About DocMaster | Yoeln Digital Products",
+  title: `About ${siteConfig.productName} | ${siteConfig.legalOwnerName}`,
   description:
     "Learn about DocMaster, a workspace for documents, images, GIS and AI-powered tools.",
 };
@@ -67,7 +69,7 @@ export default function AboutPage() {
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-              About DocMaster
+              About {siteConfig.productName}
             </p>
 
             <h1 className="mt-3 max-w-4xl text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">
@@ -75,12 +77,7 @@ export default function AboutPage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-lg leading-8 text-gray-600">
-              DocMaster is built by {" "}
-              <strong className="font-semibold text-gray-900">
-                Yoeln Digital Products
-              </strong>
-              . It brings PDF tools, image tools, coordinate utilities
-              and AI-assisted features into one clean workspace.
+              {siteConfig.platformDescription}
             </p>
 
             <p className="mt-4 max-w-3xl leading-7 text-gray-600">
@@ -192,11 +189,11 @@ export default function AboutPage() {
 
         <div className="mt-10 border-t border-gray-200 pt-8 text-center">
           <p className="font-semibold text-gray-900">
-            DocMaster - Developed by Yoeln Digital Products
+            {siteConfig.productName} - {siteConfig.developerAttribution}
           </p>
 
           <p className="mt-2 text-sm italic text-gray-500">
-            Simplifying documents, data and digital workflows.
+            {siteConfig.tagline}
           </p>
         </div>
       </section>

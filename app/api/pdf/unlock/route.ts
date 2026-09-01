@@ -14,6 +14,10 @@ import {
   NextResponse,
 } from "next/server";
 
+import {
+  NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+  isNativeDependencyError,
+} from "@/lib/nativeExecutables";
 import { runQpdf } from "@/lib/pdf/qpdf";
 import { checkUsageLimit } from "@/lib/supabase/usageLimit";
 import { recordConversionUsage } from "@/lib/supabase/recordUsage";
@@ -247,6 +251,17 @@ export async function POST(
       "Unlock PDF error:",
       error
     );
+
+    if (isNativeDependencyError(error)) {
+      return NextResponse.json(
+        {
+          message: NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+        },
+        {
+          status: 503,
+        }
+      );
+    }
 
     const message =
       error instanceof Error

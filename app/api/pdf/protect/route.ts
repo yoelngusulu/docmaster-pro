@@ -12,6 +12,10 @@ import path from "path";
 import os from "os";
 import crypto from "crypto";
 
+import {
+  NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+  isNativeDependencyError,
+} from "@/lib/nativeExecutables";
 import { runQpdf } from "@/lib/pdf/qpdf";
 import { checkUsageLimit } from "@/lib/supabase/usageLimit";
 import { recordConversionUsage } from "@/lib/supabase/recordUsage";
@@ -227,12 +231,21 @@ export async function POST(
       error
     );
 
+    if (isNativeDependencyError(error)) {
+      return NextResponse.json(
+        {
+          message: NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+        },
+        {
+          status: 503,
+        }
+      );
+    }
+
     return NextResponse.json(
       {
         message:
-          error instanceof Error
-            ? error.message
-            : "Unable to protect the PDF.",
+          "Unable to protect the PDF.",
       },
       {
         status: 500,

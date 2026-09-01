@@ -6,8 +6,13 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
-import { spawn } from "child_process";
 
+import {
+  NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+  isNativeDependencyError,
+  isPythonRuntimeError,
+  runNativeExecutable,
+} from "@/lib/nativeExecutables";
 import { checkUsageLimit } from "@/lib/supabase/usageLimit";
 import { recordConversionUsage } from "@/lib/supabase/recordUsage";
 
@@ -99,123 +104,48 @@ export async function POST(
       bytes
     );
 
-    await new Promise<void>(
-      (resolve, reject) => {
-        const python = spawn(
-          "python",
-          [
-            "scripts/pdf_to_word.py",
-            inputPath,
-            outputPath,
-          ],
-          {
-            windowsHide: true,
-          }
-        );
-
-        let stderr = "";
-        let stdout = "";
-        let finished = false;
-
-        const finishWithError = (
-          error: Error
-        ) => {
-          if (finished) {
-            return;
-          }
-
-          finished = true;
-
-          clearTimeout(
-            timeout
-          );
-
-          reject(error);
-        };
-
-        const timeout =
-          setTimeout(() => {
-            if (finished) {
-              return;
-            }
-
-            python.kill();
-
-            finishWithError(
-              new Error(
-                "PDF conversion timed out because the document layout is too complex."
-              )
-            );
-          }, CONVERSION_TIMEOUT_MS);
-
-        python.stdout.on(
-          "data",
-          (data) => {
-            const text =
-              data.toString();
-
-            stdout += text;
-
-            console.log(
-              "[pdf-to-word]",
-              text.trim()
-            );
-          }
-        );
-
-        python.stderr.on(
-          "data",
-          (data) => {
-            const text =
-              data.toString();
-
-            stderr += text;
-
-            console.error(
-              "[pdf-to-word]",
-              text.trim()
-            );
-          }
-        );
-
-        python.on(
-          "error",
-          (error) => {
-            finishWithError(
-              error
-            );
-          }
-        );
-
-        python.on(
-          "close",
-          (code) => {
-            if (finished) {
-              return;
-            }
-
-            finished = true;
-
-            clearTimeout(
-              timeout
-            );
-
-            if (code === 0) {
-              resolve();
-              return;
-            }
-
-            reject(
-              new Error(
-                stderr ||
-                  stdout ||
-                  "PDF conversion failed."
-              )
-            );
-          }
-        );
-      }
+    const scriptPath = path.join(
+      process.cwd(),
+      "scripts",
+      "pdf_to_word.py"
     );
+
+    const conversionResult =
+      await runNativeExecutable(
+        "python",
+        [
+          scriptPath,
+          inputPath,
+          outputPath,
+        ],
+        {
+          timeoutMs: CONVERSION_TIMEOUT_MS,
+          onStdout: (text) => {
+            if (text.trim()) {
+              console.log(
+                "[pdf-to-word]",
+                text.trim()
+              );
+            }
+          },
+          onStderr: (text) => {
+            if (text.trim()) {
+              console.error(
+                "[pdf-to-word]",
+                text.trim()
+              );
+            }
+          },
+        }
+      );
+
+    if (conversionResult.exitCode !== 0) {
+      throw new Error(
+        conversionResult.stderr.trim() ||
+          conversionResult.stdout.trim() ||
+          "PDF conversion failed."
+      );
+    }
 
     const output =
       await fs.readFile(
@@ -231,11 +161,11 @@ export async function POST(
     }
 
     // Record usage only after a successful conversion.
-  await recordConversionUsage({
-  tool: "pdf-to-word",
-  identityType: usage.identityType,
-  identityId: usage.identityId,
-});
+    await recordConversionUsage({
+      tool: "pdf-to-word",
+      identityType: usage.identityType,
+      identityId: usage.identityId,
+    });
 
     return new NextResponse(
       output,
@@ -254,15 +184,29 @@ export async function POST(
       }
     );
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to convert PDF to Word.";
-
     console.error(
       "PDF to Word API error:",
       error
     );
+
+    if (
+      isNativeDependencyError(error) ||
+      isPythonRuntimeError(error)
+    ) {
+      return NextResponse.json(
+        {
+          error: NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+        },
+        {
+          status: 503,
+        }
+      );
+    }
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to convert PDF to Word.";
 
     const isTimeout =
       message.includes(
@@ -273,7 +217,7 @@ export async function POST(
       {
         error: isTimeout
           ? "This PDF has a complex layout and could not be converted within 2 minutes. Try a simpler PDF."
-          : message,
+          : "Unable to convert PDF to Word.",
       },
       {
         status: isTimeout

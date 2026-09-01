@@ -7,31 +7,31 @@ import {
   Image as ImageIcon,
   MapPinned,
 } from "lucide-react";
+
 const categories = [
   {
     icon: FileText,
     title: "PDF Tools",
     href: "/tools/pdf",
-    tools: "9 Available Tools",
+    tools: "3 live tools + server tools coming soon",
     description:
-      "Convert, merge, split, compress and protect PDF documents.",
+      "Merge, split and compress PDFs now. Advanced PDF conversion tools are being prepared for the production server.",
   },
-
-    {
+  {
     icon: MapPinned,
     title: "GIS Tools",
     href: "/tools/coordinates-converter",
-    tools: "1 Available Tool",
+    tools: "1 live tool",
     description:
-      "Convert latitude and longitude between decimal degrees and DMS format.",
+      "Convert coordinates between Decimal Degrees, DMS and UTM with map preview.",
   },
   {
     icon: ImageIcon,
     title: "Image Tools",
     href: "/tools/image",
-    tools: "2 Available Tools",
+    tools: "1 live tool + compression coming soon",
     description:
-      "Convert, compress, edit and optimize image files.",
+      "Convert images to PDF now while production image compression is being prepared.",
   },
 ];
 
@@ -69,12 +69,12 @@ export default function ToolCategories() {
           </h2>
 
           <p className="mt-4 text-base leading-7 text-gray-600 sm:text-lg">
-            Everything you need to convert, edit and manage
-            documents in one intelligent platform.
+            Start with the production-ready tools now, then unlock heavier
+            conversion workflows as the dedicated processing server comes online.
           </p>
         </motion.div>
 
-       <div className="mx-auto mt-12 grid max-w-6xl gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mx-auto mt-12 grid max-w-6xl gap-8 md:grid-cols-2 lg:grid-cols-3">
           {categories.map((category, index) => {
             const Icon = category.icon;
 

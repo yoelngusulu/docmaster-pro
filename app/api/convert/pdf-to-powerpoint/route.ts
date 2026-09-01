@@ -2,68 +2,22 @@ import {
   NextRequest,
   NextResponse,
 } from "next/server";
-import { spawn } from "child_process";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import crypto from "crypto";
 
+import {
+  NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+  isNativeDependencyError,
+  isPythonRuntimeError,
+  runNativeExecutable,
+} from "@/lib/nativeExecutables";
 import { checkUsageLimit } from "@/lib/supabase/usageLimit";
 import { recordConversionUsage } from "@/lib/supabase/recordUsage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-function runPython(
-  scriptPath: string,
-  inputPath: string,
-  outputPath: string
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const pythonProcess = spawn("python", [
-      scriptPath,
-      inputPath,
-      outputPath,
-    ]);
-
-    let stderr = "";
-
-    pythonProcess.stderr.on(
-      "data",
-      (data) => {
-        stderr += data.toString();
-      }
-    );
-
-    pythonProcess.on(
-      "error",
-      (error) => {
-        reject(
-          new Error(
-            `Unable to start Python: ${error.message}`
-          )
-        );
-      }
-    );
-
-    pythonProcess.on(
-      "close",
-      (code) => {
-        if (code === 0) {
-          resolve();
-          return;
-        }
-
-        reject(
-          new Error(
-            stderr ||
-              `Python exited with code ${code}.`
-          )
-        );
-      }
-    );
-  });
-}
 
 export async function POST(
   request: NextRequest
@@ -195,11 +149,26 @@ export async function POST(
       "pdf_to_powerpoint.py"
     );
 
-    await runPython(
-      scriptPath,
-      inputPath,
-      outputPath
-    );
+    const conversionResult =
+      await runNativeExecutable(
+        "python",
+        [
+          scriptPath,
+          inputPath,
+          outputPath,
+        ],
+        {
+          timeoutMs: 120000,
+        }
+      );
+
+    if (conversionResult.exitCode !== 0) {
+      throw new Error(
+        conversionResult.stderr.trim() ||
+          conversionResult.stdout.trim() ||
+          "Python conversion failed."
+      );
+    }
 
     const outputBuffer =
       await fs.readFile(
@@ -247,12 +216,24 @@ export async function POST(
       error
     );
 
+    if (
+      isNativeDependencyError(error) ||
+      isPythonRuntimeError(error)
+    ) {
+      return NextResponse.json(
+        {
+          error: NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+        },
+        {
+          status: 503,
+        }
+      );
+    }
+
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : "PDF to PowerPoint conversion failed.",
+          "PDF to PowerPoint conversion failed.",
       },
       {
         status: 500,

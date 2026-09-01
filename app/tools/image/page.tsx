@@ -8,17 +8,21 @@ import ToolHubPage from "@/components/ToolHubPage";
 const imageTools = [
   {
     title: "Image to PDF",
-    description: "Convert JPG, PNG and other images into one PDF document.",
+    description:
+      "Convert JPG and PNG images into one PDF document. Live on Vercel.",
     href: "/tools/image/image-to-pdf",
     icon: FileImage,
-    badge: "Convert",
+    badge: "Live",
+    status: "available" as const,
   },
   {
     title: "Compress Image",
-    description: "Reduce image file size while keeping good visual quality.",
+    description:
+      "Prepared for a production-safe image compression engine or conversion worker.",
     href: "/tools/image/compress-image",
     icon: Archive,
-    badge: "Optimize",
+    badge: "Server soon",
+    status: "server-coming-soon" as const,
   },
 ];
 
@@ -27,7 +31,7 @@ export default function ImageToolsPage() {
     <ToolHubPage
       eyebrow="Image Tools"
       title="Image Tools"
-      subtitle="Convert images into PDFs or reduce image size through the same simple DocMaster workflow."
+      subtitle="Use Image to PDF now on Vercel while image compression is prepared for production processing."
       tools={imageTools}
     />
   );

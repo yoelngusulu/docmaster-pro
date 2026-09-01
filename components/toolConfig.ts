@@ -1,22 +1,30 @@
 export const toolConfig = {
   "pdf-to-word": {
-  title: "PDF to Word",
-  subtitle: "Convert PDF documents into editable Word files.",
-  button: "Convert to Word",
-  success: "Your Word document is ready.",
-  accept: ".pdf",
-  multiple: false,
-},
-  
-"pdf-to-excel": {
-  title: "PDF to Excel",
-  subtitle: "Convert PDF tables into editable Excel spreadsheets.",
-  button: "Convert to Excel",
-  success: "Your Excel document is ready.",
-  accept: ".pdf",
-  multiple: false,
-},
- 
+    title: "PDF to Word",
+    subtitle: "Convert PDF documents into editable Word files.",
+    button: "Convert to Word",
+    success: "Your Word document is ready.",
+    accept: ".pdf",
+    multiple: false,
+    availability: "server-coming-soon",
+    availabilityTitle: "Server processing coming soon",
+    availabilityMessage:
+      "This converter needs a dedicated document conversion server to produce reliable Word files. It is temporarily unavailable on Vercel while we prepare the production worker.",
+  },
+
+  "pdf-to-excel": {
+    title: "PDF to Excel",
+    subtitle: "Convert PDF tables into editable Excel spreadsheets.",
+    button: "Convert to Excel",
+    success: "Your Excel document is ready.",
+    accept: ".pdf",
+    multiple: false,
+    availability: "server-coming-soon",
+    availabilityTitle: "Server processing coming soon",
+    availabilityMessage:
+      "This converter needs a dedicated document conversion server for reliable table extraction. It is temporarily unavailable on Vercel while we prepare the production worker.",
+  },
+
   "pdf-to-image": {
     title: "PDF to Image",
     subtitle: "Convert PDF pages into high-quality image files.",
@@ -24,18 +32,22 @@ export const toolConfig = {
     success: "Your images are ready.",
     accept: ".pdf",
     multiple: false,
+    availability: "server-coming-soon",
+    availabilityTitle: "Server processing coming soon",
+    availabilityMessage:
+      "High-quality PDF rendering needs a dedicated conversion runtime. It is temporarily unavailable on Vercel while we prepare the production worker.",
   },
-"merge-pdf": {
-  title: "Merge PDF",
-  subtitle:
-    "Combine multiple PDF files into one document.",
-  accept: ".pdf,.zip",
-  multiple: true,
-  button: "Merge PDFs",
-  success:
-    "Your merged PDF is ready.",
-},
 
+  "merge-pdf": {
+    title: "Merge PDF",
+    subtitle:
+      "Combine multiple PDF files into one document.",
+    accept: ".pdf,.zip",
+    multiple: true,
+    button: "Merge PDFs",
+    success:
+      "Your merged PDF is ready.",
+  },
 
   "split-pdf": {
     title: "Split PDF",
@@ -62,97 +74,121 @@ export const toolConfig = {
     success: "Your protected PDF is ready.",
     accept: ".pdf",
     multiple: false,
+    availability: "server-coming-soon",
+    availabilityTitle: "Server processing coming soon",
+    availabilityMessage:
+      "Password protection needs QPDF on a dedicated conversion server. It is temporarily unavailable on Vercel while we prepare the production worker.",
   },
+
   "unlock-pdf": {
-  title: "Unlock PDF",
-  subtitle: "Remove password protection from your PDF documents.",
-  button: "Unlock PDF",
-  success: "Your unlocked PDF is ready.",
-  accept: ".pdf",
-  multiple: false,
-},
-"word-to-pdf": {
-  title: "Word to PDF",
-  subtitle: "Convert DOC and DOCX files to PDF.",
-  accept: ".doc,.docx",
-  multiple: false,
-  button: "Convert to PDF",
-  success: "Your PDF document is ready.",
-},
+    title: "Unlock PDF",
+    subtitle: "Remove password protection from your PDF documents.",
+    button: "Unlock PDF",
+    success: "Your unlocked PDF is ready.",
+    accept: ".pdf",
+    multiple: false,
+    availability: "server-coming-soon",
+    availabilityTitle: "Server processing coming soon",
+    availabilityMessage:
+      "Unlocking PDFs needs QPDF on a dedicated conversion server. It is temporarily unavailable on Vercel while we prepare the production worker.",
+  },
 
-"excel-to-pdf": {
-  title: "Excel to PDF",
-  subtitle: "Convert Excel spreadsheets into PDF.",
-  button: "Convert to PDF",
-  success: "Your PDF document is ready.",
-  accept: ".xls,.xlsx",
-  multiple: false,
-},
+  "word-to-pdf": {
+    title: "Word to PDF",
+    subtitle: "Convert DOC and DOCX files to PDF.",
+    accept: ".doc,.docx",
+    multiple: false,
+    button: "Convert to PDF",
+    success: "Your PDF document is ready.",
+    availability: "server-coming-soon",
+    availabilityTitle: "Server processing coming soon",
+    availabilityMessage:
+      "Word to PDF needs LibreOffice on a dedicated conversion server. It is temporarily unavailable on Vercel while we prepare the production worker.",
+  },
 
-"powerpoint-to-pdf": {
-  title: "PowerPoint to PDF",
-  subtitle: "Convert PowerPoint presentations into PDF.",
-  button: "Convert to PDF",
-  success: "Your PDF document is ready.",
-  accept: ".ppt,.pptx",
-  multiple: false,
-},
-"jpg-to-png": {
-  title: "JPG to PNG",
-  subtitle: "Convert JPG images into PNG format.",
-  button: "Convert to PNG",
-  success: "Your PNG image is ready.",
-  accept: ".jpg,.jpeg",
-  multiple: false,
-},
+  "excel-to-pdf": {
+    title: "Excel to PDF",
+    subtitle: "Convert Excel spreadsheets into PDF.",
+    button: "Convert to PDF",
+    success: "Your PDF document is ready.",
+    accept: ".xls,.xlsx",
+    multiple: false,
+    availability: "server-coming-soon",
+    availabilityTitle: "Server processing coming soon",
+    availabilityMessage:
+      "Excel to PDF needs a dedicated document conversion server. It is temporarily unavailable while we prepare production processing.",
+  },
 
+  "powerpoint-to-pdf": {
+    title: "PowerPoint to PDF",
+    subtitle: "Convert PowerPoint presentations into PDF.",
+    button: "Convert to PDF",
+    success: "Your PDF document is ready.",
+    accept: ".ppt,.pptx",
+    multiple: false,
+    availability: "server-coming-soon",
+    availabilityTitle: "Server processing coming soon",
+    availabilityMessage:
+      "PowerPoint to PDF needs a dedicated document conversion server. It is temporarily unavailable while we prepare production processing.",
+  },
 
-"webp-to-jpg": {
-  title: "WEBP to JPG",
-  subtitle: "Convert WEBP images into JPG format.",
-  button: "Convert to JPG",
-  success: "Your JPG image is ready.",
-  accept: ".webp",
-  multiple: false,
-},
+  "jpg-to-png": {
+    title: "JPG to PNG",
+    subtitle: "Convert JPG images into PNG format.",
+    button: "Convert to PNG",
+    success: "Your PNG image is ready.",
+    accept: ".jpg,.jpeg",
+    multiple: false,
+  },
 
-"webp-to-png": {
-  title: "WEBP to PNG",
-  subtitle: "Convert WEBP images into PNG format.",
-  button: "Convert to PNG",
-  success: "Your PNG image is ready.",
-  accept: ".webp",
-  multiple: false,
-},
+  "webp-to-jpg": {
+    title: "WEBP to JPG",
+    subtitle: "Convert WEBP images into JPG format.",
+    button: "Convert to JPG",
+    success: "Your JPG image is ready.",
+    accept: ".webp",
+    multiple: false,
+  },
 
-"compress-image": {
-  title: "Compress Image",
-  subtitle: "Reduce image size without losing quality.",
-  button: "Compress Image",
-  success: "Your compressed image is ready.",
-  accept: ".jpg,.jpeg,.png,.webp",
-  multiple: false,
-},
+  "webp-to-png": {
+    title: "WEBP to PNG",
+    subtitle: "Convert WEBP images into PNG format.",
+    button: "Convert to PNG",
+    success: "Your PNG image is ready.",
+    accept: ".webp",
+    multiple: false,
+  },
 
-"png-to-jpg": {
-  title: "PNG to JPG",
-  subtitle: "Convert PNG images into JPG format.",
-  button: "Convert to JPG",
-  success: "Your JPG image is ready.",
-  accept: ".png",
-  multiple: false,
-},
+  "compress-image": {
+    title: "Compress Image",
+    subtitle: "Reduce image size without losing quality.",
+    button: "Compress Image",
+    success: "Your compressed image is ready.",
+    accept: ".jpg,.jpeg,.png,.webp",
+    multiple: false,
+    availability: "server-coming-soon",
+    availabilityTitle: "Server processing coming soon",
+    availabilityMessage:
+      "Image compression is being moved to a browser-safe or worker-based engine. It is temporarily unavailable on Vercel while we finish that production path.",
+  },
 
+  "png-to-jpg": {
+    title: "PNG to JPG",
+    subtitle: "Convert PNG images into JPG format.",
+    button: "Convert to JPG",
+    success: "Your JPG image is ready.",
+    accept: ".png",
+    multiple: false,
+  },
 
-"crop-image": {
-  title: "Crop Image",
-  subtitle: "Crop images quickly and precisely.",
-  button: "Crop Image",
-  success: "Your cropped image is ready.",
-  accept: ".jpg,.jpeg,.png,.webp",
-  multiple: false,
-},
-
+  "crop-image": {
+    title: "Crop Image",
+    subtitle: "Crop images quickly and precisely.",
+    button: "Crop Image",
+    success: "Your cropped image is ready.",
+    accept: ".jpg,.jpeg,.png,.webp",
+    multiple: false,
+  },
 
   "image-editor": {
     title: "AI Image Editor",
@@ -266,36 +302,40 @@ export const toolConfig = {
     accept: ".pdf,.doc,.docx,.txt",
     multiple: false,
   },
+
   "pdf-to-powerpoint": {
-  title: "PDF to PowerPoint",
-  subtitle:
-    "Convert PDF pages into high-quality PowerPoint slides.",
-  button: "Convert to PowerPoint",
-  success:
-    "Your PowerPoint presentation is ready.",
-  accept: ".pdf",
-  multiple: false,
-},
+    title: "PDF to PowerPoint",
+    subtitle:
+      "Convert PDF pages into high-quality PowerPoint slides.",
+    button: "Convert to PowerPoint",
+    success:
+      "Your PowerPoint presentation is ready.",
+    accept: ".pdf",
+    multiple: false,
+    availability: "server-coming-soon",
+    availabilityTitle: "Server processing coming soon",
+    availabilityMessage:
+      "This converter needs a dedicated document conversion server to produce reliable PowerPoint files. It is temporarily unavailable on Vercel while we prepare the production worker.",
+  },
 
-"image-to-pdf": {
-  title: "Image to PDF",
-  subtitle:
-    "Convert JPG and PNG images into a single PDF document.",
-  button: "Convert to PDF",
-  success: "Your PDF is ready.",
-  accept: ".jpg,.jpeg,.png",
-  multiple: true,
-},
+  "image-to-pdf": {
+    title: "Image to PDF",
+    subtitle:
+      "Convert JPG and PNG images into a single PDF document.",
+    button: "Convert to PDF",
+    success: "Your PDF is ready.",
+    accept: ".jpg,.jpeg,.png",
+    multiple: true,
+  },
 
-"coordinates-converter": {
-  title: "Coordinates Converter",
-  subtitle:
-    "Convert coordinates between decimal degrees and DMS format.",
-  accept: "",
-  multiple: false,
-  button: "Convert Coordinates",
-  success:
-    "Your coordinates are ready.",
-},
-
+  "coordinates-converter": {
+    title: "Coordinates Converter",
+    subtitle:
+      "Convert coordinates between decimal degrees and DMS format.",
+    accept: "",
+    multiple: false,
+    button: "Convert Coordinates",
+    success:
+      "Your coordinates are ready.",
+  },
 } as const;

@@ -1,4 +1,3 @@
-import { execFile } from "child_process";
 import {
   mkdtemp,
   readFile,
@@ -7,15 +6,18 @@ import {
 } from "fs/promises";
 import os from "os";
 import path from "path";
-import { promisify } from "util";
 
+import {
+  NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+  isNativeDependencyError,
+  isPythonRuntimeError,
+  runNativeExecutable,
+} from "@/lib/nativeExecutables";
 import { checkUsageLimit } from "@/lib/supabase/usageLimit";
 import { recordConversionUsage } from "@/lib/supabase/recordUsage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const execFileAsync = promisify(execFile);
 
 const allowedExtensions = new Set([
   ".jpg",
@@ -39,10 +41,6 @@ function sanitizeFileName(
     3,
     "0"
   )}${extension}`;
-}
-
-function getPythonCommand() {
-  return process.env.PYTHON_PATH || "python";
 }
 
 export async function POST(
@@ -104,6 +102,18 @@ export async function POST(
     ) {
       const file = files[index];
 
+      if (file.size === 0) {
+        return Response.json(
+          {
+            error:
+              `The uploaded image is empty: ${file.name}`,
+          },
+          {
+            status: 400,
+          }
+        );
+      }
+
       const extension = path
         .extname(file.name)
         .toLowerCase();
@@ -159,39 +169,24 @@ export async function POST(
       "image_to_pdf.py"
     );
 
-    try {
-      await execFileAsync(
-        getPythonCommand(),
+    const conversionResult =
+      await runNativeExecutable(
+        "python",
         [
           scriptPath,
           outputPath,
           ...inputPaths,
         ],
         {
-          windowsHide: true,
-          maxBuffer:
-            10 * 1024 * 1024,
+          timeoutMs: 120000,
         }
       );
-    } catch (conversionError) {
-      const errorMessage =
-        conversionError instanceof Error
-          ? conversionError.message
-          : "Unknown Python error.";
 
-      console.error(
-        "Image to PDF conversion failed:",
-        conversionError
-      );
-
-      return Response.json(
-        {
-          error:
-            `Unable to convert images to PDF. ${errorMessage}`,
-        },
-        {
-          status: 500,
-        }
+    if (conversionResult.exitCode !== 0) {
+      throw new Error(
+        conversionResult.stderr.trim() ||
+          conversionResult.stdout.trim() ||
+          "Python conversion failed."
       );
     }
 
@@ -235,6 +230,20 @@ export async function POST(
       "Image to PDF API error:",
       error
     );
+
+    if (
+      isNativeDependencyError(error) ||
+      isPythonRuntimeError(error)
+    ) {
+      return Response.json(
+        {
+          error: NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+        },
+        {
+          status: 503,
+        }
+      );
+    }
 
     return Response.json(
       {

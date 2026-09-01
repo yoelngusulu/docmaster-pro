@@ -6,8 +6,13 @@ import { randomUUID } from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
-import { spawn } from "child_process";
 
+import {
+  NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+  isNativeDependencyError,
+  isPythonRuntimeError,
+  runNativeExecutable,
+} from "@/lib/nativeExecutables";
 import { checkUsageLimit } from "@/lib/supabase/usageLimit";
 import { recordConversionUsage } from "@/lib/supabase/recordUsage";
 
@@ -33,89 +38,6 @@ const mimeTypes: Record<
   ".png": "image/png",
   ".webp": "image/webp",
 };
-
-function runPythonScript(
-  scriptPath: string,
-  inputPath: string,
-  outputPath: string
-): Promise<void> {
-  return new Promise(
-    (resolve, reject) => {
-      const pythonCommand =
-        process.env.PYTHON_PATH ||
-        process.env.PYTHON_EXECUTABLE ||
-        "python";
-
-      const pythonProcess = spawn(
-        pythonCommand,
-        [
-          scriptPath,
-          inputPath,
-          outputPath,
-        ],
-        {
-          windowsHide: true,
-        }
-      );
-
-      let standardOutput = "";
-      let standardError = "";
-
-      pythonProcess.stdout.on(
-        "data",
-        (data: Buffer) => {
-          standardOutput +=
-            data.toString();
-        }
-      );
-
-      pythonProcess.stderr.on(
-        "data",
-        (data: Buffer) => {
-          standardError +=
-            data.toString();
-        }
-      );
-
-      pythonProcess.on(
-        "error",
-        (error) => {
-          reject(
-            new Error(
-              `Unable to start Python: ${error.message}`
-            )
-          );
-        }
-      );
-
-      pythonProcess.on(
-        "close",
-        (code) => {
-          if (code === 0) {
-            if (
-              standardOutput.trim()
-            ) {
-              console.log(
-                "Image compression:",
-                standardOutput.trim()
-              );
-            }
-
-            resolve();
-            return;
-          }
-
-          reject(
-            new Error(
-              standardError.trim() ||
-                `Python exited with code ${code}.`
-            )
-          );
-        }
-      );
-    }
-  );
-}
 
 function sanitizeFileName(
   fileName: string
@@ -258,12 +180,12 @@ export async function POST(
       fileBuffer
     );
 
-    const scriptPath =
-  path.join(
-    /*turbopackIgnore: true*/ process.cwd(),
-    "scripts",
-    "compress_image.py"
-  );
+    const scriptPath = path.join(
+      /*turbopackIgnore: true*/ process.cwd(),
+      "scripts",
+      "compress_image.py"
+    );
+
     try {
       await fs.access(
         scriptPath
@@ -272,19 +194,42 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "The image compression script was not found.",
+            "The image compression service is temporarily unavailable.",
         },
         {
-          status: 500,
+          status: 503,
         }
       );
     }
 
-    await runPythonScript(
-      scriptPath,
-      inputPath,
-      outputPath
-    );
+    const conversionResult =
+      await runNativeExecutable(
+        "python",
+        [
+          scriptPath,
+          inputPath,
+          outputPath,
+        ],
+        {
+          timeoutMs: 120000,
+          onStdout: (text) => {
+            if (text.trim()) {
+              console.log(
+                "Image compression:",
+                text.trim()
+              );
+            }
+          },
+        }
+      );
+
+    if (conversionResult.exitCode !== 0) {
+      throw new Error(
+        conversionResult.stderr.trim() ||
+          conversionResult.stdout.trim() ||
+          "Python conversion failed."
+      );
+    }
 
     const compressedBuffer =
       await fs.readFile(
@@ -372,12 +317,24 @@ export async function POST(
       error
     );
 
+    if (
+      isNativeDependencyError(error) ||
+      isPythonRuntimeError(error)
+    ) {
+      return NextResponse.json(
+        {
+          error: NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+        },
+        {
+          status: 503,
+        }
+      );
+    }
+
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : "Unable to compress the image.",
+          "Unable to compress the image.",
       },
       {
         status: 500,

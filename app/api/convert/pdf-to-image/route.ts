@@ -6,65 +6,19 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
-import { spawn } from "child_process";
 import JSZip from "jszip";
 
+import {
+  NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+  isNativeDependencyError,
+  isPythonRuntimeError,
+  runNativeExecutable,
+} from "@/lib/nativeExecutables";
 import { checkUsageLimit } from "@/lib/supabase/usageLimit";
 import { recordConversionUsage } from "@/lib/supabase/recordUsage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-function runPythonScript(
-  scriptPath: string,
-  inputPath: string,
-  outputFolder: string
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const pythonProcess = spawn("python", [
-      scriptPath,
-      inputPath,
-      outputFolder,
-    ]);
-
-    let standardError = "";
-
-    pythonProcess.stderr.on(
-      "data",
-      (data) => {
-        standardError += data.toString();
-      }
-    );
-
-    pythonProcess.on(
-      "error",
-      (error) => {
-        reject(
-          new Error(
-            `Unable to start Python: ${error.message}`
-          )
-        );
-      }
-    );
-
-    pythonProcess.on(
-      "close",
-      (code) => {
-        if (code === 0) {
-          resolve();
-          return;
-        }
-
-        reject(
-          new Error(
-            standardError ||
-              `Python exited with code ${code}.`
-          )
-        );
-      }
-    );
-  });
-}
 
 async function createZipFile(
   sourceFolder: string,
@@ -156,10 +110,21 @@ export async function POST(
       );
     }
 
+    if (uploadedFile.size === 0) {
+      return NextResponse.json(
+        {
+          error:
+            "The uploaded PDF is empty.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
     if (
-      uploadedFile.type &&
-      uploadedFile.type !==
-        "application/pdf"
+      !uploadedFile.name.toLowerCase().endsWith(".pdf") ||
+      (uploadedFile.type && uploadedFile.type !== "application/pdf")
     ) {
       return NextResponse.json(
         {
@@ -239,15 +204,30 @@ export async function POST(
 
     if (!fs.existsSync(scriptPath)) {
       throw new Error(
-        `Python script was not found: ${scriptPath}`
+        "PDF to image conversion service is not configured."
       );
     }
 
-    await runPythonScript(
-      scriptPath,
-      inputPath,
-      outputFolder
-    );
+    const conversionResult =
+      await runNativeExecutable(
+        "python",
+        [
+          scriptPath,
+          inputPath,
+          outputFolder,
+        ],
+        {
+          timeoutMs: 120000,
+        }
+      );
+
+    if (conversionResult.exitCode !== 0) {
+      throw new Error(
+        conversionResult.stderr.trim() ||
+          conversionResult.stdout.trim() ||
+          "Python conversion failed."
+      );
+    }
 
     const generatedFiles =
       await fs.promises.readdir(
@@ -332,14 +312,24 @@ export async function POST(
       error
     );
 
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "Unable to convert PDF to images.";
+    if (
+      isNativeDependencyError(error) ||
+      isPythonRuntimeError(error)
+    ) {
+      return NextResponse.json(
+        {
+          error: NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+        },
+        {
+          status: 503,
+        }
+      );
+    }
 
     return NextResponse.json(
       {
-        error: errorMessage,
+        error:
+          "Unable to convert PDF to images.",
       },
       {
         status: 500,

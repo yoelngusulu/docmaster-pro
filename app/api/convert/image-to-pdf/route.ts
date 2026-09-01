@@ -1,46 +1,56 @@
-import {
-  mkdtemp,
-  readFile,
-  rm,
-  writeFile,
-} from "fs/promises";
-import os from "os";
 import path from "path";
+import { PDFDocument } from "pdf-lib";
 
-import {
-  NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
-  isNativeDependencyError,
-  isPythonRuntimeError,
-  runNativeExecutable,
-} from "@/lib/nativeExecutables";
 import { checkUsageLimit } from "@/lib/supabase/usageLimit";
 import { recordConversionUsage } from "@/lib/supabase/recordUsage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const MAX_FILE_SIZE = 100 * 1024 * 1024;
+
 const allowedExtensions = new Set([
   ".jpg",
   ".jpeg",
   ".png",
-  ".webp",
-  ".bmp",
-  ".tif",
-  ".tiff",
 ]);
 
-function sanitizeFileName(
-  fileName: string,
-  index: number
-) {
+function getImageType(fileName: string) {
   const extension = path
     .extname(fileName)
     .toLowerCase();
 
-  return `image-${String(index + 1).padStart(
-    3,
-    "0"
-  )}${extension}`;
+  if (
+    extension === ".jpg" ||
+    extension === ".jpeg"
+  ) {
+    return "jpg";
+  }
+
+  if (extension === ".png") {
+    return "png";
+  }
+
+  return null;
+}
+
+function getPdfPageSize(
+  imageWidth: number,
+  imageHeight: number
+) {
+  const maxPageWidth = 1440;
+  const maxPageHeight = 1440;
+
+  const scale = Math.min(
+    maxPageWidth / imageWidth,
+    maxPageHeight / imageHeight,
+    1
+  );
+
+  return {
+    width: imageWidth * scale,
+    height: imageHeight * scale,
+  };
 }
 
 export async function POST(
@@ -61,14 +71,6 @@ export async function POST(
       }
     );
   }
-
-  const temporaryDirectory =
-    await mkdtemp(
-      path.join(
-        os.tmpdir(),
-        "docmaster-image-to-pdf-"
-      )
-    );
 
   try {
     const formData =
@@ -93,20 +95,14 @@ export async function POST(
       );
     }
 
-    const inputPaths: string[] = [];
+    const pdfDocument =
+      await PDFDocument.create();
 
-    for (
-      let index = 0;
-      index < files.length;
-      index += 1
-    ) {
-      const file = files[index];
-
+    for (const file of files) {
       if (file.size === 0) {
         return Response.json(
           {
-            error:
-              `The uploaded image is empty: ${file.name}`,
+            error: `The uploaded image is empty: ${file.name}`,
           },
           {
             status: 400,
@@ -114,19 +110,25 @@ export async function POST(
         );
       }
 
-      const extension = path
-        .extname(file.name)
-        .toLowerCase();
+      if (file.size > MAX_FILE_SIZE) {
+        return Response.json(
+          {
+            error: `Maximum file size is 100 MB: ${file.name}`,
+          },
+          {
+            status: 413,
+          }
+        );
+      }
 
-      if (
-        !allowedExtensions.has(
-          extension
-        )
-      ) {
+      const imageType =
+        getImageType(file.name);
+
+      if (!imageType) {
         return Response.json(
           {
             error:
-              `Unsupported image format: ${file.name}`,
+              "Only JPG, JPEG and PNG images are supported.",
           },
           {
             status: 400,
@@ -134,68 +136,57 @@ export async function POST(
         );
       }
 
-      const safeFileName =
-        sanitizeFileName(
-          file.name,
-          index
-        );
-
-      const inputPath = path.join(
-        temporaryDirectory,
-        safeFileName
+      const bytes = new Uint8Array(
+        await file.arrayBuffer()
       );
 
-      const fileBuffer =
-        Buffer.from(
-          await file.arrayBuffer()
+      let image;
+
+      try {
+        image =
+          imageType === "jpg"
+            ? await pdfDocument.embedJpg(bytes)
+            : await pdfDocument.embedPng(bytes);
+      } catch {
+        return Response.json(
+          {
+            error: `The uploaded file could not be read as a valid JPG or PNG: ${file.name}`,
+          },
+          {
+            status: 400,
+          }
+        );
+      }
+
+      const { width, height } =
+        getPdfPageSize(
+          image.width,
+          image.height
         );
 
-      await writeFile(
-        inputPath,
-        fileBuffer
-      );
+      const page = pdfDocument.addPage([
+        width,
+        height,
+      ]);
 
-      inputPaths.push(inputPath);
+      page.drawImage(image, {
+        x: 0,
+        y: 0,
+        width,
+        height,
+      });
     }
 
-    const outputPath = path.join(
-      temporaryDirectory,
-      "images-to-pdf.pdf"
-    );
-
-    const scriptPath = path.join(
-      process.cwd(),
-      "scripts",
-      "image_to_pdf.py"
-    );
-
-    const conversionResult =
-      await runNativeExecutable(
-        "python",
-        [
-          scriptPath,
-          outputPath,
-          ...inputPaths,
-        ],
-        {
-          timeoutMs: 120000,
-        }
-      );
-
-    if (conversionResult.exitCode !== 0) {
+    if (pdfDocument.getPageCount() === 0) {
       throw new Error(
-        conversionResult.stderr.trim() ||
-          conversionResult.stdout.trim() ||
-          "Python conversion failed."
+        "The PDF document has no pages."
       );
     }
 
-    const pdfBuffer =
-      await readFile(outputPath);
+    const pdfBytes =
+      await pdfDocument.save();
 
-    if (
-      pdfBuffer.byteLength === 0
-    ) {
+    if (pdfBytes.byteLength === 0) {
       throw new Error(
         "The generated PDF file is empty."
       );
@@ -210,16 +201,16 @@ export async function POST(
     });
 
     return new Response(
-      pdfBuffer,
+      Buffer.from(pdfBytes),
       {
         status: 200,
         headers: {
           "Content-Type":
             "application/pdf",
-
           "Content-Disposition":
             'attachment; filename="images-to-pdf.pdf"',
-
+          "Content-Length":
+            pdfBytes.byteLength.toString(),
           "Cache-Control":
             "no-store",
         },
@@ -231,35 +222,13 @@ export async function POST(
       error
     );
 
-    if (
-      isNativeDependencyError(error) ||
-      isPythonRuntimeError(error)
-    ) {
-      return Response.json(
-        {
-          error: NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
-        },
-        {
-          status: 503,
-        }
-      );
-    }
-
     return Response.json(
       {
         error:
-          "Something went wrong while processing the images.",
+          "Unable to convert images to PDF.",
       },
       {
         status: 500,
-      }
-    );
-  } finally {
-    await rm(
-      temporaryDirectory,
-      {
-        recursive: true,
-        force: true,
       }
     );
   }

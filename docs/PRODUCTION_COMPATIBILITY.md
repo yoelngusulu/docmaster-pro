@@ -11,6 +11,7 @@ Some conversion routes depend on native runtimes such as QPDF, LibreOffice, or P
 | Merge PDF | `pdf-lib` | None | Works | Expected to work | Optional | Vercel-compatible as implemented |
 | Split PDF | `pdf-lib` + `jszip` | None | Works | Expected to work | Optional | Vercel-compatible as implemented |
 | Compress PDF | `pdf-lib` + `jszip` | None | Works | Expected to work | Optional | Vercel-compatible as implemented |
+| Image to PDF | `pdf-lib` | None for JPG/JPEG/PNG | Works | Expected to work | Optional | Vercel-compatible after removing Python dependency |
 | Coordinates Converter | `proj4`, `xlsx`, Leaflet/OpenStreetMap | None | Works | Expected to work | Optional | Vercel-compatible as implemented |
 | AI/Image to Text | OpenAI API | No local binary | Works if API key is configured | Expected to work if API key is configured | Optional | Vercel-compatible with server-side `OPENAI_API_KEY` |
 | Protect PDF | QPDF | `qpdf` executable | Works with QPDF installed | Not reliable on Vercel | Yes | Native runtime required; now fails gracefully if unavailable |
@@ -20,7 +21,6 @@ Some conversion routes depend on native runtimes such as QPDF, LibreOffice, or P
 | PDF to Excel | Python script | Python + `pdfplumber` + `pandas` + `openpyxl` | Works with Python deps installed | Not reliable on Vercel | Yes | Python runtime required; now fails gracefully if unavailable |
 | PDF to PowerPoint | Python script | Python + PyMuPDF + `python-pptx` | Works with Python deps installed | Not reliable on Vercel | Yes | Python runtime required; now fails gracefully if unavailable |
 | PDF to Image | Python script | Python + PyMuPDF | Works with Python deps installed | Not reliable on Vercel | Yes | Python runtime required; now fails gracefully if unavailable |
-| Image to PDF | Python script | Python + Pillow | Works with Python deps installed | Not reliable on Vercel | Yes | Python runtime required; now fails gracefully if unavailable |
 | Image Compress | Python script | Python + Pillow | Works with Python deps installed | Not reliable on Vercel | Yes | Python runtime required; now fails gracefully if unavailable |
 
 ## Server-side Native Configuration

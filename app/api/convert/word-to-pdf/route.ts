@@ -2,17 +2,18 @@ import {
   NextRequest,
   NextResponse,
 } from "next/server";
-import { execFile } from "child_process";
 import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
-import { promisify } from "util";
 import crypto from "crypto";
 
+import {
+  NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+  isNativeDependencyError,
+  runNativeExecutable,
+} from "@/lib/nativeExecutables";
 import { checkUsageLimit } from "@/lib/supabase/usageLimit";
 import { recordConversionUsage } from "@/lib/supabase/recordUsage";
-
-const execFileAsync = promisify(execFile);
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,14 +22,6 @@ const allowedExtensions = [
   ".doc",
   ".docx",
 ];
-
-function getLibreOfficePath() {
-  if (process.platform === "win32") {
-    return "C:\\Program Files\\LibreOffice\\program\\soffice.exe";
-  }
-
-  return "soffice";
-}
 
 export async function POST(
   request: NextRequest
@@ -146,7 +139,7 @@ export async function POST(
         .replace(
           /[^a-zA-Z0-9-_]/g,
           "_"
-        );
+        ) || "document";
 
     const inputFilePath =
       path.join(
@@ -164,24 +157,29 @@ export async function POST(
       fileBuffer
     );
 
-    const libreOfficePath =
-      getLibreOfficePath();
+    const conversionResult =
+      await runNativeExecutable(
+        "libreoffice",
+        [
+          "--headless",
+          "--convert-to",
+          "pdf",
+          "--outdir",
+          outputDirectory,
+          inputFilePath,
+        ],
+        {
+          timeoutMs: 120000,
+        }
+      );
 
-    await execFileAsync(
-      libreOfficePath,
-      [
-        "--headless",
-        "--convert-to",
-        "pdf",
-        "--outdir",
-        outputDirectory,
-        inputFilePath,
-      ],
-      {
-        timeout: 120000,
-        windowsHide: true,
-      }
-    );
+    if (conversionResult.exitCode !== 0) {
+      throw new Error(
+        conversionResult.stderr.trim() ||
+          conversionResult.stdout.trim() ||
+          "LibreOffice conversion failed."
+      );
+    }
 
     const convertedFilePath =
       path.join(
@@ -198,7 +196,7 @@ export async function POST(
         {
           success: false,
           message:
-            "LibreOffice did not create the PDF file.",
+            "Unable to convert the Word document.",
         },
         {
           status: 500,
@@ -249,17 +247,23 @@ export async function POST(
       error
     );
 
-    const message =
-      error instanceof Error
-        ? error.message
-        : "An unexpected error occurred.";
+    if (isNativeDependencyError(error)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+        },
+        {
+          status: 503,
+        }
+      );
+    }
 
     return NextResponse.json(
       {
         success: false,
         message:
           "Unable to convert the Word document.",
-        error: message,
       },
       {
         status: 500,

@@ -5,12 +5,17 @@ import {
   ArrowRight,
 } from "lucide-react";
 
+type ToolStatus =
+  | "available"
+  | "server-coming-soon";
+
 type ToolHubItem = {
   title: string;
   description: string;
   href: string;
   icon: LucideIcon;
   badge?: string;
+  status?: ToolStatus;
 };
 
 type ToolHubPageProps = {
@@ -58,20 +63,37 @@ export default function ToolHubPage({
         <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {tools.map((tool) => {
             const Icon = tool.icon;
+            const isServerComingSoon =
+              tool.status === "server-coming-soon";
+            const badgeClass = isServerComingSoon
+              ? "bg-amber-50 text-amber-700"
+              : tool.status === "available"
+              ? "bg-green-50 text-green-700"
+              : "bg-gray-100 text-gray-600";
+            const iconClass = isServerComingSoon
+              ? "bg-amber-50 text-amber-700 group-hover:bg-amber-600 group-hover:text-white"
+              : "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white";
+            const linkClass = isServerComingSoon
+              ? "hover:border-amber-300"
+              : "hover:border-blue-300";
 
             return (
               <Link
                 key={tool.href}
                 href={tool.href}
-                className="group flex min-h-44 flex-col rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg"
+                className={`group flex min-h-44 flex-col rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${linkClass}`}
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
+                  <div
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition ${iconClass}`}
+                  >
                     <Icon size={22} />
                   </div>
 
                   {tool.badge && (
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${badgeClass}`}
+                    >
                       {tool.badge}
                     </span>
                   )}
@@ -85,8 +107,16 @@ export default function ToolHubPage({
                   {tool.description}
                 </p>
 
-                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-blue-600">
-                  Open Tool
+                <span
+                  className={`mt-5 inline-flex items-center gap-2 text-sm font-semibold ${
+                    isServerComingSoon
+                      ? "text-amber-700"
+                      : "text-blue-600"
+                  }`}
+                >
+                  {isServerComingSoon
+                    ? "View Status"
+                    : "Open Tool"}
                   <ArrowRight
                     size={16}
                     className="transition group-hover:translate-x-1"

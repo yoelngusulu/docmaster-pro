@@ -2,12 +2,17 @@ import {
   NextRequest,
   NextResponse,
 } from "next/server";
-import { spawn } from "child_process";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
 
+import {
+  NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+  isNativeDependencyError,
+  isPythonRuntimeError,
+  runNativeExecutable,
+} from "@/lib/nativeExecutables";
 import { checkUsageLimit } from "@/lib/supabase/usageLimit";
 import { recordConversionUsage } from "@/lib/supabase/recordUsage";
 
@@ -34,8 +39,7 @@ export async function POST(
     );
   }
 
-  let inputPath = "";
-  let outputPath = "";
+  let tempDirectory = "";
 
   try {
     const formData =
@@ -56,10 +60,21 @@ export async function POST(
       );
     }
 
+    if (file.size === 0) {
+      return NextResponse.json(
+        {
+          error:
+            "The uploaded PDF is empty.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
     if (
-      file.type &&
-      file.type !==
-        "application/pdf"
+      !file.name.toLowerCase().endsWith(".pdf") ||
+      (file.type && file.type !== "application/pdf")
     ) {
       return NextResponse.json(
         {
@@ -90,16 +105,21 @@ export async function POST(
       );
     }
 
-    const tempDir =
-      os.tmpdir();
+    tempDirectory =
+      await fs.mkdtemp(
+        path.join(
+          os.tmpdir(),
+          "docmaster-pdf-to-excel-"
+        )
+      );
 
-    inputPath = path.join(
-      tempDir,
+    const inputPath = path.join(
+      tempDirectory,
       `${randomUUID()}.pdf`
     );
 
-    outputPath = path.join(
-      tempDir,
+    const outputPath = path.join(
+      tempDirectory,
       `${randomUUID()}.xlsx`
     );
 
@@ -113,57 +133,32 @@ export async function POST(
       bytes
     );
 
-    await new Promise<void>(
-      (resolve, reject) => {
-        const python =
-          spawn(
-            "python",
-            [
-              path.join(process.cwd(), "scripts", "pdf_to_excel.py"),
-              inputPath,
-              outputPath,
-            ]
-          );
-
-        let standardError = "";
-
-        python.stderr.on(
-          "data",
-          (data) => {
-            standardError +=
-              data.toString();
-          }
-        );
-
-        python.on(
-          "error",
-          (error) => {
-            reject(
-              new Error(
-                `Unable to start Python: ${error.message}`
-              )
-            );
-          }
-        );
-
-        python.on(
-          "close",
-          (code) => {
-            if (code === 0) {
-              resolve();
-              return;
-            }
-
-            reject(
-              new Error(
-                standardError ||
-                  `Python exited with code ${code}.`
-              )
-            );
-          }
-        );
-      }
+    const scriptPath = path.join(
+      process.cwd(),
+      "scripts",
+      "pdf_to_excel.py"
     );
+
+    const conversionResult =
+      await runNativeExecutable(
+        "python",
+        [
+          scriptPath,
+          inputPath,
+          outputPath,
+        ],
+        {
+          timeoutMs: 120000,
+        }
+      );
+
+    if (conversionResult.exitCode !== 0) {
+      throw new Error(
+        conversionResult.stderr.trim() ||
+          conversionResult.stdout.trim() ||
+          "Python conversion failed."
+      );
+    }
 
     const excel =
       await fs.readFile(
@@ -203,34 +198,41 @@ export async function POST(
       }
     );
   } catch (err: unknown) {
-    const message =
-      err instanceof Error
-        ? err.message
-        : "Unable to convert PDF to Excel.";
-
     console.error(
       "PDF to Excel error:",
       err
     );
 
+    if (
+      isNativeDependencyError(err) ||
+      isPythonRuntimeError(err)
+    ) {
+      return NextResponse.json(
+        {
+          error: NATIVE_CONVERSION_UNAVAILABLE_MESSAGE,
+        },
+        {
+          status: 503,
+        }
+      );
+    }
+
     return NextResponse.json(
       {
-        error: message,
+        error:
+          "Unable to convert PDF to Excel.",
       },
       {
         status: 500,
       }
     );
   } finally {
-    if (inputPath) {
+    if (tempDirectory) {
       await fs
-        .unlink(inputPath)
-        .catch(() => {});
-    }
-
-    if (outputPath) {
-      await fs
-        .unlink(outputPath)
+        .rm(tempDirectory, {
+          recursive: true,
+          force: true,
+        })
         .catch(() => {});
     }
   }

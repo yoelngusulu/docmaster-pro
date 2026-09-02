@@ -7,8 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 
 const GUEST_LIMIT = 5;
 const REGISTERED_LIMIT = 5;
-const COORDINATES_BULK_GUEST_LIMIT = 1;
-const COORDINATES_BULK_REGISTERED_LIMIT = 1;
+const COORDINATES_BULK_GUEST_LIMIT = 5;
+const COORDINATES_BULK_REGISTERED_LIMIT = 5;
 const WINDOW_HOURS = 24;
 const UNLIMITED_LIMIT = 999999;
 const GUEST_COOKIE_NAME = "docmaster_guest_id";

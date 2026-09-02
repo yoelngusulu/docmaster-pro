@@ -20,10 +20,10 @@ const categories = [
   {
     icon: MapPinned,
     title: "GIS Tools",
-    href: "/tools/coordinates-converter",
-    tools: "1 live tool",
+    href: "/tools/gis",
+    tools: "2 live tools",
     description:
-      "Convert coordinates between Decimal Degrees, DMS and UTM with map preview.",
+      "Convert coordinates, preview locations and measure distance or area from GIS coordinate pairs.",
   },
   {
     icon: ImageIcon,

@@ -15,6 +15,7 @@ Features zinazofanya kazi:
 ✅ Compress Image
 ✅ Coordinates Converter
 ✅ CSV/Excel Bulk Coordinate Conversion
+✅ GIS Distance & Area Calculator
 ✅ Dashboard
 ✅ Conversion History
 ✅ Usage Limits
@@ -37,7 +38,7 @@ Features zilizopo lakini zinahitaji testing zaidi:
 🟡 Translate Document
 🟡 Resume Builder  
 Project status:
-DocMaster ipo kwenye Version 0.7 Alpha. Core PDF tools, Image tools, GIS Coordinates Converter, dashboard, history, usage limits, tools navigation, pricing page, and about page zimekamilika na build inapita successfully.
+DocMaster ipo kwenye Version 0.7 Alpha. Core PDF tools, Image tools, GIS Coordinates Converter, GIS Distance & Area Calculator, dashboard, history, usage limits, tools navigation, pricing page, and about page zimekamilika na build inapita successfully.
 
 Next steps:
 1. Smoke test PDF tools zote

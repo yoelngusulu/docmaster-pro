@@ -159,10 +159,12 @@ const knownColumnAliases = [
   "lon",
   "long",
   "easting",
+  "e",
   "east",
   "eastx",
   "x",
   "northing",
+  "n",
   "north",
   "northy",
   "y",
@@ -174,7 +176,7 @@ const knownColumnAliases = [
   "bandlat",
   "elevation",
   "height",
-  "z",
+  "Z",
   "rl",
   "latdeg",
   "latdegree",
@@ -279,7 +281,7 @@ function toDms(value: number, type: "lat" | "lng") {
   const minutes = Math.floor(minutesFloat);
   const seconds = (minutesFloat - minutes) * 60;
 
-  return `${degrees}° ${minutes}' ${seconds.toFixed(
+return `${degrees}\u00b0 ${minutes}' ${seconds.toFixed(
     4
   )}" ${direction}`;
 }
@@ -551,7 +553,7 @@ function validateUtmInput(
 }
 
 function normalizeHeader(header: string) {
-  return header.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return header.trim()toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function getValue(row: BulkRow, aliases: string[]) {
@@ -739,24 +741,26 @@ function convertBulkRow(
   try {
     if (bulkType === "utm-to-dms") {
       const rawEasting = getNumber(row, [
-        "easting",
-        "east",
-        "east_x",
-        "eastx",
-        "x",
-        "utm_easting",
-        "utmeasting",
-      ]);
+    "easting",
+    "east",
+    "east_x",
+    "eastx",
+    "e",
+    "x",
+    "utm_easting",
+    "utmeasting",
+  ]);
 
       const rawNorthing = getNumber(row, [
-        "northing",
-        "north",
-        "north_y",
-        "northy",
-        "y",
-        "utm_northing",
-        "utmnorthing",
-      ]);
+    "northing",
+    "north",
+    "north_y",
+    "northy",
+    "n",
+    "y",
+    "utm_northing",
+    "utmnorthing",
+  ]);
 
       const rowZone = getNumber(row, [
         "zone",
@@ -790,7 +794,7 @@ function convertBulkRow(
           zone: String(resolvedZone),
           band,
           hemisphere,
-          error: "Missing easting or northing column.",
+          error: "Missing UTM coordinate columns. Accepted Easting columns include Easting, E, X, East and UTM Easting. Accepted Northing columns include Northing, N, Y, North and UTM Northing.",
         };
       }
 
@@ -2816,7 +2820,7 @@ export default function CoordinatesConverterPage() {
             </h2>
 
             <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-gray-600">
-              If this coordinates converter helps your GIS, survey or mapping work, you can support DocMaster AI so we can keep improving free tools.
+              If this coordinates converter helps your GIS, survey or mapping work, you can support DocMaster so we can keep improving free tools.
             </p>
 
             <a

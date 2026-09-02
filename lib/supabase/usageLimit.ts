@@ -5,7 +5,7 @@ import { getActivePremiumSubscription } from "@/lib/billing/subscriptions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-const GUEST_LIMIT = 3;
+const GUEST_LIMIT = 5;
 const REGISTERED_LIMIT = 5;
 const COORDINATES_BULK_GUEST_LIMIT = 1;
 const COORDINATES_BULK_REGISTERED_LIMIT = 1;

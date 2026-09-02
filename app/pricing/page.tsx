@@ -26,7 +26,7 @@ function getPlans(): Plan[] {
       description:
         "Start converting documents without creating an account.",
       features: [
-        "3 limited conversions per day",
+        "5 limited conversions per day",
         "Unlimited ad-supported basic tools",
         "PDF split, merge and compress",
         "Image and GIS tools",

@@ -12,7 +12,8 @@ export default function PopularTools() {
     "Protect PDF",
     "Unlock PDF",
     "Rotate PDF",
-  ];
+    "coordinates converter"
+      ];
 
   return (
     <section className="py-20 bg-white">

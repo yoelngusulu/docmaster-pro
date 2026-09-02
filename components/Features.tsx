@@ -31,7 +31,7 @@ const features = [
     icon: Cloud,
     title: "Cloud Based",
     description:
-      "Access DocMaster AI directly from your browser without installing software.",
+      "Access DocMaster directly from your browser without installing software.",
   },
 ];
 
@@ -58,7 +58,7 @@ export default function Features() {
           className="mx-auto max-w-3xl text-center"
         >
           <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-            Why Choose DocMaster AI
+            Why Choose DocMaster
           </p>
 
           <h2 className="mt-3 text-3xl font-bold text-gray-900 sm:text-4xl">

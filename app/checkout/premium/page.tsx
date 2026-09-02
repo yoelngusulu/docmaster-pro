@@ -9,7 +9,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Premium Checkout | DocMaster AI",
+  title: "Premium Checkout | DocMaster",
   description:
     "Submit Airtel Money payment details for DocMaster Premium verification.",
 };

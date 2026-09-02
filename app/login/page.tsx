@@ -87,7 +87,7 @@ export default function LoginPage() {
           </h1>
 
           <p className="mt-3 text-gray-600">
-            Log in to your DocMaster AI account.
+            Log in to your DocMaster account.
           </p>
         </div>
 

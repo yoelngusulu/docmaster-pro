@@ -31,7 +31,7 @@ export default function CallToAction() {
 
           <p className="mt-6 text-lg text-blue-100">
             Convert PDFs, Office files and images in seconds
-            with DocMaster AI.
+            with DocMaster.
           </p>
 
           <div className="mt-10 flex flex-wrap justify-center gap-4">

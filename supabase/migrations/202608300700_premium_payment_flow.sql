@@ -1,7 +1,7 @@
 create extension if not exists pgcrypto;
 
 do $$
-begin
+beginn 
   create type public.payment_request_status as enum (
     'PENDING',
     'APPROVED',

@@ -1,6 +1,6 @@
 export const siteConfig = {
   productName: "DocMaster",
-  displayName: "DocMaster AI",
+  displayName: "DocMaster",
   tagline: "Simplifying documents, data and digital workflows.",
   platformDescription:
     "DocMaster is an independent productivity platform developed by Yoel Ngusulu, bringing together PDF tools, image processing, GIS utilities and AI-assisted workflows in one simple and professional workspace.",

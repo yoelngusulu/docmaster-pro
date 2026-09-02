@@ -53,7 +53,7 @@ export default async function HistoryPage() {
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
-              DocMaster AI
+              DocMaster
             </p>
 
             <h1 className="mt-2 text-4xl font-bold text-gray-900">

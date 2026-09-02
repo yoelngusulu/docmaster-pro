@@ -553,7 +553,7 @@ function validateUtmInput(
 }
 
 function normalizeHeader(header: string) {
-  return header.trim()toLowerCase().replace(/[^a-z0-9]/g, "");
+  return header.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function getValue(row: BulkRow, aliases: string[]) {

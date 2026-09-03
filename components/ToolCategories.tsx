@@ -21,9 +21,9 @@ const categories = [
     icon: MapPinned,
     title: "GIS Tools",
     href: "/tools/gis",
-    tools: "2 live tools",
+    tools: "3 live tools",
     description:
-      "Convert coordinates, preview locations and measure distance or area from GIS coordinate pairs.",
+      "Convert coordinates, preview locations, measure distance or area, and calculate bearings from GIS coordinate points.",
   },
   {
     icon: ImageIcon,

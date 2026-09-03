@@ -123,7 +123,7 @@ export default async function DashboardPage() {
       <div className="mx-auto max-w-6xl">
         <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
-            DocMaster AI Dashboard
+            DocMaster Dashboard
           </p>
 
           <h1 className="mt-3 text-4xl font-bold text-gray-900">

@@ -147,41 +147,48 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link
-          href="/"
-          onClick={closeMobileMenu}
-          className="flex min-w-0 shrink-0 items-center gap-3"
-        >
-          <motion.div
-            animate={{
-              scale: [1, 1.08, 1],
-            }}
-            transition={{
-              duration: 1.5,
-              delay: 5,
-              repeat: Infinity,
-              repeatDelay: 4.2,
-              ease: "easeInOut",
-            }}
-          >
-            <Image
-              src="/images/logo.png"
-              alt="DocMaster logo"
-              width={96}
-              height={48}
-              priority
-              style={{
-                width: "96px",
-                height: "auto",
-              }}
-            />
-          </motion.div>
+  href="/"
+  onClick={closeMobileMenu}
+  className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3"
+>
+  <motion.div
+    animate={{
+      scale: [1, 1.05, 1],
+    }}
+    transition={{
+      duration: 1.5,
+      delay: 5,
+      repeat: Infinity,
+      repeatDelay: 4.2,
+      ease: "easeInOut",
+    }}
+    className="flex shrink-0 items-center justify-center"
+  >
+    <Image
+      src="/images/logo.png"
+      alt="DocMaster icon"
+      width={36}
+      height={42}
+      priority
+      className="h-10 w-auto object-contain"
+    />
+  </motion.div>
 
-          <div className="hidden leading-tight sm:block">
-            <p className="max-w-48 truncate text-[11px] text-gray-500 lg:max-w-none lg:text-xs dark:text-slate-400">
-              The Smartest Document Platform
-            </p>
-          </div>
-        </Link>
+  <div className="min-w-0 leading-tight">
+    <p className="text-lg font-extrabold tracking-tight sm:text-xl">
+      <span className="text-gray-950 dark:text-white">
+        Doc
+      </span>
+      <span className="text-blue-600 dark:text-blue-400">
+        Master
+      </span>
+    </p>
+
+    <p className="hidden text-[10px] font-semibold uppercase tracking-wide text-gray-500 sm:block dark:text-slate-400">
+      Smart Document Platform
+    </p>
+  </div>
+</Link>
 
         <div className="hidden items-center gap-7 font-medium text-gray-700 lg:flex dark:text-slate-200">
           <Link

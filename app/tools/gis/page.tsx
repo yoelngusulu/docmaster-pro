@@ -15,7 +15,7 @@ const gisTools = [
   {
     title: "Distance & Area Calculator",
     description:
-      "Measure distance, perimeter and approximate area from latitude and longitude coordinate pairs.",
+      "Measure distance, perimeter and approximate area from Decimal, DMS, UTM or CSV coordinate points.",
     href: "/tools/gis/distance-area-calculator",
     icon: Ruler,
     badge: "Live",

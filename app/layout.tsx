@@ -8,6 +8,10 @@ import Footer from "@/components/Footer";
 export const metadata: Metadata = {
   title: "DocMaster | Smart Document Platform",
   description: "The Smart Document Platform",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+  },
   verification: {
     google: "FppDEXu38DNorAFUEUKxvodn18B68YT6hF8uvmpBDuo",
   },

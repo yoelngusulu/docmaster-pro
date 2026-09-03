@@ -125,7 +125,7 @@ export default function UpdatePasswordPage() {
 
           <p className="mt-3 text-gray-600">
             Enter a new password for your
-            DocMaster AI account.
+            DocMaster account.
           </p>
         </div>
 

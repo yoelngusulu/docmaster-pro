@@ -13,6 +13,8 @@ type Point = { latitude: number; longitude: number; label: string };
 const EARTH_RADIUS_METERS = 6371008.8;
 const CSV_MAX_FILE_SIZE = 5 * 1024 * 1024;
 const WGS84 = "+proj=longlat +datum=WGS84 +no_defs";
+const ACCEPTED_COLUMNS_MESSAGE =
+  "CSV columns accepted: Latitude/Longitude, Lat/Lng, Easting/Northing, E/N, or X/Y.";
 
 const formats = [
   { key: "decimal" as const, label: "Decimal", help: "Latitude, Longitude", placeholder: "Latitude, Longitude" },
@@ -302,7 +304,7 @@ function parseCsv(text: string) {
     text: "",
     format: "decimal" as Format,
     count: 0,
-    error: "CSV columns accepted: Latitude/Longitude, Lat/Lng, Easting/Northing, E/N, or X/Y.",
+    error: ACCEPTED_COLUMNS_MESSAGE,
   };
 }
 
@@ -426,7 +428,7 @@ export default function BearingAzimuthCalculatorPage() {
       const result = parseCsv(await file.text());
 
       if (!result.text) {
-        setFileError(result.error || acceptedColumns);
+        setFileError(result.error || ACCEPTED_COLUMNS_MESSAGE);
         return;
       }
 

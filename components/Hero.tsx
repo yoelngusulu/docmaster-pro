@@ -139,7 +139,7 @@ export default function Hero() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-                DocMaster AI
+                DocMaster
               </p>
 
               <h3 className="mt-1 text-2xl font-bold text-gray-900">

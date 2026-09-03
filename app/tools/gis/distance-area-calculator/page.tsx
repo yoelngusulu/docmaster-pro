@@ -12,7 +12,9 @@ import {
   Download,
   MapPinned,
   RefreshCw,
+  Upload,
 } from "lucide-react";
+import type { ChangeEvent } from "react";
 import {
   useEffect,
   useMemo,
@@ -44,7 +46,42 @@ type UtmOptions = {
   customProj4: string;
 };
 
+type CsvImportResult = {
+  text: string;
+  inputFormat: InputFormat;
+  importedRows: number;
+  errors: string[];
+};
+
+type CsvCoordinateColumns =
+  | {
+      inputFormat: "decimal";
+      latitudeIndex: number;
+      longitudeIndex: number;
+    }
+  | {
+      inputFormat: "dms";
+      latitudeTextIndex?: number;
+      longitudeTextIndex?: number;
+      latitudeDegreeIndex?: number;
+      latitudeMinuteIndex?: number;
+      latitudeSecondIndex?: number;
+      latitudeDirectionIndex?: number | null;
+      longitudeDegreeIndex?: number;
+      longitudeMinuteIndex?: number;
+      longitudeSecondIndex?: number;
+      longitudeDirectionIndex?: number | null;
+    }
+  | {
+      inputFormat: "utm";
+      eastingIndex: number;
+      northingIndex: number;
+      zoneIndex?: number | null;
+      hemisphereIndex?: number | null;
+    };
+
 const EARTH_RADIUS_METERS = 6371008.8;
+const CSV_MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 const WGS84_GEOGRAPHIC =
   "+proj=longlat +datum=WGS84 +no_defs";
@@ -95,6 +132,175 @@ const crsOptions: {
   { key: "arc1960-utm", label: "Arc 1960 / UTM" },
   { key: "custom", label: "Custom Proj4 definition" },
 ];
+
+const CSV_DECIMAL_LATITUDE_ALIASES = [
+  "latitude",
+  "lat",
+];
+
+const CSV_DECIMAL_LONGITUDE_ALIASES = [
+  "longitude",
+  "lng",
+  "lon",
+  "long",
+];
+
+const CSV_UTM_EASTING_ALIASES = [
+  "easting",
+  "east",
+  "e",
+  "x",
+  "east_x",
+  "eastx",
+  "utm_easting",
+  "utmeasting",
+];
+
+const CSV_UTM_NORTHING_ALIASES = [
+  "northing",
+  "north",
+  "n",
+  "y",
+  "north_y",
+  "northy",
+  "utm_northing",
+  "utmnorthing",
+];
+
+const CSV_UTM_ZONE_ALIASES = [
+  "zone",
+  "utm_zone",
+  "utmzone",
+];
+
+const CSV_UTM_HEMISPHERE_ALIASES = [
+  "hemisphere",
+  "hemi",
+  "utm_hemisphere",
+  "utmhemisphere",
+  "utm_hemi",
+  "utmhemi",
+  "zone_hemisphere",
+  "zonehemisphere",
+  "zone_hemi",
+  "zonehemi",
+  "band",
+  "utm_band",
+  "utmband",
+];
+
+const CSV_DMS_LATITUDE_TEXT_ALIASES = [
+  "latitude_dms",
+  "lat_dms",
+  "latdms",
+  "latitudedms",
+];
+
+const CSV_DMS_LONGITUDE_TEXT_ALIASES = [
+  "longitude_dms",
+  "lng_dms",
+  "lon_dms",
+  "long_dms",
+  "lngdms",
+  "londms",
+  "longdms",
+  "longitudedms",
+];
+
+const CSV_DMS_LATITUDE_DEGREE_ALIASES = [
+  "lat_deg",
+  "latdeg",
+  "lat_degree",
+  "latdegree",
+  "latitude_degree",
+  "latitude_degrees",
+  "latitude_deg",
+];
+
+const CSV_DMS_LATITUDE_MINUTE_ALIASES = [
+  "lat_min",
+  "latmin",
+  "lat_minute",
+  "latminute",
+  "latitude_minute",
+  "latitude_minutes",
+  "latitude_min",
+];
+
+const CSV_DMS_LATITUDE_SECOND_ALIASES = [
+  "lat_sec",
+  "latsec",
+  "lat_second",
+  "latsecond",
+  "latitude_second",
+  "latitude_seconds",
+  "latitude_sec",
+];
+
+const CSV_DMS_LATITUDE_DIRECTION_ALIASES = [
+  "lat_dir",
+  "latdir",
+  "lat_direction",
+  "latdirection",
+  "latitude_direction",
+  "latitude_dir",
+];
+
+const CSV_DMS_LONGITUDE_DEGREE_ALIASES = [
+  "lng_deg",
+  "lngdeg",
+  "lon_deg",
+  "londeg",
+  "long_deg",
+  "longdeg",
+  "lng_degree",
+  "longitude_degree",
+  "longitude_degrees",
+  "longitude_deg",
+];
+
+const CSV_DMS_LONGITUDE_MINUTE_ALIASES = [
+  "lng_min",
+  "lngmin",
+  "lon_min",
+  "lonmin",
+  "long_min",
+  "longmin",
+  "lng_minute",
+  "longitude_minute",
+  "longitude_minutes",
+  "longitude_min",
+];
+
+const CSV_DMS_LONGITUDE_SECOND_ALIASES = [
+  "lng_sec",
+  "lngsec",
+  "lon_sec",
+  "lonsec",
+  "long_sec",
+  "longsec",
+  "lng_second",
+  "longitude_second",
+  "longitude_seconds",
+  "longitude_sec",
+];
+
+const CSV_DMS_LONGITUDE_DIRECTION_ALIASES = [
+  "lng_dir",
+  "lngdir",
+  "lon_dir",
+  "londir",
+  "long_dir",
+  "longdir",
+  "lng_direction",
+  "londirection",
+  "longdirection",
+  "longitude_direction",
+  "longitude_dir",
+];
+
+const CSV_ACCEPTED_COLUMNS_MESSAGE =
+  "CSV columns accepted: Decimal uses Latitude/Lat and Longitude/Lng/Lon/Long. UTM uses Easting/E/X and Northing/N/Y, with optional Zone and Hemisphere/Hemi. DMS uses Latitude DMS/Longitude DMS text, or LatDeg/LatMin/LatSec/LatDir plus LngDeg/LngMin/LngSec/LngDir.";
 
 function toRadians(value: number) {
   return (value * Math.PI) / 180;
@@ -641,6 +847,418 @@ function parseCoordinateText(
   return { points, errors };
 }
 
+function normalizeCsvHeader(header: string) {
+  return header
+    .replace(/^\uFEFF/, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function findCsvColumn(headers: string[], aliases: string[]) {
+  const normalizedHeaders = headers.map(normalizeCsvHeader);
+
+  for (const alias of aliases) {
+    const index = normalizedHeaders.indexOf(normalizeCsvHeader(alias));
+
+    if (index !== -1) {
+      return index;
+    }
+  }
+
+  return null;
+}
+
+function detectDelimitedRows(text: string) {
+  const delimiters = [",", ";", "\t", "|"];
+  const firstDataLine =
+    text
+      .split(/\r?\n/)
+      .find((line) => line.trim().length > 0) || "";
+
+  const delimiter = delimiters.reduce(
+    (bestDelimiter, candidate) => {
+      const bestCount = countDelimiterOutsideQuotes(
+        firstDataLine,
+        bestDelimiter
+      );
+      const candidateCount = countDelimiterOutsideQuotes(
+        firstDataLine,
+        candidate
+      );
+
+      return candidateCount > bestCount ? candidate : bestDelimiter;
+    },
+    ","
+  );
+
+  return parseDelimitedRows(text, delimiter);
+}
+
+function countDelimiterOutsideQuotes(text: string, delimiter: string) {
+  let count = 0;
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+
+    if (character === '"') {
+      if (inQuotes && text[index + 1] === '"') {
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (character === delimiter && !inQuotes) {
+      count += 1;
+    }
+  }
+
+  return count;
+}
+
+function parseDelimitedRows(text: string, delimiter: string) {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = "";
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+
+    if (character === '"') {
+      if (inQuotes && text[index + 1] === '"') {
+        cell += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (character === delimiter && !inQuotes) {
+      row.push(cell);
+      cell = "";
+      continue;
+    }
+
+    if ((character === "\n" || character === "\r") && !inQuotes) {
+      if (character === "\r" && text[index + 1] === "\n") {
+        index += 1;
+      }
+
+      row.push(cell);
+
+      if (!isBlankCsvRow(row)) {
+        rows.push(row);
+      }
+
+      row = [];
+      cell = "";
+      continue;
+    }
+
+    cell += character;
+  }
+
+  row.push(cell);
+
+  if (!isBlankCsvRow(row)) {
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+function isBlankCsvRow(row: string[]) {
+  return row.every((cell) => !cell.trim());
+}
+
+function getCsvValue(row: string[], index?: number | null) {
+  if (index === undefined || index === null) {
+    return "";
+  }
+
+  return String(row[index] ?? "").trim();
+}
+
+function looksLikeDmsValue(value: string) {
+  const text = value.trim();
+
+  if (!text) {
+    return false;
+  }
+
+  return (
+    /[°º'"]/.test(text) ||
+    /\b[NSWE]\b/i.test(text) ||
+    extractNumbers(text).length >= 2
+  );
+}
+
+function csvLatLngLooksLikeDms(
+  rows: string[][],
+  latitudeIndex: number,
+  longitudeIndex: number
+) {
+  return rows.slice(0, 6).some((row) => {
+    const latitude = getCsvValue(row, latitudeIndex);
+    const longitude = getCsvValue(row, longitudeIndex);
+
+    return looksLikeDmsValue(latitude) || looksLikeDmsValue(longitude);
+  });
+}
+
+function detectCsvCoordinateColumns(
+  headers: string[],
+  rows: string[][]
+): CsvCoordinateColumns | null {
+  const eastingIndex = findCsvColumn(headers, CSV_UTM_EASTING_ALIASES);
+  const northingIndex = findCsvColumn(headers, CSV_UTM_NORTHING_ALIASES);
+
+  if (eastingIndex !== null && northingIndex !== null) {
+    return {
+      inputFormat: "utm",
+      eastingIndex,
+      northingIndex,
+      zoneIndex: findCsvColumn(headers, CSV_UTM_ZONE_ALIASES),
+      hemisphereIndex: findCsvColumn(
+        headers,
+        CSV_UTM_HEMISPHERE_ALIASES
+      ),
+    };
+  }
+
+  const latitudeTextIndex = findCsvColumn(
+    headers,
+    CSV_DMS_LATITUDE_TEXT_ALIASES
+  );
+  const longitudeTextIndex = findCsvColumn(
+    headers,
+    CSV_DMS_LONGITUDE_TEXT_ALIASES
+  );
+
+  if (latitudeTextIndex !== null && longitudeTextIndex !== null) {
+    return {
+      inputFormat: "dms",
+      latitudeTextIndex,
+      longitudeTextIndex,
+    };
+  }
+
+  const latitudeDegreeIndex = findCsvColumn(
+    headers,
+    CSV_DMS_LATITUDE_DEGREE_ALIASES
+  );
+  const latitudeMinuteIndex = findCsvColumn(
+    headers,
+    CSV_DMS_LATITUDE_MINUTE_ALIASES
+  );
+  const latitudeSecondIndex = findCsvColumn(
+    headers,
+    CSV_DMS_LATITUDE_SECOND_ALIASES
+  );
+  const longitudeDegreeIndex = findCsvColumn(
+    headers,
+    CSV_DMS_LONGITUDE_DEGREE_ALIASES
+  );
+  const longitudeMinuteIndex = findCsvColumn(
+    headers,
+    CSV_DMS_LONGITUDE_MINUTE_ALIASES
+  );
+  const longitudeSecondIndex = findCsvColumn(
+    headers,
+    CSV_DMS_LONGITUDE_SECOND_ALIASES
+  );
+
+  if (
+    latitudeDegreeIndex !== null &&
+    latitudeMinuteIndex !== null &&
+    latitudeSecondIndex !== null &&
+    longitudeDegreeIndex !== null &&
+    longitudeMinuteIndex !== null &&
+    longitudeSecondIndex !== null
+  ) {
+    return {
+      inputFormat: "dms",
+      latitudeDegreeIndex,
+      latitudeMinuteIndex,
+      latitudeSecondIndex,
+      latitudeDirectionIndex: findCsvColumn(
+        headers,
+        CSV_DMS_LATITUDE_DIRECTION_ALIASES
+      ),
+      longitudeDegreeIndex,
+      longitudeMinuteIndex,
+      longitudeSecondIndex,
+      longitudeDirectionIndex: findCsvColumn(
+        headers,
+        CSV_DMS_LONGITUDE_DIRECTION_ALIASES
+      ),
+    };
+  }
+
+  const latitudeIndex = findCsvColumn(
+    headers,
+    CSV_DECIMAL_LATITUDE_ALIASES
+  );
+  const longitudeIndex = findCsvColumn(
+    headers,
+    CSV_DECIMAL_LONGITUDE_ALIASES
+  );
+
+  if (latitudeIndex !== null && longitudeIndex !== null) {
+    if (csvLatLngLooksLikeDms(rows, latitudeIndex, longitudeIndex)) {
+      return {
+        inputFormat: "dms",
+        latitudeTextIndex: latitudeIndex,
+        longitudeTextIndex: longitudeIndex,
+      };
+    }
+
+    return {
+      inputFormat: "decimal",
+      latitudeIndex,
+      longitudeIndex,
+    };
+  }
+
+  return null;
+}
+
+function buildCsvLine(
+  row: string[],
+  columns: CsvCoordinateColumns
+) {
+  if (columns.inputFormat === "decimal") {
+    const latitude = getCsvValue(row, columns.latitudeIndex);
+    const longitude = getCsvValue(row, columns.longitudeIndex);
+
+    if (!latitude || !longitude) {
+      return null;
+    }
+
+    return `${latitude}, ${longitude}`;
+  }
+
+  if (columns.inputFormat === "utm") {
+    const easting = getCsvValue(row, columns.eastingIndex);
+    const northing = getCsvValue(row, columns.northingIndex);
+    const zone = getCsvValue(row, columns.zoneIndex);
+    const hemisphere = getCsvValue(row, columns.hemisphereIndex);
+
+    if (!easting || !northing) {
+      return null;
+    }
+
+    return [easting, northing, zone, hemisphere]
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  if (
+    columns.latitudeTextIndex !== undefined &&
+    columns.longitudeTextIndex !== undefined
+  ) {
+    const latitude = getCsvValue(row, columns.latitudeTextIndex);
+    const longitude = getCsvValue(row, columns.longitudeTextIndex);
+
+    if (!latitude || !longitude) {
+      return null;
+    }
+
+    return `${latitude}; ${longitude}`;
+  }
+
+  const latitudeValues = [
+    getCsvValue(row, columns.latitudeDegreeIndex),
+    getCsvValue(row, columns.latitudeMinuteIndex),
+    getCsvValue(row, columns.latitudeSecondIndex),
+    getCsvValue(row, columns.latitudeDirectionIndex),
+  ].filter(Boolean);
+  const longitudeValues = [
+    getCsvValue(row, columns.longitudeDegreeIndex),
+    getCsvValue(row, columns.longitudeMinuteIndex),
+    getCsvValue(row, columns.longitudeSecondIndex),
+    getCsvValue(row, columns.longitudeDirectionIndex),
+  ].filter(Boolean);
+
+  if (latitudeValues.length < 3 || longitudeValues.length < 3) {
+    return null;
+  }
+
+  return `${latitudeValues.join(" ")}; ${longitudeValues.join(" ")}`;
+}
+
+function importCoordinatesFromCsv(text: string): CsvImportResult {
+  const rows = detectDelimitedRows(text);
+
+  if (rows.length < 2) {
+    return {
+      text: "",
+      inputFormat: "decimal",
+      importedRows: 0,
+      errors: [
+        `CSV must include a header row and at least one coordinate row. ${CSV_ACCEPTED_COLUMNS_MESSAGE}`,
+      ],
+    };
+  }
+
+  const headers = rows[0];
+  const dataRows = rows.slice(1).filter((row) => !isBlankCsvRow(row));
+  const columns = detectCsvCoordinateColumns(headers, dataRows);
+
+  if (!columns) {
+    return {
+      text: "",
+      inputFormat: "decimal",
+      importedRows: 0,
+      errors: [CSV_ACCEPTED_COLUMNS_MESSAGE],
+    };
+  }
+
+  const lines: string[] = [];
+  const errors: string[] = [];
+
+  dataRows.forEach((row, index) => {
+    const line = buildCsvLine(row, columns);
+
+    if (!line) {
+      errors.push(
+        `CSV row ${index + 2}: missing required coordinate values.`
+      );
+      return;
+    }
+
+    lines.push(line);
+  });
+
+  if (lines.length === 0) {
+    return {
+      text: "",
+      inputFormat: columns.inputFormat,
+      importedRows: 0,
+      errors: [
+        `No valid coordinate rows were found. ${CSV_ACCEPTED_COLUMNS_MESSAGE}`,
+      ],
+    };
+  }
+
+  const limitedErrors =
+    errors.length > 5
+      ? [
+          ...errors.slice(0, 5),
+          `${errors.length - 5} more CSV rows were skipped.`,
+        ]
+      : errors;
+
+  return {
+    text: lines.join("\n"),
+    inputFormat: columns.inputFormat,
+    importedRows: lines.length,
+    errors: limitedErrors,
+  };
+}
+
 function calculateDistanceMeters(
   start: CoordinatePoint,
   end: CoordinatePoint
@@ -706,6 +1324,25 @@ function formatArea(value: number) {
 
 function formatCoordinate(value: number) {
   return value.toFixed(6);
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+
+  if (bytes < 1024 * 1024) {
+    return `${formatNumber(bytes / 1024, 1)} KB`;
+  }
+
+  return `${formatNumber(bytes / (1024 * 1024), 2)} MB`;
+}
+
+function getInputFormatLabel(inputFormat: InputFormat) {
+  return (
+    inputFormats.find((format) => format.key === inputFormat)?.label ||
+    inputFormat
+  );
 }
 
 function escapeCsv(value: unknown) {
@@ -881,7 +1518,7 @@ function MapPreview({
 
       {points.length === 0 && (
         <p className="border-t border-gray-200 px-4 py-3 text-sm text-gray-600">
-          Enter valid coordinates to show them on the map.
+          Enter valid coordinates or upload a CSV file to show them on the map.
         </p>
       )}
 
@@ -905,6 +1542,13 @@ export default function DistanceAreaCalculatorPage() {
     useState<UtmHemisphere>("S");
   const [customProj4, setCustomProj4] =
     useState(DEFAULT_CUSTOM_PROJ4);
+  const [csvFileName, setCsvFileName] = useState<string | null>(null);
+  const [csvImportMessage, setCsvImportMessage] = useState<string | null>(
+    null
+  );
+  const [csvImportError, setCsvImportError] = useState<string | null>(
+    null
+  );
   const [copyLabel, setCopyLabel] = useState("Copy Summary");
 
   const activeInputFormat = inputFormatDetails[inputFormat];
@@ -972,7 +1616,7 @@ export default function DistanceAreaCalculatorPage() {
   const summaryLines = useMemo(() => {
     const lines = [
       `Mode: ${mode === "distance" ? "Distance" : "Area"}`,
-      `Input format: ${inputFormats.find((format) => format.key === inputFormat)?.label || inputFormat}`,
+      `Input format: ${getInputFormatLabel(inputFormat)}`,
       `Points: ${points.length}`,
     ];
 
@@ -996,6 +1640,68 @@ export default function DistanceAreaCalculatorPage() {
     totalDistanceMeters,
   ]);
 
+  async function handleCsvUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setCsvFileName(null);
+    setCsvImportMessage(null);
+    setCsvImportError(null);
+
+    const lowerFileName = file.name.toLowerCase();
+    const isCsvFile =
+      lowerFileName.endsWith(".csv") ||
+      file.type === "text/csv" ||
+      file.type === "application/csv" ||
+      file.type === "application/vnd.ms-excel" ||
+      file.type === "text/plain";
+
+    if (!isCsvFile) {
+      setCsvImportError("Upload a valid CSV file.");
+      return;
+    }
+
+    if (file.size > CSV_MAX_FILE_SIZE) {
+      setCsvImportError(
+        `CSV file is too large. Maximum size is ${formatFileSize(
+          CSV_MAX_FILE_SIZE
+        )}.`
+      );
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const result = importCoordinatesFromCsv(text);
+
+      if (!result.text) {
+        setCsvImportError(result.errors.join(" "));
+        return;
+      }
+
+      setInputFormat(result.inputFormat);
+      setCoordinateText(result.text);
+      setCsvFileName(file.name);
+      setCsvImportMessage(
+        `Imported ${result.importedRows} coordinate row${
+          result.importedRows === 1 ? "" : "s"
+        } from ${file.name} as ${getInputFormatLabel(
+          result.inputFormat
+        )}.`
+      );
+
+      if (result.errors.length > 0) {
+        setCsvImportError(result.errors.join(" "));
+      }
+    } catch {
+      setCsvImportError("Unable to read the CSV file.");
+    }
+  }
+
   async function copySummary() {
     await navigator.clipboard.writeText(summaryLines.join("\n"));
     setCopyLabel("Copied");
@@ -1005,15 +1711,18 @@ export default function DistanceAreaCalculatorPage() {
     }, 1500);
   }
 
+  function clearCoordinates() {
+    setCoordinateText("");
+    setCsvFileName(null);
+    setCsvImportMessage(null);
+    setCsvImportError(null);
+  }
+
   function downloadCsv() {
     const rows: string[][] = [
       ["Metric", "Value"],
       ["Mode", mode],
-      [
-        "Input format",
-        inputFormats.find((format) => format.key === inputFormat)?.label ||
-          inputFormat,
-      ],
+      ["Input format", getInputFormatLabel(inputFormat)],
       ["Point count", String(points.length)],
       ["Total distance", formatDistance(totalDistanceMeters)],
     ];
@@ -1093,7 +1802,7 @@ export default function DistanceAreaCalculatorPage() {
 
               <p className="mt-3 max-w-3xl text-base leading-7 text-gray-600">
                 Measure distance, perimeter and approximate polygon area from
-                Decimal, DMS or UTM coordinate points.
+                Decimal, DMS, UTM or CSV coordinate points.
               </p>
             </div>
 
@@ -1224,6 +1933,49 @@ export default function DistanceAreaCalculatorPage() {
                 </div>
               )}
 
+              <div className="rounded-lg border border-dashed border-blue-200 bg-blue-50/50 p-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">
+                      CSV bulk upload
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-gray-600">
+                      Supports Decimal, DMS and UTM columns. UTM accepts
+                      Easting/E/X with Northing/N/Y.
+                    </p>
+                  </div>
+
+                  <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">
+                    <Upload size={16} />
+                    Upload CSV
+                    <input
+                      type="file"
+                      accept=".csv,text/csv"
+                      onChange={handleCsvUpload}
+                      className="sr-only"
+                    />
+                  </label>
+                </div>
+
+                {csvFileName && (
+                  <p className="mt-3 text-xs font-semibold text-blue-700">
+                    Loaded: {csvFileName}
+                  </p>
+                )}
+
+                {csvImportMessage && (
+                  <p className="mt-3 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+                    {csvImportMessage}
+                  </p>
+                )}
+
+                {csvImportError && (
+                  <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                    {csvImportError}
+                  </p>
+                )}
+              </div>
+
               <label className="block">
                 <span className="text-sm font-semibold text-gray-800">
                   Coordinates
@@ -1231,9 +1983,11 @@ export default function DistanceAreaCalculatorPage() {
 
                 <textarea
                   value={coordinateText}
-                  onChange={(event) =>
-                    setCoordinateText(event.target.value)
-                  }
+                  onChange={(event) => {
+                    setCoordinateText(event.target.value);
+                    setCsvImportMessage(null);
+                    setCsvImportError(null);
+                  }}
                   rows={8}
                   spellCheck={false}
                   placeholder={activeInputFormat.placeholder}
@@ -1244,7 +1998,7 @@ export default function DistanceAreaCalculatorPage() {
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={() => setCoordinateText("")}
+                  onClick={clearCoordinates}
                   className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-200"
                 >
                   <RefreshCw size={16} />

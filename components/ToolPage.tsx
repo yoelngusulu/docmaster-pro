@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import GoogleAd from "./GoogleAd";
 import MergePdfUploadArea from "./MergePdfUploadArea";
 import SplitPdfUploadArea from "./SplitPdfUploadArea";
 import UploadArea from "./UploadArea";
@@ -68,6 +69,11 @@ export default function ToolPage({
           <ArrowLeft size={16} />
           {backText}
         </Link>
+
+        <GoogleAd
+          slot={process.env.NEXT_PUBLIC_ADSENSE_TOOL_TOP_SLOT}
+          className="mt-8"
+        />
 
         <section className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.25fr)] lg:items-start">
           <div className="lg:sticky lg:top-28">
@@ -165,6 +171,11 @@ export default function ToolPage({
             <UploadArea tool={tool} />
           )}
         </section>
+
+        <GoogleAd
+          slot={process.env.NEXT_PUBLIC_ADSENSE_TOOL_BOTTOM_SLOT}
+          className="mt-10"
+        />
       </div>
     </main>
   );

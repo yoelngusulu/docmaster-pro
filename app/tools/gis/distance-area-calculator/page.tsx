@@ -11,7 +11,6 @@ import {
   Download,
   MapPinned,
   RefreshCw,
-  Ruler,
 } from "lucide-react";
 import {
   useEffect,
@@ -32,12 +31,6 @@ type ParsedCoordinates = {
   points: CoordinatePoint[];
   errors: string[];
 };
-
-const SAMPLE_COORDINATES = [
-  "-6.7924, 39.2083",
-  "-6.8161, 39.2803",
-  "-6.8700, 39.2200",
-].join("\n");
 
 const EARTH_RADIUS_METERS = 6371008.8;
 
@@ -73,7 +66,7 @@ function parseCoordinateText(text: string): ParsedCoordinates {
 
     if (values.length < 2) {
       errors.push(
-        `Line ${index + 1}: enter latitude and longitude, for example -6.7924, 39.2083.`
+        `Line ${index + 1}: enter latitude and longitude.`
       );
       return;
     }
@@ -360,8 +353,7 @@ function MapPreview({
 
 export default function DistanceAreaCalculatorPage() {
   const [mode, setMode] = useState<MeasurementMode>("distance");
-  const [coordinateText, setCoordinateText] =
-    useState(SAMPLE_COORDINATES);
+  const [coordinateText, setCoordinateText] = useState("");
   const [copyLabel, setCopyLabel] = useState("Copy Summary");
 
   const parsed = useMemo(
@@ -558,21 +550,12 @@ export default function DistanceAreaCalculatorPage() {
                   }
                   rows={8}
                   spellCheck={false}
-                  placeholder="-6.7924, 39.2083"
+                  placeholder="Latitude, Longitude"
                   className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-3 font-mono text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
               </label>
 
               <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => setCoordinateText(SAMPLE_COORDINATES)}
-                  className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-200"
-                >
-                  <Ruler size={16} />
-                  Use Sample
-                </button>
-
                 <button
                   type="button"
                   onClick={() => setCoordinateText("")}

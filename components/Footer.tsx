@@ -3,6 +3,37 @@ import Link from "next/link";
 
 import { siteConfig } from "@/lib/site/config";
 
+const productLinks = [
+  {
+    label: "PDF to Word",
+    href: "/tools/pdf/pdf-to-word",
+  },
+  {
+    label: "Word to PDF",
+    href: "/tools/pdf/word-to-pdf",
+  },
+  {
+    label: "Merge PDF",
+    href: "/tools/pdf/merge-pdf",
+  },
+  {
+    label: "Compress PDF",
+    href: "/tools/pdf/compress-pdf",
+  },
+  {
+    label: "Unlock PDF",
+    href: "/tools/pdf/unlock-pdf",
+  },
+  {
+    label: "Image to PDF",
+    href: "/tools/image/image-to-pdf",
+  },
+  {
+    label: "Coordinates Converter",
+    href: "/tools/coordinates-converter",
+  },
+];
+
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300">
@@ -46,13 +77,16 @@ export default function Footer() {
             </h3>
 
             <ul className="mt-4 space-y-3">
-              <li>PDF to Word</li>
-              <li>Word to PDF</li>
-              <li>Merge PDF</li>
-              <li>Compress PDF</li>
-              <li>Unlock PDF</li>
-              <li>Image to PDF</li>
-              <li>Coordinate Convertor</li>
+              {productLinks.map((product) => (
+                <li key={product.href}>
+                  <Link
+                    href={product.href}
+                    className="transition hover:text-white"
+                  >
+                    {product.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

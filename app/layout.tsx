@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "DocMaster | Smart Document Platform",
+  title: "DocMaster",
   description: "The Smart Document Platform",
   icons: {
     icon: "/icon.svg",

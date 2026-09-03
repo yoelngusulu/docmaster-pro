@@ -254,3 +254,43 @@ body {
   background-color: #020617;
   color: #e5e7eb;
 }
+
+/* Keep Leaflet maps inside page content and below the sticky navbar. */
+.leaflet-container {
+  isolation: isolate;
+  z-index: 0;
+}
+
+.leaflet-pane {
+  z-index: 1;
+}
+
+.leaflet-tile-pane {
+  z-index: 1;
+}
+
+.leaflet-overlay-pane {
+  z-index: 2;
+}
+
+.leaflet-shadow-pane {
+  z-index: 3;
+}
+
+.leaflet-marker-pane {
+  z-index: 4;
+}
+
+.leaflet-tooltip-pane {
+  z-index: 5;
+}
+
+.leaflet-popup-pane {
+  z-index: 6;
+}
+
+.leaflet-top,
+.leaflet-bottom,
+.leaflet-control-container {
+  z-index: 7;
+}

@@ -23,7 +23,7 @@ const features = [
   },
   {
     icon: Bot,
-    title: "AI Powered",
+    title: "Smart Tools",
     description:
       "Use intelligent tools to edit images and simplify document workflows.",
   },

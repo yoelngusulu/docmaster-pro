@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-
 import {
   Sparkles,
   UploadCloud,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { link } from "framer-motion/m";
-xport default function Hero() {
+
+export default function Hero() {
   const openAIAssistant = () => {
     window.dispatchEvent(
       new CustomEvent("open-docmaster-ai")
@@ -50,7 +49,10 @@ xport default function Hero() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-gray-600 sm:text-lg lg:mx-0">
-           Easily Convert, edit and enhance PDFs, Images, Coordinates, Distance and Area Caclculation. Fast, secure and built for professionals.
+            Convert, edit and enhance PDF, Office
+            documents and images with powerful AI
+            tools. Fast, secure and built for
+            professionals.
           </p>
 
           {/* Buttons */}
@@ -163,24 +165,13 @@ xport default function Hero() {
                 ✓ Ready
               </span>
             </Link>
-<<<<<<< HEAD
 
             <Link
               href="/tools/coordinates-converter"
               className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"
             >
-              <span className="flex items-center gap-2 font-medium text-gray-800">
-                <MapPinned size={18} className="text-blue-600" />
-                Coordinate Conversion
-=======
-"
-              <link
-                href="/tools/gis/coorinates-converter"
-                className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"
-            >
               <span className="font-medium text-gray-800">
-                🗺️ Coordinate Conversion
->>>>>>> dce8e48 (Feature coordinate converter in hero)
+                📍 Coordinate Conversion
               </span>
 
               <span className="font-semibold text-green-600">

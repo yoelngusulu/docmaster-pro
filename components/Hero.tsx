@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  MapPinned,
   Sparkles,
   UploadCloud,
 } from "lucide-react";
@@ -167,11 +168,12 @@ export default function Hero() {
             </Link>
 
             <Link
-              href="/tools/pdf/word-to-pdf"
+              href="/tools/coordinates-converter"
               className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"
             >
-              <span className="font-medium text-gray-800">
-                📝 Word → PDF
+              <span className="flex items-center gap-2 font-medium text-gray-800">
+                <MapPinned size={18} className="text-blue-600" />
+                Coordinate Conversion
               </span>
 
               <span className="font-semibold text-green-600">

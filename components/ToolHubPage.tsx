@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
 } from "lucide-react";
+import GoogleAd from "./GoogleAd";
 
 type ToolStatus =
   | "available"
@@ -59,6 +60,11 @@ export default function ToolHubPage({
             {subtitle}
           </p>
         </section>
+
+        <GoogleAd
+          slot={process.env.NEXT_PUBLIC_ADSENSE_TOOLS_HUB_SLOT}
+          className="mt-10"
+        />
 
         <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {tools.map((tool) => {

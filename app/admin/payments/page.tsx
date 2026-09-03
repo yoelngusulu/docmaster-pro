@@ -12,7 +12,7 @@ import { requireAdmin } from "@/lib/admin/authorization";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = {
-  title: "Payment Verification | DocMaster AI",
+  title: "Payment Verification | DocMaster",
   description:
     "Admin payment verification for DocMaster Premium.",
 };

@@ -2,826 +2,592 @@
 
 import Link from "next/link";
 import proj4 from "proj4";
-import {
-  ArrowLeft,
-  Clipboard,
-  Compass,
-  Download,
-  RefreshCw,
-  Upload,
-} from "lucide-react";
+import { ArrowLeft, Clipboard, Compass, Download, RefreshCw, Upload } from "lucide-react";
 import type { ChangeEvent } from "react";
-import {
-  useMemo,
-  useState,
-} from "react";
+import { useMemo, useState } from "react";
 
-type InputFormat = "decimal" | "dms" | "utm";
-type CrsType = "wgs84-utm" | "arc1960-utm" | "custom";
-type UtmHemisphere = "N" | "S";
-type CoordinateAxis = "lat" | "lng";
-
-type CoordinatePoint = {
-  latitude: number;
-  longitude: number;
-  label: string;
-};
-
-type SegmentResult = {
-  from: CoordinatePoint;
-  to: CoordinatePoint;
-  distanceMeters: number;
-  initialBearing: number;
-  finalBearing: number;
-  reverseBearing: number;
-};
-
-type UtmOptions = {
-  crs: CrsType;
-  zone: number;
-  hemisphere: UtmHemisphere;
-  customProj4: string;
-};
+type Format = "decimal" | "dms" | "utm";
+type Hemisphere = "N" | "S";
+type Point = { latitude: number; longitude: number; label: string };
 
 const EARTH_RADIUS_METERS = 6371008.8;
 const CSV_MAX_FILE_SIZE = 5 * 1024 * 1024;
+const WGS84 = "+proj=longlat +datum=WGS84 +no_defs";
 
-const WGS84_GEOGRAPHIC =
-  "+proj=longlat +datum=WGS84 +no_defs";
-
-const ARC1960_GEOGRAPHIC =
-  "+proj=longlat +ellps=clrk80 +towgs84=-160,-6,-302,0,0,0,0 +no_defs";
-
-const DEFAULT_CUSTOM_PROJ4 =
-  "+proj=utm +zone=37 +south +datum=WGS84 +units=m +no_defs";
-
-const inputFormats: {
-  key: InputFormat;
-  label: string;
-  description: string;
-  placeholder: string;
-}[] = [
-  {
-    key: "decimal",
-    label: "Decimal",
-    description: "One point per line: latitude, longitude.",
-    placeholder: "Latitude, Longitude",
-  },
-  {
-    key: "dms",
-    label: "DMS",
-    description:
-      "One point per line: latitude DMS, longitude DMS. Use N/S and E/W where needed.",
-    placeholder: "Lat DMS, Long DMS",
-  },
-  {
-    key: "utm",
-    label: "UTM",
-    description:
-      "One point per line: easting, northing. Optional zone and N/S can also be included per line.",
-    placeholder: "Easting, Northing",
-  },
+const formats = [
+  { key: "decimal" as const, label: "Decimal", help: "Latitude, Longitude", placeholder: "Latitude, Longitude" },
+  { key: "dms" as const, label: "DMS", help: "Latitude DMS, Longitude DMS", placeholder: "Lat DMS, Long DMS" },
+  { key: "utm" as const, label: "UTM", help: "Easting, Northing", placeholder: "Easting, Northing" },
 ];
 
-const crsOptions: {
-  key: CrsType;
-  label: string;
-}[] = [
-  { key: "wgs84-utm", label: "WGS84 / UTM" },
-  { key: "arc1960-utm", label: "Arc 1960 / UTM" },
-  { key: "custom", label: "Custom Proj4 definition" },
-];
-
-const decimalLatitudeAliases = ["latitude", "lat"];
-const decimalLongitudeAliases = ["longitude", "lng", "lon", "long"];
-
-const utmEastingAliases = [
-  "easting",
-  "east",
-  "e",
-  "x",
-  "east_x",
-  "eastx",
-  "utm_easting",
-  "utmeasting",
-];
-
-const utmNorthingAliases = [
-  "northing",
-  "north",
-  "n",
-  "y",
-  "north_y",
-  "northy",
-  "utm_northing",
-  "utmnorthing",
-];
-
-const utmZoneAliases = ["zone", "utm_zone", "utmzone"];
-const utmHemisphereAliases = [
-  "hemisphere",
-  "hemi",
-  "utm_hemisphere",
-  "utmhemisphere",
-  "utm_hemi",
-  "utmhemi",
-  "band",
-  "utm_band",
-  "utmband",
-];
-
-const dmsLatitudeTextAliases = [
-  "latitude_dms",
-  "lat_dms",
-  "latdms",
-  "latitudedms",
-];
-
-const dmsLongitudeTextAliases = [
-  "longitude_dms",
-  "lng_dms",
-  "lon_dms",
-  "long_dms",
-  "lngdms",
-  "londms",
-  "longdms",
-  "longitudedms",
-];
-
-const dmsLatitudeDegreeAliases = [
-  "lat_deg",
-  "latdeg",
-  "lat_degree",
-  "latdegree",
-  "latitude_deg",
-  "latitude_degree",
-  "latitude_degrees",
-];
-
-const dmsLatitudeMinuteAliases = [
-  "lat_min",
-  "latmin",
-  "lat_minute",
-  "latminute",
-  "latitude_min",
-  "latitude_minute",
-  "latitude_minutes",
-];
-
-const dmsLatitudeSecondAliases = [
-  "lat_sec",
-  "latsec",
-  "lat_second",
-  "latsecond",
-  "latitude_sec",
-  "latitude_second",
-  "latitude_seconds",
-];
-
-const dmsLatitudeDirectionAliases = [
-  "lat_dir",
-  "latdir",
-  "lat_direction",
-  "latdirection",
-  "latitude_dir",
-  "latitude_direction",
-];
-
-const dmsLongitudeDegreeAliases = [
-  "lng_deg",
-  "lngdeg",
-  "lon_deg",
-  "londeg",
-  "long_deg",
-  "longdeg",
-  "longitude_deg",
-  "longitude_degree",
-  "longitude_degrees",
-];
-
-const dmsLongitudeMinuteAliases = [
-  "lng_min",
-  "lngmin",
-  "lon_min",
-  "lonmin",
-  "long_min",
-  "longmin",
-  "longitude_min",
-  "longitude_minute",
-  "longitude_minutes",
-];
-
-const dmsLongitudeSecondAliases = [
-  "lng_sec",
-  "lngsec",
-  "lon_sec",
-  "lonsec",
-  "long_sec",
-  "longsec",
-  "longitude_sec",
-  "longitude_second",
-  "longitude_seconds",
-];
-
-const dmsLongitudeDirectionAliases = [
-  "lng_dir",
-  "lngdir",
-  "lon_dir",
-  "londir",
-  "long_dir",
-  "longdir",
-  "longitude_dir",
-  "longitude_direction",
-];
-
-const csvAcceptedColumnsMessage =
-  "CSV columns accepted: Decimal uses Latitude/Lat and Longitude/Lng/Lon/Long. UTM uses Easting/E/X and Northing/N/Y, with optional Zone and Hemisphere/Hemi. DMS uses Latitude DMS/Longitude DMS text, or LatDeg/LatMin/LatSec/LatDir plus LngDeg/LngMin/LngSec/LngDir.";
-
-function toRadians(value: number) {
+function toRad(value: number) {
   return (value * Math.PI) / 180;
 }
 
-function toDegrees(value: number) {
+function toDeg(value: number) {
   return (value * 180) / Math.PI;
 }
 
-function normalizeDegrees(value: number) {
+function wrap360(value: number) {
   return ((value % 360) + 360) % 360;
 }
 
-function parseNumericToken(token: string) {
-  const normalized = token.trim().replace(",", ".");
-
-  if (!/^[-+]?\d+(?:\.\d+)?$/.test(normalized)) {
-    return null;
-  }
-
-  const value = Number(normalized);
-
-  return Number.isFinite(value) ? value : null;
+function parseNum(value: string) {
+  const number = Number(value.trim().replace(",", "."));
+  return Number.isFinite(number) ? number : null;
 }
 
-function extractNumbers(text: string) {
+function numbers(text: string) {
   return (text.match(/[-+]?\d+(?:[.,]\d+)?/g) || [])
-    .map(parseNumericToken)
+    .map(parseNum)
     .filter((value): value is number => value !== null);
 }
 
-function validateDecimalPoint(
-  latitude: number,
-  longitude: number,
-  lineNumber: number
-) {
-  if (
-    !Number.isFinite(latitude) ||
-    !Number.isFinite(longitude)
-  ) {
-    return `Line ${lineNumber}: latitude and longitude must be valid numbers.`;
+function validate(latitude: number, longitude: number, line: number) {
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return `Line ${line}: latitude and longitude must be valid numbers.`;
   }
 
   if (latitude < -90 || latitude > 90) {
-    return `Line ${lineNumber}: latitude must be between -90 and 90.`;
+    return `Line ${line}: latitude must be between -90 and 90.`;
   }
 
   if (longitude < -180 || longitude > 180) {
-    return `Line ${lineNumber}: longitude must be between -180 and 180.`;
+    return `Line ${line}: longitude must be between -180 and 180.`;
   }
 
   return null;
 }
 
-function parseDecimalLine(line: string, lineNumber: number) {
-  const values = line
+function parseDecimal(lineText: string, line: number) {
+  const values = lineText
     .split(/[\s,;|]+/)
-    .map(parseNumericToken)
+    .map(parseNum)
     .filter((value): value is number => value !== null);
 
   if (values.length < 2) {
-    return {
-      error: `Line ${lineNumber}: enter latitude and longitude.`,
-      point: null,
-    };
+    return { point: null, error: `Line ${line}: enter latitude and longitude.` };
   }
 
   const latitude = values[0];
   const longitude = values[1];
-  const error = validateDecimalPoint(latitude, longitude, lineNumber);
-
-  if (error) {
-    return { error, point: null };
-  }
-
-  return {
-    error: null,
-    point: { latitude, longitude },
-  };
+  const error = validate(latitude, longitude, line);
+  return error ? { point: null, error } : { point: { latitude, longitude }, error: null };
 }
 
-function getDmsDirection(text: string, axis: CoordinateAxis) {
-  const match = text
-    .toUpperCase()
-    .match(axis === "lat" ? /[NS]/ : /[EW]/);
+function dmsValue(text: string, axis: "lat" | "lng", line: number) {
+  const values = numbers(text);
+  const direction = text.toUpperCase().match(axis === "lat" ? /[NS]/ : /[EW]/)?.[0] || null;
 
-  return match ? match[0] : null;
-}
-
-function dmsComponentsToDecimal(
-  degrees: number,
-  minutes: number,
-  seconds: number,
-  direction: string | null
-) {
-  const absoluteDegrees = Math.abs(degrees);
-  let decimal =
-    absoluteDegrees + minutes / 60 + seconds / 3600;
-
-  if (direction === "S" || direction === "W") {
-    decimal = -decimal;
-  } else if (!direction && degrees < 0) {
-    decimal = -decimal;
+  if (values.length < 1) {
+    return { value: null, error: `Line ${line}: missing ${axis === "lat" ? "latitude" : "longitude"} DMS values.` };
   }
 
-  return decimal;
-}
-
-function parseDmsCoordinateFromText(
-  text: string,
-  axis: CoordinateAxis,
-  lineNumber: number
-) {
-  const numbers = extractNumbers(text);
-
-  if (numbers.length < 1) {
-    return {
-      error: `Line ${lineNumber}: missing ${axis === "lat" ? "latitude" : "longitude"} DMS values.`,
-      value: null,
-    };
-  }
-
-  const degrees = numbers[0];
-  const minutes = numbers[1] ?? 0;
-  const seconds = numbers[2] ?? 0;
+  const degrees = values[0];
+  const minutes = values[1] ?? 0;
+  const seconds = values[2] ?? 0;
 
   if (minutes < 0 || minutes >= 60 || seconds < 0 || seconds >= 60) {
-    return {
-      error: `Line ${lineNumber}: DMS minutes and seconds must be between 0 and 59.`,
-      value: null,
-    };
+    return { value: null, error: `Line ${line}: DMS minutes and seconds must be between 0 and 59.` };
   }
 
-  const direction = getDmsDirection(text, axis);
-  const value = dmsComponentsToDecimal(
-    degrees,
-    minutes,
-    seconds,
-    direction
-  );
-  const validationError =
-    axis === "lat"
-      ? validateDecimalPoint(value, 0, lineNumber)
-      : validateDecimalPoint(0, value, lineNumber);
+  let decimal = Math.abs(degrees) + minutes / 60 + seconds / 3600;
 
-  if (validationError) {
-    return {
-      error: validationError,
-      value: null,
-    };
+  if (direction === "S" || direction === "W" || (!direction && degrees < 0)) {
+    decimal = -decimal;
   }
 
-  return {
-    error: null,
-    value,
-  };
+  const error = axis === "lat" ? validate(decimal, 0, line) : validate(0, decimal, line);
+  return error ? { value: null, error } : { value: decimal, error: null };
 }
 
-function parseDmsLine(line: string, lineNumber: number) {
-  const semicolonParts = line
-    .split(/[;|]/)
-    .map((part) => part.trim())
-    .filter(Boolean);
+function parseDms(lineText: string, line: number) {
+  const semicolonParts = lineText.split(/[;|]/).map((part) => part.trim()).filter(Boolean);
+  const commaParts = lineText.split(",").map((part) => part.trim()).filter(Boolean);
+  const parts = semicolonParts.length >= 2 ? semicolonParts : commaParts.length === 2 ? commaParts : [];
 
-  const commaParts = line
-    .split(",")
-    .map((part) => part.trim())
-    .filter(Boolean);
+  if (parts.length >= 2) {
+    const latitude = dmsValue(parts[0], "lat", line);
+    const longitude = dmsValue(parts[1], "lng", line);
 
-  const coordinateParts =
-    semicolonParts.length >= 2
-      ? semicolonParts
-      : commaParts.length >= 2
-        ? commaParts
-        : [];
-
-  if (coordinateParts.length >= 2) {
-    const latitudeResult = parseDmsCoordinateFromText(
-      coordinateParts[0],
-      "lat",
-      lineNumber
-    );
-    const longitudeResult = parseDmsCoordinateFromText(
-      coordinateParts[1],
-      "lng",
-      lineNumber
-    );
-
-    if (latitudeResult.error || longitudeResult.error) {
-      return {
-        error: latitudeResult.error || longitudeResult.error,
-        point: null,
-      };
+    if (latitude.error || longitude.error) {
+      return { point: null, error: latitude.error || longitude.error };
     }
 
-    return {
-      error: null,
-      point: {
-        latitude: latitudeResult.value as number,
-        longitude: longitudeResult.value as number,
-      },
-    };
+    return { point: { latitude: latitude.value as number, longitude: longitude.value as number }, error: null };
   }
 
-  const values = extractNumbers(line);
+  const values = numbers(lineText);
 
   if (values.length < 6) {
-    return {
-      error: `Line ${lineNumber}: enter DMS as latitude degrees minutes seconds and longitude degrees minutes seconds.`,
-      point: null,
-    };
+    return { point: null, error: `Line ${line}: enter DMS as latitude degrees minutes seconds and longitude degrees minutes seconds.` };
   }
 
-  const uppercaseLine = line.toUpperCase();
-  const latitudeDirection =
-    uppercaseLine.match(/[NS]/)?.[0] || null;
-  const longitudeDirection =
-    uppercaseLine.match(/[EW]/)?.[0] || null;
+  const upper = lineText.toUpperCase();
+  const latDir = upper.match(/[NS]/)?.[0] || "";
+  const lngDir = upper.match(/[EW]/)?.[0] || "";
+  const latitude = dmsValue(`${values[0]} ${values[1]} ${values[2]} ${latDir}`, "lat", line);
+  const longitude = dmsValue(`${values[3]} ${values[4]} ${values[5]} ${lngDir}`, "lng", line);
 
-  const latitudeResult = parseDmsCoordinateFromText(
-    values.slice(0, 3).join(" ") +
-      (latitudeDirection ? ` ${latitudeDirection}` : ""),
-    "lat",
-    lineNumber
-  );
-  const longitudeResult = parseDmsCoordinateFromText(
-    values.slice(3, 6).join(" ") +
-      (longitudeDirection ? ` ${longitudeDirection}` : ""),
-    "lng",
-    lineNumber
-  );
-
-  if (latitudeResult.error || longitudeResult.error) {
-    return {
-      error: latitudeResult.error || longitudeResult.error,
-      point: null,
-    };
+  if (latitude.error || longitude.error) {
+    return { point: null, error: latitude.error || longitude.error };
   }
 
-  return {
-    error: null,
-    point: {
-      latitude: latitudeResult.value as number,
-      longitude: longitudeResult.value as number,
-    },
-  };
+  return { point: { latitude: latitude.value as number, longitude: longitude.value as number }, error: null };
 }
 
-function normalizeUtmZone(value: unknown, fallback = 37) {
-  const parsed =
-    typeof value === "number"
-      ? value
-      : parseNumericToken(String(value ?? ""));
-
-  if (parsed === null || parsed < 1 || parsed > 60) {
-    return fallback;
-  }
-
-  return Math.round(parsed);
-}
-
-function getUtmZoneError(value: string) {
-  const parsed = parseNumericToken(value);
-
-  if (parsed === null || parsed < 1 || parsed > 60) {
-    return "UTM zone must be between 1 and 60.";
-  }
-
-  return null;
-}
-
-function normalizeHemisphere(value: unknown): UtmHemisphere {
-  const text = String(value || "").trim().toUpperCase();
-
-  return text.startsWith("N") ? "N" : "S";
-}
-
-function getGeographicProjection(crs: CrsType) {
-  return crs === "arc1960-utm"
-    ? ARC1960_GEOGRAPHIC
-    : WGS84_GEOGRAPHIC;
-}
-
-function getUtmProjection(
-  crs: CrsType,
-  zone: number,
-  hemisphere: UtmHemisphere,
-  customProj4: string
-) {
-  if (crs === "custom") {
-    return customProj4.trim();
-  }
-
-  const south = hemisphere === "S" ? " +south" : "";
-
-  if (crs === "arc1960-utm") {
-    return `+proj=utm +zone=${zone}${south} +ellps=clrk80 +towgs84=-160,-6,-302,0,0,0,0 +units=m +no_defs`;
-  }
-
-  return `+proj=utm +zone=${zone}${south} +datum=WGS84 +units=m +no_defs`;
-}
-
-function utmToDecimal(
-  easting: number,
-  northing: number,
-  options: UtmOptions
-) {
-  const sourceProjection = getUtmProjection(
-    options.crs,
-    options.zone,
-    options.hemisphere,
-    options.customProj4
-  );
-  const targetProjection = getGeographicProjection(options.crs);
-
-  const result = proj4(sourceProjection, targetProjection, [
-    easting,
-    northing,
-  ]) as [number, number];
-
-  return {
-    longitude: result[0],
-    latitude: result[1],
-  };
-}
-
-function validateUtmInput(
-  easting: number,
-  northing: number,
-  zone: number,
-  lineNumber: number
-) {
-  if (
-    !Number.isFinite(easting) ||
-    !Number.isFinite(northing)
-  ) {
-    return `Line ${lineNumber}: easting and northing must be valid numbers.`;
-  }
-
-  if (zone < 1 || zone > 60) {
-    return `Line ${lineNumber}: UTM zone must be between 1 and 60.`;
-  }
-
-  if (easting < 100000 || easting > 900000) {
-    return `Line ${lineNumber}: easting is outside the normal UTM range. Use easting, northing order.`;
-  }
-
-  if (northing < 0 || northing > 10000000) {
-    return `Line ${lineNumber}: northing is outside the normal UTM range. Check hemisphere or coordinate order.`;
-  }
-
-  return null;
-}
-
-function parseUtmLine(
-  line: string,
-  lineNumber: number,
-  options: UtmOptions
-) {
-  const values = extractNumbers(line);
+function parseUtm(lineText: string, line: number, zone: number, hemisphere: Hemisphere) {
+  const values = numbers(lineText);
 
   if (values.length < 2) {
-    return {
-      error: `Line ${lineNumber}: enter UTM easting and northing.`,
-      point: null,
-    };
+    return { point: null, error: `Line ${line}: enter UTM easting and northing.` };
   }
 
-  const leadingZoneMatch = line
-    .trim()
-    .match(/^(\d{1,2})\s*([NS])?\b/i);
-  const startsWithZone =
-    values.length >= 3 &&
-    leadingZoneMatch &&
-    Number(leadingZoneMatch[1]) === values[0] &&
-    values[0] >= 1 &&
-    values[0] <= 60;
-
-  let zone = options.zone;
-  let hemisphere = options.hemisphere;
   let easting = values[0];
   let northing = values[1];
+  let activeZone = zone;
+  let activeHemisphere = hemisphere;
+  const leadingZone = lineText.trim().match(/^(\d{1,2})\s*([NS])?\b/i);
 
-  if (startsWithZone) {
-    zone = normalizeUtmZone(values[0], options.zone);
+  if (values.length >= 3 && leadingZone && Number(leadingZone[1]) === values[0] && values[0] >= 1 && values[0] <= 60) {
+    activeZone = Math.round(values[0]);
     easting = values[1];
     northing = values[2];
 
-    if (leadingZoneMatch[2]) {
-      hemisphere = normalizeHemisphere(leadingZoneMatch[2]);
+    if (leadingZone[2]) {
+      activeHemisphere = leadingZone[2].toUpperCase() as Hemisphere;
     }
-  } else if (
-    values.length >= 3 &&
-    values[2] >= 1 &&
-    values[2] <= 60
-  ) {
-    zone = normalizeUtmZone(values[2], options.zone);
+  } else if (values.length >= 3 && values[2] >= 1 && values[2] <= 60) {
+    activeZone = Math.round(values[2]);
   }
 
-  const zoneHemisphereMatch = line.match(
-    /\b([1-5]?\d|60)\s*([NS])\b/i
-  );
-  const explicitHemisphere = line.match(/\b([NS])\b/i);
+  const zoneHemisphere = lineText.match(/\b([1-5]?\d|60)\s*([NS])\b/i);
 
-  if (zoneHemisphereMatch) {
-    zone = normalizeUtmZone(zoneHemisphereMatch[1], zone);
-    hemisphere = normalizeHemisphere(zoneHemisphereMatch[2]);
-  } else if (explicitHemisphere) {
-    hemisphere = normalizeHemisphere(explicitHemisphere[1]);
+  if (zoneHemisphere) {
+    activeZone = Math.round(Number(zoneHemisphere[1]));
+    activeHemisphere = zoneHemisphere[2].toUpperCase() as Hemisphere;
   }
 
-  const utmError = validateUtmInput(
-    easting,
-    northing,
-    zone,
-    lineNumber
-  );
+  if (activeZone < 1 || activeZone > 60) {
+    return { point: null, error: `Line ${line}: UTM zone must be between 1 and 60.` };
+  }
 
-  if (utmError) {
-    return { error: utmError, point: null };
+  if (easting < 100000 || easting > 900000) {
+    return { point: null, error: `Line ${line}: easting is outside the normal UTM range. Use easting, northing order.` };
+  }
+
+  if (northing < 0 || northing > 10000000) {
+    return { point: null, error: `Line ${line}: northing is outside the normal UTM range.` };
   }
 
   try {
-    const point = utmToDecimal(easting, northing, {
-      ...options,
-      zone,
-      hemisphere,
-    });
-    const coordinateError = validateDecimalPoint(
-      point.latitude,
-      point.longitude,
-      lineNumber
-    );
-
-    if (coordinateError) {
-      return { error: coordinateError, point: null };
-    }
-
-    return {
-      error: null,
-      point,
-    };
+    const south = activeHemisphere === "S" ? " +south" : "";
+    const source = `+proj=utm +zone=${activeZone}${south} +datum=WGS84 +units=m +no_defs`;
+    const result = proj4(source, WGS84, [easting, northing]) as [number, number];
+    const point = { longitude: result[0], latitude: result[1] };
+    const error = validate(point.latitude, point.longitude, line);
+    return error ? { point: null, error } : { point, error: null };
   } catch {
-    return {
-      error: `Line ${lineNumber}: unable to convert UTM coordinates. Check CRS, zone and hemisphere.`,
-      point: null,
-    };
+    return { point: null, error: `Line ${line}: unable to convert UTM coordinates.` };
   }
 }
 
-function parseCoordinateText(
-  text: string,
-  inputFormat: InputFormat,
-  utmOptions: UtmOptions
-) {
-  const points: CoordinatePoint[] = [];
+function parseCoordinates(text: string, format: Format, zone: number, hemisphere: Hemisphere) {
+  const points: Point[] = [];
   const errors: string[] = [];
-  const lines = text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
+  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
 
-  if (
-    lines.length > 0 &&
-    inputFormat === "utm" &&
-    utmOptions.crs === "custom" &&
-    !utmOptions.customProj4.trim()
-  ) {
-    return {
-      points,
-      errors: [
-        "Enter a custom Proj4 definition before converting UTM coordinates.",
-      ],
-    };
-  }
-
-  lines.forEach((line, index) => {
-    const lineNumber = index + 1;
+  lines.forEach((lineText, index) => {
+    const line = index + 1;
     const result =
-      inputFormat === "dms"
-        ? parseDmsLine(line, lineNumber)
-        : inputFormat === "utm"
-          ? parseUtmLine(line, lineNumber, utmOptions)
-          : parseDecimalLine(line, lineNumber);
+      format === "dms"
+        ? parseDms(lineText, line)
+        : format === "utm"
+          ? parseUtm(lineText, line, zone, hemisphere)
+          : parseDecimal(lineText, line);
 
-  const inputFormat, result.point) {
-    { key: "decimal", label: "Decimal" },
-    { key: "dms", label: "DMS" },
-    { key: "utm", label: "UTM" },
-  ];
     if (result.error || !result.point) {
-      errors.push(result.error || `Line ${lineNumber}: invalid coordinate.`);
+      errors.push(result.error || `Line ${line}: invalid coordinate.`);
       return;
     }
 
-    points.push({
-      ...result.point,
-      label: `Point ${points.length + 1}`,
-    });
+    points.push({ ...result.point, label: `Point ${points.length + 1}` });
   });
 
   return { points, errors };
 }
 
-function calculateDistanceMeters(
-  start: CoordinatePoint,
-  end: CoordinatePoint
-) {
-  const latitudeDelta = toRadians(end.latitude - start.latitude);
-  const longitudeDelta = toRadians(end.longitude - start.longitude);
+function normalizeHeader(header: string) {
+  return header.replace(/^\uFEFF/, "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+}
 
-  const a =
-    Math.sin(latitudeDelta / 2) ** 2 +
-    Math.cos(toRadians(start.latitude)) *
-      Math.cos(toRadians(end.latitude)) *
-      Math.sin(longitudeDelta / 2) ** 2;
+function findColumn(headers: string[], names: string[]) {
+  const normalized = headers.map(normalizeHeader);
+
+  for (const name of names) {
+    const index = normalized.indexOf(normalizeHeader(name));
+
+    if (index !== -1) {
+      return index;
+    }
+  }
+
+  return null;
+}
+
+function splitCsvLine(line: string, delimiter: string) {
+  const cells: string[] = [];
+  let cell = "";
+  let quoted = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+
+    if (character === '"') {
+      quoted = !quoted;
+      continue;
+    }
+
+    if (character === delimiter && !quoted) {
+      cells.push(cell.trim());
+      cell = "";
+      continue;
+    }
+
+    cell += character;
+  }
+
+  cells.push(cell.trim());
+  return cells;
+}
+
+function parseCsv(text: string) {
+  const lines = text.split(/\r?\n/).filter((line) => line.trim());
+
+  if (lines.length < 2) {
+    return { text: "", format: "decimal" as Format, count: 0, error: "CSV must include a header row and coordinate rows." };
+  }
+
+  const delimiter = [",", ";", "\t", "|"].reduce((best, candidate) =>
+    (lines[0].split(candidate).length > lines[0].split(best).length ? candidate : best)
+  );
+  const headers = splitCsvLine(lines[0], delimiter);
+  const rows = lines.slice(1).map((line) => splitCsvLine(line, delimiter));
+  const easting = findColumn(headers, ["easting", "east", "e", "x", "east_x", "eastx", "utm_easting"]);
+  const northing = findColumn(headers, ["northing", "north", "n", "y", "north_y", "northy", "utm_northing"]);
+
+  if (easting !== null && northing !== null) {
+    const zone = findColumn(headers, ["zone", "utm_zone", "utmzone"]);
+    const hemi = findColumn(headers, ["hemisphere", "hemi", "utm_hemisphere", "band"]);
+    const csvText = rows
+      .map((row) => [row[easting], row[northing], zone !== null ? row[zone] : "", hemi !== null ? row[hemi] : ""].filter(Boolean).join(", "))
+      .filter(Boolean)
+      .join("\n");
+    return { text: csvText, format: "utm" as Format, count: csvText ? csvText.split("\n").length : 0, error: csvText ? null : "No valid UTM rows were found." };
+  }
+
+  const lat = findColumn(headers, ["latitude", "lat"]);
+  const lng = findColumn(headers, ["longitude", "lng", "lon", "long"]);
+
+  if (lat !== null && lng !== null) {
+    const hasDms = rows.some((row) => /[NSWE°º'"]/.test(`${row[lat]} ${row[lng]}`));
+    const csvText = rows
+      .map((row) => `${row[lat] || ""}${hasDms ? ";" : ","} ${row[lng] || ""}`)
+      .filter((row) => row.trim() !== (hasDms ? ";" : ","))
+      .join("\n");
+    return { text: csvText, format: hasDms ? "dms" as Format : "decimal" as Format, count: csvText ? csvText.split("\n").length : 0, error: csvText ? null : "No valid coordinate rows were found." };
+  }
+
+  return {
+    text: "",
+    format: "decimal" as Format,
+    count: 0,
+    error: "CSV columns accepted: Latitude/Longitude, Lat/Lng, Easting/Northing, E/N, or X/Y.",
+  };
+}
+
+function distanceMeters(start: Point, end: Point) {
+  const latDelta = toRad(end.latitude - start.latitude);
+  const lngDelta = toRad(end.longitude - start.longitude);
+  const a = Math.sin(latDelta / 2) ** 2 + Math.cos(toRad(start.latitude)) * Math.cos(toRad(end.latitude)) * Math.sin(lngDelta / 2) ** 2;
+  return 2 * EARTH_RADIUS_METERS * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function bearingDegrees(start: Point, end: Point) {
+  const lat1 = toRad(start.latitude);
+  const lat2 = toRad(end.latitude);
+  const lngDelta = toRad(end.longitude - start.longitude);
+  const y = Math.sin(lngDelta) * Math.cos(lat2);
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lngDelta);
+  return wrap360(toDeg(Math.atan2(y, x)));
+}
+
+function direction(value: number) {
+  const names = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+  return names[Math.round(value / 22.5) % 16];
+}
+
+function formatNumber(value: number, digits = 2) {
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits: digits }).format(value);
+}
+
+function formatDistance(value: number) {
+  return value < 1000 ? `${formatNumber(value, 2)} m` : `${formatNumber(value / 1000, 3)} km`;
+}
+
+function formatBearing(value: number) {
+  return `${formatNumber(value, 2)} deg`;
+}
+
+function formatSize(bytes: number) {
+  return bytes < 1024 * 1024 ? `${formatNumber(bytes / 1024, 1)} KB` : `${formatNumber(bytes / (1024 * 1024), 2)} MB`;
+}
+
+function escapeCsv(value: unknown) {
+  const text = String(value ?? "");
+  return text.includes(",") || text.includes('"') || text.includes("\n") ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+export default function BearingAzimuthCalculatorPage() {
+  const [format, setFormat] = useState<Format>("decimal");
+  const [coordinateText, setCoordinateText] = useState("");
+  const [utmZone, setUtmZone] = useState("37");
+  const [hemisphere, setHemisphere] = useState<Hemisphere>("S");
+  const [fileMessage, setFileMessage] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [copyLabel, setCopyLabel] = useState("Copy Summary");
+
+  const activeFormat = formats.find((item) => item.key === format) || formats[0];
+  const zone = Math.round(Number(utmZone));
+  const zoneError = format === "utm" && (!Number.isFinite(zone) || zone < 1 || zone > 60) ? "UTM zone must be between 1 and 60." : null;
+  const parsed = useMemo(
+    () => zoneError ? { points: [], errors: [zoneError] } : parseCoordinates(coordinateText, format, zone, hemisphere),
+    [coordinateText, format, hemisphere, zone, zoneError]
+  );
+  const points = parsed.points;
+  const segments = useMemo(
+    () => points.slice(1).map((point, index) => {
+      const from = points[index];
+      const initial = bearingDegrees(from, point);
+      return {
+        from,
+        to: point,
+        distance: distanceMeters(from, point),
+        initial,
+        final: wrap360(bearingDegrees(point, from) + 180),
+        reverse: wrap360(initial + 180),
+      };
+    }),
+    [points]
+  );
+  const totalDistance = segments.reduce((total, item) => total + item.distance, 0);
+  const firstSegment = segments[0];
+  const hasResult = segments.length > 0 && parsed.errors.length === 0;
+  const status = parsed.errors.length ? "Fix coordinate errors first." : hasResult ? "Bearing and azimuth results are ready." : "Enter at least two points.";
+
+  const summary = useMemo(() => {
+    const lines = [`Input format: ${activeFormat.label}`, `Points: ${points.length}`, `Segments: ${segments.length}`];
+
+    if (segments.length > 0) {
+      lines.push(`Total distance: ${formatDistance(totalDistance)}`);
+      segments.forEach((segment, index) => {
+        lines.push(`Segment ${index + 1}: ${segment.from.label} to ${segment.to.label}`);
+        lines.push(`Initial azimuth: ${formatBearing(segment.initial)} ${direction(segment.initial)}`);
+        lines.push(`Final bearing: ${formatBearing(segment.final)}`);
+        lines.push(`Reverse bearing: ${formatBearing(segment.reverse)}`);
+        lines.push(`Distance: ${formatDistance(segment.distance)}`);
+      });
+    }
+
+    return lines;
+  }, [activeFormat.label, points.length, segments, totalDistance]);
+
+  async function handleCsvUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    setFileMessage(null);
+    setFileError(null);
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.name.toLowerCase().endsWith(".csv") && !["text/csv", "text/plain", "application/vnd.ms-excel", ""].includes(file.type)) {
+      setFileError("Upload a valid CSV file.");
+      return;
+    }
+
+    if (file.size > CSV_MAX_FILE_SIZE) {
+      setFileError(`CSV file is too large. Maximum size is ${formatSize(CSV_MAX_FILE_SIZE)}.`);
+      return;
+    }
+
+    try {
+      const result = parseCsv(await file.text());
+
+      if (!result.text) {
+        setFileError(result.error || acceptedColumns);
+        return;
+      }
+
+      setFormat(result.format);
+      setCoordinateText(result.text);
+      setFileMessage(`Imported ${result.count} rows from ${file.name} as ${formats.find((item) => item.key === result.format)?.label || result.format}.`);
+    } catch {
+      setFileError("Unable to read the CSV file.");
+    }
+  }
+
+  async function copySummary() {
+    await navigator.clipboard.writeText(summary.join("\n"));
+    setCopyLabel("Copied");
+    window.setTimeout(() => setCopyLabel("Copy Summary"), 1500);
+  }
+
+  function downloadCsv() {
+    const rows = [
+      ["Segment", "From", "To", "Distance", "Initial Azimuth", "Direction", "Final Bearing", "Reverse Bearing"],
+      ...segments.map((segment, index) => [
+        String(index + 1),
+        segment.from.label,
+        segment.to.label,
+        formatDistance(segment.distance),
+        formatBearing(segment.initial),
+        direction(segment.initial),
+        formatBearing(segment.final),
+        formatBearing(segment.reverse),
+      ]),
+    ];
+    const blob = new Blob([rows.map((row) => row.map(escapeCsv).join(",")).join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "docmaster-bearing-azimuth.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
 
   return (
-    2 *
-    EARTH_RADIUS_METERS *
-    Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    <main className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl">
+        <Link href="/tools/gis" className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-blue-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50">
+          <ArrowLeft size={16} />
+          Back to GIS Tools
+        </Link>
+
+        <section className="mt-8 rounded-lg border border-gray-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase text-blue-700">
+                <Compass size={14} />
+                GIS Utility
+              </p>
+              <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl">Bearing / Azimuth Calculator</h1>
+              <p className="mt-3 max-w-3xl text-base leading-7 text-gray-600">
+                Calculate initial bearing, final bearing, reverse bearing and distance from Decimal, DMS, UTM or CSV coordinate points.
+              </p>
+            </div>
+            <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+              <p className="font-semibold">Input format</p>
+              <p className="mt-1">{activeFormat.help}</p>
+            </div>
+          </div>
+
+          <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+            <div className="space-y-5">
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Coordinate input type</p>
+                <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                  {formats.map((item) => (
+                    <button key={item.key} type="button" onClick={() => setFormat(item.key)} className={`rounded-lg border px-4 py-2 text-sm font-semibold transition ${format === item.key ? "border-blue-600 bg-blue-600 text-white" : "border-gray-200 bg-white text-gray-700 hover:bg-blue-50"}`}>
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {format === "utm" && (
+                <div className="grid gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="text-sm font-semibold text-gray-800">UTM Zone</span>
+                    <input value={utmZone} onChange={(event) => setUtmZone(event.target.value)} className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-blue-500" />
+                  </label>
+                  <label className="block">
+                    <span className="text-sm font-semibold text-gray-800">Hemisphere</span>
+                    <select value={hemisphere} onChange={(event) => setHemisphere(event.target.value as Hemisphere)} className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-blue-500">
+                      <option value="S">S</option>
+                      <option value="N">N</option>
+                    </select>
+                  </label>
+                </div>
+              )}
+
+              <div className="rounded-lg border border-dashed border-blue-200 bg-blue-50/50 p-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">CSV bulk upload</p>
+                    <p className="mt-1 text-sm leading-6 text-gray-600">Supports Latitude/Longitude, DMS text, and UTM columns like N/E or Easting/Northing.</p>
+                  </div>
+                  <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">
+                    <Upload size={16} />
+                    Upload CSV
+                    <input type="file" accept=".csv,text/csv" onChange={handleCsvUpload} className="sr-only" />
+                  </label>
+                </div>
+                {fileMessage && <p className="mt-3 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">{fileMessage}</p>}
+                {fileError && <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">{fileError}</p>}
+              </div>
+
+              <label className="block">
+                <span className="text-sm font-semibold text-gray-800">Coordinates</span>
+                <textarea value={coordinateText} onChange={(event) => setCoordinateText(event.target.value)} rows={9} spellCheck={false} placeholder={activeFormat.placeholder} className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-3 font-mono text-sm outline-none focus:border-blue-500" />
+              </label>
+
+              <button type="button" onClick={() => { setCoordinateText(""); setFileMessage(null); setFileError(null); }} className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-200">
+                <RefreshCw size={16} />
+                Clear
+              </button>
+
+              {parsed.errors.length > 0 && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  <p className="font-semibold">Coordinate errors</p>
+                  <ul className="mt-2 space-y-1">{parsed.errors.map((error) => <li key={error}>{error}</li>)}</ul>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <p className="text-sm font-semibold text-gray-500">Status</p>
+                <p className="mt-1 font-semibold text-gray-900">{status}</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"><p className="text-sm font-semibold text-gray-500">Points</p><p className="mt-2 text-3xl font-bold text-gray-950">{points.length}</p></div>
+                <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"><p className="text-sm font-semibold text-gray-500">Segments</p><p className="mt-2 text-3xl font-bold text-gray-950">{segments.length}</p></div>
+                <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"><p className="text-sm font-semibold text-gray-500">Total Distance</p><p className="mt-2 text-2xl font-bold text-gray-950">{segments.length ? formatDistance(totalDistance) : "-"}</p></div>
+                <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"><p className="text-sm font-semibold text-gray-500">First Azimuth</p><p className="mt-2 text-2xl font-bold text-gray-950">{firstSegment ? formatBearing(firstSegment.initial) : "-"}</p>{firstSegment && <p className="mt-1 text-sm font-semibold text-blue-600">{direction(firstSegment.initial)}</p>}</div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button type="button" onClick={copySummary} disabled={!hasResult} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"><Clipboard size={16} />{copyLabel}</button>
+                <button type="button" onClick={downloadCsv} disabled={!hasResult} className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"><Download size={16} />Download CSV</button>
+              </div>
+            </div>
+          </div>
+
+          {segments.length > 0 && (
+            <div className="mt-8 overflow-x-auto rounded-lg border border-gray-200">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-gray-50 text-gray-700"><tr><th className="px-4 py-3 font-semibold">Segment</th><th className="px-4 py-3 font-semibold">From</th><th className="px-4 py-3 font-semibold">To</th><th className="px-4 py-3 font-semibold">Distance</th><th className="px-4 py-3 font-semibold">Initial Azimuth</th><th className="px-4 py-3 font-semibold">Direction</th><th className="px-4 py-3 font-semibold">Final Bearing</th><th className="px-4 py-3 font-semibold">Reverse Bearing</th></tr></thead>
+                <tbody className="divide-y divide-gray-100 bg-white text-gray-700">
+                  {segments.map((segment, index) => <tr key={`${segment.from.label}-${segment.to.label}`}><td className="px-4 py-3 font-medium text-gray-900">{index + 1}</td><td className="px-4 py-3">{segment.from.label}</td><td className="px-4 py-3">{segment.to.label}</td><td className="px-4 py-3">{formatDistance(segment.distance)}</td><td className="px-4 py-3">{formatBearing(segment.initial)}</td><td className="px-4 py-3 font-semibold text-blue-600">{direction(segment.initial)}</td><td className="px-4 py-3">{formatBearing(segment.final)}</td><td className="px-4 py-3">{formatBearing(segment.reverse)}</td></tr>)}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
+    </main>
   );
-}
-
-function calculateInitialBearing(
-  start: CoordinatePoint,
-  end: CoordinatePoint
-) {
-  const startLatitude = toRadians(start.latitude);
-  const endLatitude = toRadians(end.latitude);
-  const longitudeDelta = toRadians(end.longitude - start.longitude);
-
-  const y = Math.sin(longitudeDelta) * Math.cos(endLatitude);
-  const x =
-    Math.cos(startLatitude) * Math.sin(endLatitude) -
-    Math.sin(startLatitude) *
-      Math.cos(endLatitude) *
-      Math.cos(longitudeDelta);
-
-  return normalizeDegrees(toDegrees(Math.atan2(y, x)));
-}
-
-function calculateFinalBearing(
-  start: CoordinatePoint,
-  end: CoordinatePoint
-) {
-  return normalizeDegrees(calculateInitialBearing(end, start) + 180);
-}
-
-function getCompassDirection(bearing: number) {
-  const directions = [
-    "N",
-    "NNE",
-    "NE",
-    "ENE",
-    "E",
-    "ESE",
-    "SE",
-    "SSE",
-    "S",
-    "SSW",
-    "SW",
-    "WSW",
-    "W",
-    "WNW",
-    "NW",
-    "NNW",
-  ];
-
-  return directions[Math.round(bearing / 22.5) % 16];
-}
-
-function buildSegments(points: CoordinatePoint[]) {
-  return points.slice(1).map((point, index) => {
-    const from = points[index];
-    const to = point;
-    const initialBearing = calculateInitialBearing(from, to);
-    const finalBearing = calculateFinalBearing(from, to);
-
-    return {
-      from,
-      to,
-      distanceMeters: calculateDistanceMeters(from, to),
-      initialBearing,
-      finalBearing,
-      reverseBearing: normalizeDegrees(initialBearing + 180),
-    };
-  });
 }

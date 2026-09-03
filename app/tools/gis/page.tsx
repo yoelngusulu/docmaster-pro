@@ -24,9 +24,9 @@ const gisTools = [
 ];
 
 export const metadata = {
-  title: "GIS Tools | DocMaster AI",
+  title: "GIS Tools | DocMaster",
   description:
-    "DocMaster AI GIS tools for coordinate conversion, distance measurement and area calculation.",
+    "DocMaster GIS tools for coordinate conversion, distance measurement and area calculation.",
 };
 
 export default function GISToolsPage() {

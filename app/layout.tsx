@@ -5,13 +5,12 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-verification: {
-  "google": "FppDEXu38DNorAFUEUKxvodn18B68YT6hF8uvmpBDuo",
-}
-
 export const metadata: Metadata = {
-  title: "DocMaster",
+  title: "DocMaster | Smart Document Platform",
   description: "The Smart Document Platform",
+  verification: {
+    google: "FppDEXu38DNorAFUEUKxvodn18B68YT6hF8uvmpBDuo",
+  },
 };
 
 const themeScript = `

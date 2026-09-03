@@ -40,7 +40,7 @@ export default function Hero() {
           <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700">
             <Sparkles size={18} />
 
-            AI Powered Document Platform
+            Smart Document Tools
           </div>
 
          
@@ -50,9 +50,8 @@ export default function Hero() {
 
           <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-gray-600 sm:text-lg lg:mx-0">
             Convert, edit and enhance PDF, Office
-            documents and images with powerful AI
-            tools. Fast, secure and built for
-            professionals.
+            documents, images and coordinates with fast,
+            secure tools built for professionals.
           </p>
 
           {/* Buttons */}
@@ -91,11 +90,11 @@ export default function Hero() {
 
             <div>
               <h3 className="text-3xl font-bold text-blue-600">
-                AI
+                Smart
               </h3>
 
               <p className="mt-1 text-sm text-gray-600">
-                Powered
+                Workflow
               </p>
             </div>
 

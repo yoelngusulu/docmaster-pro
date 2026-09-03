@@ -184,7 +184,7 @@ export default function Navbar() {
       </span>
     </p>
 
-    <p className="hidden text-[10px] font-semibold uppercase tracking-wide text-gray-500 sm:block dark:text-slate-400">
+    <p className="block max-w-[140px] whitespace-nowrap text-[9px] font-semibold uppercase tracking-wide text-gray-500 sm:max-w-none sm:text-[10px] dark:text-slate-400">
       Smart Document Platform
     </p>
   </div>

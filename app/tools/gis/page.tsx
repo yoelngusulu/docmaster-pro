@@ -1,4 +1,4 @@
-import { MapPinned, Ruler } from "lucide-react";
+import { Compass, MapPinned, Ruler } from "lucide-react";
 
 import ToolHubPage from "@/components/ToolHubPage";
 
@@ -21,12 +21,21 @@ const gisTools = [
     badge: "Live",
     status: "available" as const,
   },
+  {
+    title: "Bearing / Azimuth Calculator",
+    description:
+      "Calculate initial bearing, final bearing, reverse bearing and distance from Decimal, DMS, UTM or CSV coordinate points.",
+    href: "/tools/gis/bearing-azimuth-calculator",
+    icon: Compass,
+    badge: "Live",
+    status: "available" as const,
+  },
 ];
 
 export const metadata = {
   title: "GIS Tools | DocMaster",
   description:
-    "DocMaster GIS tools for coordinate conversion, distance measurement and area calculation.",
+    "DocMaster GIS tools for coordinate conversion, distance measurement, area calculation and bearing calculation.",
 };
 
 export default function GISToolsPage() {
@@ -34,7 +43,7 @@ export default function GISToolsPage() {
     <ToolHubPage
       eyebrow="GIS Tools"
       title="GIS Tools"
-      subtitle="Convert coordinates, check locations on a map and measure simple GIS distances or areas from one clean workspace."
+      subtitle="Convert coordinates, check locations on a map, measure GIS distances and calculate bearings from one clean workspace."
       backLink="/tools"
       backText="Back to Tools"
       tools={gisTools}

@@ -3,6 +3,7 @@ import ToolCategories from "@/components/ToolCategories";
 import Features from "@/components/Features";
 import HowItWorks from "@/components/HowItWorks";
 import PopularTools from "@/components/PopularTools";
+import WaitlistForm from "@/components/WaitlistForm";
 import CallToAction from "@/components/CallToAction";
 import AIAssistant from "@/components/AIAssistant";
 
@@ -23,6 +24,9 @@ export default function Home() {
 
       {/* Popular tools */}
       <PopularTools />
+
+      {/* Waitlist signup */}
+      <WaitlistForm />
 
       {/* Call to action */}
       <CallToAction />

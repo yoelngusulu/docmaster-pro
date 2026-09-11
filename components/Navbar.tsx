@@ -166,7 +166,7 @@ export default function Navbar() {
   >
     <Image
       src="/images/logo.png"
-      alt="DocMaster icon"
+      alt="YAJU icon"
       width={36}
       height={42}
       priority
@@ -177,10 +177,7 @@ export default function Navbar() {
   <div className="min-w-0 leading-tight">
     <p className="text-lg font-extrabold tracking-tight sm:text-xl">
       <span className="text-gray-950 dark:text-white">
-        Doc
-      </span>
-      <span className="text-blue-600 dark:text-blue-400">
-        Master
+        YAJU
       </span>
     </p>
 

@@ -131,7 +131,7 @@ export default function RegisterPage() {
           </h1>
 
           <p className="mt-3 text-gray-600">
-            Create your DocMaster account.
+            Create your YAJU account.
           </p>
         </div>
 

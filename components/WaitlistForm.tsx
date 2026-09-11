@@ -54,7 +54,7 @@ export default function WaitlistForm() {
         },
         body: JSON.stringify({
           email: trimmedEmail,
-          source: "DocMaster Waitlist",
+          source: "YAJU Waitlist",
         }),
       });
 
@@ -85,11 +85,11 @@ export default function WaitlistForm() {
             </div>
 
             <h2 className="mt-6 text-3xl font-bold text-white sm:text-4xl">
-              Join the DocMaster Waitlist
+              Join the YAJU Waitlist
             </h2>
 
             <p className="mt-4 text-base leading-7 text-slate-300 sm:text-lg">
-              Get product updates, new tool announcements and early access to upcoming DocMaster features.
+              Get product updates, new tool announcements and early access to upcoming YAJU features.
             </p>
           </div>
 
@@ -165,7 +165,7 @@ export default function WaitlistForm() {
             ) : null}
 
             <p className="mt-4 text-sm leading-6 text-gray-500">
-              By joining, you agree to receive occasional DocMaster product updates. You can unsubscribe anytime.
+              By joining, you agree to receive occasional YAJU product updates. You can unsubscribe anytime.
             </p>
           </form>
         </div>

@@ -10,6 +10,14 @@ import {
 
 const categories = [
   {
+    icon: MapPinned,
+    title: "YAJU Coordinates",
+    href: "/tools/gis",
+    tools: "3 live tools",
+    description:
+      "Convert coordinates, preview locations, measure distance or area, and calculate bearings from GIS coordinate points.",
+  },
+  {
     icon: FileText,
     title: "YAJU Documents",
     href: "/tools/pdf",
@@ -24,14 +32,6 @@ const categories = [
     tools: "1 live tool + compression coming soon",
     description:
       "Convert images to PDF now while production image compression is being prepared.",
-  },
-  {
-    icon: MapPinned,
-    title: "YAJU Coordinates",
-    href: "/tools/gis",
-    tools: "3 live tools",
-    description:
-      "Convert coordinates, preview locations, measure distance or area, and calculate bearings from GIS coordinate points.",
   },
 ];
 
@@ -69,8 +69,8 @@ export default function ToolCategories() {
           </h2>
 
           <p className="mt-4 text-base leading-7 text-gray-600 sm:text-lg">
-            Start with the production-ready tools now, then unlock heavier
-            conversion workflows as the dedicated processing server comes online.
+            Start with coordinate conversion and other production-ready tools now,
+            then unlock heavier document workflows as the dedicated processing server comes online.
           </p>
         </motion.div>
 

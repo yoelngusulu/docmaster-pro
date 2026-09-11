@@ -70,7 +70,7 @@ export default async function DashboardPage() {
   const fullName =
     user.user_metadata?.full_name ||
     user.user_metadata?.name ||
-    "DocMaster User";
+    "YAJU User";
 
   const billingSummary = await getUserBillingSummary(user.id);
   const premiumPlan = getPremiumPlanConfig();
@@ -123,7 +123,7 @@ export default async function DashboardPage() {
       <div className="mx-auto max-w-6xl">
         <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
-            DocMaster Dashboard
+            YAJU Dashboard
           </p>
 
           <h1 className="mt-3 text-4xl font-bold text-gray-900">
@@ -318,7 +318,7 @@ export default async function DashboardPage() {
               </h2>
 
               <p className="mt-1 text-sm text-gray-500">
-                Your latest DocMaster activity.
+                Your latest YAJU activity.
               </p>
             </div>
 

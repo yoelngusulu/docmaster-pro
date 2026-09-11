@@ -166,9 +166,9 @@ export default function AboutPage() {
 
           <p className="mt-4 max-w-4xl leading-7 text-blue-50">
             From converting coordinates between formats and coordinate systems,
-            previewing locations, measuring distance and area, and working with GIS
-            data to converting PDFs, cleaning up images and using AI to understand
-            documents, YAJU keeps practical tools together in one workspace.
+            previewing locations and measuring distance and area to converting PDFs,
+            cleaning up images and using AI to understand documents, YAJU keeps
+            practical tools together in one workspace.
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">

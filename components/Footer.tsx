@@ -5,32 +5,20 @@ import { siteConfig } from "@/lib/site/config";
 
 const productLinks = [
   {
-    label: "PDF to Word",
-    href: "/tools/pdf/pdf-to-word",
+    label: "YAJU Documents",
+    href: "/tools/pdf",
   },
   {
-    label: "Word to PDF",
-    href: "/tools/pdf/word-to-pdf",
+    label: "YAJU Images",
+    href: "/tools/image",
   },
   {
-    label: "Merge PDF",
-    href: "/tools/pdf/merge-pdf",
+    label: "YAJU Coordinates",
+    href: "/tools/gis",
   },
   {
-    label: "Compress PDF",
-    href: "/tools/pdf/compress-pdf",
-  },
-  {
-    label: "Unlock PDF",
-    href: "/tools/pdf/unlock-pdf",
-  },
-  {
-    label: "Image to PDF",
-    href: "/tools/image/image-to-pdf",
-  },
-  {
-    label: "Coordinates Converter",
-    href: "/tools/coordinates-converter",
+    label: "YAJU AI",
+    href: "/tools/ai",
   },
 ];
 
@@ -60,20 +48,20 @@ export default function Footer() {
                   {siteConfig.productName}
                 </p>
                 <p className="text-xs text-gray-400">
-                  Smart Document Platform
+                  Documents • Images • Coordinates • AI
                 </p>
               </div>
             </Link>
 
             <p className="mt-5 text-sm leading-7">
-              Fast, secure and professional document conversion
-              platform developed by {siteConfig.legalOwnerName}.
+              Fast, secure and professional productivity platform
+              developed by {siteConfig.legalOwnerName}.
             </p>
           </div>
 
           <div>
             <h3 className="font-semibold text-white">
-              Product
+              Product Suite
             </h3>
 
             <ul className="mt-4 space-y-3">

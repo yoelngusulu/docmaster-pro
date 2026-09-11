@@ -9,9 +9,9 @@ import {
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Premium Checkout | DocMaster",
+  title: "Premium Checkout | YAJU",
   description:
-    "Submit Airtel Money payment details for DocMaster Premium verification.",
+    "Submit Airtel Money payment details for YAJU Premium verification.",
 };
 
 export default async function PremiumCheckoutPage() {

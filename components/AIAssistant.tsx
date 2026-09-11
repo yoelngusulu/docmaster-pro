@@ -48,7 +48,7 @@ export default function AIAssistant() {
       id: "welcome",
       sender: "bot",
       text:
-        "👋 Welcome to DocMaster AI!\n\nI can help you convert PDFs, Office documents and images.\n\nTell me what you would like to do today.",
+        "👋 Welcome to YAJU AI!\n\nI can help you convert PDFs, Office documents and images.\n\nTell me what you would like to do today.",
     },
   ]);
 
@@ -397,7 +397,7 @@ export default function AIAssistant() {
 
               <div>
                 <h3 className="font-bold">
-                  DocMaster AI
+                  YAJU AI
                 </h3>
 
                 <p className="text-xs text-blue-100">
@@ -472,7 +472,7 @@ export default function AIAssistant() {
                 <div className="rounded-2xl rounded-tl-none bg-gray-100 px-4 py-3 text-sm text-gray-500">
                   <div className="flex items-center gap-2">
                     <span>
-                      DocMaster AI is typing
+                      YAJU AI is typing
                     </span>
 
                     <span className="flex gap-1">
@@ -529,7 +529,7 @@ export default function AIAssistant() {
                   )
                 }
                 disabled={isTyping}
-                placeholder="Ask DocMaster AI..."
+                placeholder="Ask YAJU AI..."
                 className="min-w-0 flex-1 rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 disabled:bg-gray-100"
               />
 
@@ -555,7 +555,7 @@ export default function AIAssistant() {
           type="button"
           onClick={() => setIsOpen(true)}
           className="group flex items-center gap-3 rounded-full bg-blue-600 px-5 py-4 text-white shadow-xl transition hover:-translate-y-1 hover:bg-blue-700 hover:shadow-2xl"
-          aria-label="Open DocMaster AI Assistant"
+          aria-label="Open YAJU AI Assistant"
         >
           <MessageCircle
             size={25}
@@ -563,7 +563,7 @@ export default function AIAssistant() {
           />
 
           <span className="hidden font-semibold sm:inline">
-            Ask DocMaster AI
+            Ask YAJU AI
           </span>
 
           <span className="font-semibold sm:hidden">

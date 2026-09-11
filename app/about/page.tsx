@@ -11,25 +11,25 @@ import { siteConfig } from "@/lib/site/config";
 
 const capabilities = [
   {
-    title: "PDF & Document Tools",
+    title: "YAJU Documents",
     description:
       "Convert, compress, merge, split, protect and manage PDF files without jumping between different apps.",
     icon: FileText,
   },
   {
-    title: "Image Tools",
+    title: "YAJU Images",
     description:
       "Convert, compress and improve images with simple tools built for everyday work.",
     icon: ImageIcon,
   },
   {
-    title: "GIS & Coordinate Tools",
+    title: "YAJU Coordinates",
     description:
       "Convert coordinates and process coordinate files for GIS, surveying, engineering and mapping tasks.",
     icon: MapPinned,
   },
   {
-    title: "AI-Powered Tools",
+    title: "YAJU AI",
     description:
       "Use AI for helpful tasks like OCR, summaries, translation and image enhancement.",
     icon: Bot,
@@ -52,14 +52,14 @@ const reasons = [
   },
   {
     title: "Growing",
-    description: "New document, GIS and AI tools are added over time.",
+    description: "New document, image, coordinate and AI tools are added over time.",
   },
 ];
 
 export const metadata = {
   title: `About ${siteConfig.productName} | ${siteConfig.legalOwnerName}`,
   description:
-    "Learn about YAJU, a workspace for documents, images, GIS and AI-powered tools.",
+    "Learn about YAJU, a workspace for documents, images, coordinates and AI-powered tools.",
 };
 
 export default function AboutPage() {
@@ -73,7 +73,7 @@ export default function AboutPage() {
             </p>
 
             <h1 className="mt-3 max-w-4xl text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">
-              Useful tools for documents, images, GIS and AI work.
+              Useful tools for documents, images, coordinates and AI work.
             </h1>
 
             <p className="mt-6 max-w-3xl text-lg leading-8 text-gray-600">
@@ -94,13 +94,13 @@ export default function AboutPage() {
             </div>
 
             <h2 className="mt-5 text-2xl font-bold text-gray-900">
-              Made for everyday work
+              One master brand, four workspaces
             </h2>
 
             <p className="mt-3 leading-7 text-gray-600">
-              YAJU is designed for people who regularly work with
-              files and data, and want tools that feel clear, organized
-              and ready to use.
+              YAJU brings YAJU Documents, YAJU Images, YAJU Coordinates
+              and YAJU AI together for people who regularly work with
+              files, data and automation.
             </p>
           </div>
         </div>

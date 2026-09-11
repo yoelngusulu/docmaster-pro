@@ -1,9 +1,9 @@
 import ToolCategories from "@/components/ToolCategories";
 
 export const metadata = {
-  title: "Tools | DocMaster",
+  title: "Tools | YAJU",
   description:
-    "Choose DocMaster tools for PDF, image and GIS coordinate conversion.",
+    "Choose YAJU Documents, YAJU Images, YAJU Coordinates and YAJU AI tools.",
 };
 
 export default function ToolsPage() {

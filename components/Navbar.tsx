@@ -98,8 +98,31 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" onClick={closeMobileMenu} className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3">
-          <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 1.5, delay: 5, repeat: Infinity, repeatDelay: 4.2, ease: "easeInOut" }} className="flex shrink-0 items-center justify-center">
-            <Image src="/images/yaju-logo-v2.svg" alt="YAJU logo" width={42} height={40} priority className="h-10 w-auto object-contain" />
+          <motion.div
+            animate={{ scale: [1, 1.04, 1] }}
+            whileHover={{ scale: 1.07, y: -2 }}
+            transition={{
+              scale: { duration: 1.8, repeat: Infinity, repeatDelay: 4.5, ease: "easeInOut" },
+              y: { duration: 0.2, ease: "easeOut" },
+            }}
+            className="group relative flex shrink-0 items-center justify-center"
+          >
+            <motion.div
+              aria-hidden="true"
+              animate={{ opacity: [0.08, 0.28, 0.08], scale: [0.9, 1.15, 0.9] }}
+              transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 4.5, ease: "easeInOut" }}
+              className="pointer-events-none absolute inset-0 rounded-full bg-blue-400 blur-lg"
+            />
+            <div className="relative overflow-hidden">
+              <Image src="/images/yaju-logo-v2.svg" alt="YAJU logo" width={42} height={40} priority className="relative z-10 h-10 w-auto object-contain" />
+              <motion.span
+                aria-hidden="true"
+                initial={{ x: "-160%" }}
+                animate={{ x: ["-160%", "190%"] }}
+                transition={{ duration: 1.1, repeat: Infinity, repeatDelay: 5.2, ease: "easeInOut" }}
+                className="pointer-events-none absolute inset-y-0 z-20 w-3 rotate-12 bg-white/50 blur-sm"
+              />
+            </div>
           </motion.div>
           <div className="min-w-0 leading-tight">
             <p><YajuWordmark /></p>

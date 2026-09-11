@@ -58,7 +58,7 @@ export function getPremiumPlanConfig(): PremiumPlanConfig {
 
   return {
     plan: "PREMIUM",
-    planName: "DocMaster Premium",
+    planName: "YAJU Premium",
     currency: "TZS",
     amountTzs,
     billingPeriod:

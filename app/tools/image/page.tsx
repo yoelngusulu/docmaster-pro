@@ -29,8 +29,8 @@ const imageTools = [
 export default function ImageToolsPage() {
   return (
     <ToolHubPage
-      eyebrow="Image Tools"
-      title="Image Tools"
+      eyebrow="YAJU Images"
+      title="YAJU Images"
       subtitle="Use Image to PDF now on Vercel while image compression is prepared for production processing."
       tools={imageTools}
     />

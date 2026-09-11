@@ -53,7 +53,7 @@ export default async function HistoryPage() {
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
-              DocMaster
+              YAJU
             </p>
 
             <h1 className="mt-2 text-4xl font-bold text-gray-900">
@@ -61,7 +61,7 @@ export default async function HistoryPage() {
             </h1>
 
             <p className="mt-2 text-gray-600">
-              View all your previous DocMaster
+              View all your previous YAJU
               conversions.
             </p>
           </div>
@@ -135,7 +135,7 @@ export default async function HistoryPage() {
               <p className="mt-2 text-sm text-gray-500">
                 Your conversion history will
                 appear here after you use a
-                DocMaster tool.
+                YAJU tool.
               </p>
 
               <Link

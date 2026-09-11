@@ -2,7 +2,7 @@ import { Compass, Droplets, MapPinned, Ruler } from "lucide-react";
 
 import ToolHubPage from "@/components/ToolHubPage";
 
-const gisTools = [
+const fieldTools = [
   {
     title: "Coordinates Converter",
     description:
@@ -42,20 +42,20 @@ const gisTools = [
 ];
 
 export const metadata = {
-  title: "YAJU Coordinates & Engineering Tools | YAJU",
+  title: "YAJU Field Tools | YAJU",
   description:
-    "YAJU tools for coordinate conversion, distance and area measurement, water storage and tank sizing, irrigation storage and bearing calculation.",
+    "YAJU Field Tools for coordinate conversion, distance and area measurement, water storage and tank sizing, irrigation storage and bearing calculations.",
 };
 
 export default function GISToolsPage() {
   return (
     <ToolHubPage
-      eyebrow="YAJU Coordinates & Engineering"
-      title="YAJU Coordinates & Engineering Tools"
-      subtitle="Convert coordinates, measure locations, size water storage for rainwater, pumping and irrigation systems, and calculate bearings from one clean workspace."
+      eyebrow="YAJU Field Tools"
+      title="YAJU Field Tools"
+      subtitle="Practical tools for GIS, surveying, water, irrigation and engineering fieldwork — from coordinate conversion and field measurements to tank sizing and bearing calculations."
       backLink="/tools"
       backText="Back to Tools"
-      tools={gisTools}
+      tools={fieldTools}
     />
   );
 }

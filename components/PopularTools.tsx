@@ -1,10 +1,9 @@
 export default function PopularTools() {
   const tools = [
     "Coordinates Converter",
+    "Measure Distance & Area",
     "PDF → Word",
-    "Word → PDF",
     "Excel → PDF",
-    "PowerPoint → PDF",
     "Merge PDF",
     "Split PDF",
     "Compress PDF",
@@ -24,7 +23,7 @@ export default function PopularTools() {
         </h2>
 
         <p className="mt-4 text-center text-gray-600">
-          Convert coordinates, documents, PDFs, and images in one smart workspace.
+          Convert coordinates, measure distance and area, and manage documents and images in one smart workspace.
         </p>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

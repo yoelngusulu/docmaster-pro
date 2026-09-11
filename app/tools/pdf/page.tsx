@@ -99,9 +99,9 @@ const pdfTools = [
 export default function PDFToolsPage() {
   return (
     <ToolHubPage
-      eyebrow="PDF Tools"
-      title="PDF Tools"
-      subtitle="Use the PDF tools that are live on Vercel now, while advanced server-based converters are prepared for the production worker."
+      eyebrow="YAJU Documents"
+      title="YAJU Documents"
+      subtitle="Use document and PDF tools that are live on Vercel now, while advanced server-based converters are prepared for the production worker."
       tools={pdfTools}
     />
   );

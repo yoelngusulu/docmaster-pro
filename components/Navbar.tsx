@@ -28,6 +28,22 @@ function applyTheme(theme: Theme) {
   localStorage.setItem("docmaster-theme", theme);
 }
 
+function YajuWordmark() {
+  return (
+    <span className="inline-flex items-baseline text-lg font-extrabold tracking-[-0.06em] text-gray-950 sm:text-xl dark:text-white" aria-label="YAJU">
+      <span>Y</span>
+      <span className="relative mx-[0.01em] inline-block w-[0.78em]" aria-hidden="true">
+        <span className="invisible">A</span>
+        <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full overflow-visible" focusable="false">
+          <path d="M4 94 L42 8 Q50 -2 58 8 L96 94 H76 L50 35 L24 94 Z" fill="currentColor" />
+          <path d="M38 78 L50 52 L62 78 Z" fill="#1597F5" />
+        </svg>
+      </span>
+      <span>JU</span>
+    </span>
+  );
+}
+
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
@@ -83,10 +99,10 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" onClick={closeMobileMenu} className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3">
           <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 1.5, delay: 5, repeat: Infinity, repeatDelay: 4.2, ease: "easeInOut" }} className="flex shrink-0 items-center justify-center">
-            <Image src="/images/yaju-logo.svg" alt="YAJU logo" width={42} height={40} priority className="h-10 w-auto object-contain" />
+            <Image src="/images/yaju-logo-v2.svg" alt="YAJU logo" width={42} height={40} priority className="h-10 w-auto object-contain" />
           </motion.div>
           <div className="min-w-0 leading-tight">
-            <p className="text-lg font-extrabold tracking-tight sm:text-xl"><span className="text-gray-950 dark:text-white">YAJU</span></p>
+            <p><YajuWordmark /></p>
             <p className="block max-w-[140px] whitespace-nowrap text-[9px] font-semibold uppercase tracking-wide text-gray-500 sm:max-w-none sm:text-[10px] dark:text-slate-400">Documents • Images • Coordinates • AI</p>
           </div>
         </Link>

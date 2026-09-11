@@ -33,14 +33,11 @@ export default function Footer() {
               className="inline-flex items-center gap-3"
             >
               <Image
-                src="/images/logo.png"
+                src="/images/yaju-logo.svg"
                 alt="YAJU logo"
-                width={36}
-                height={18}
-                style={{
-                  width: "36px",
-                  height: "auto",
-                }}
+                width={42}
+                height={40}
+                className="h-10 w-auto object-contain"
               />
 
               <div className="leading-tight">

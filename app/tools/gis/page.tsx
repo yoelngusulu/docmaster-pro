@@ -1,4 +1,4 @@
-import { Compass, MapPinned, Ruler } from "lucide-react";
+import { Compass, Droplets, MapPinned, Ruler } from "lucide-react";
 
 import ToolHubPage from "@/components/ToolHubPage";
 
@@ -22,6 +22,15 @@ const gisTools = [
     status: "available" as const,
   },
   {
+    title: "Water Storage & Tank Sizing",
+    description:
+      "Estimate storage for rainwater harvesting, borehole and pumping systems, irrigation demand and physical tank dimensions.",
+    href: "/tools/gis/water-storage-calculator",
+    icon: Droplets,
+    badge: "New",
+    status: "available" as const,
+  },
+  {
     title: "Bearing / Azimuth Calculator",
     description:
       "Calculate initial bearing, final bearing, reverse bearing and distance from Decimal, DMS, UTM or CSV coordinate points.",
@@ -33,17 +42,17 @@ const gisTools = [
 ];
 
 export const metadata = {
-  title: "YAJU Coordinates | YAJU",
+  title: "YAJU Coordinates & Engineering Tools | YAJU",
   description:
-    "YAJU Coordinates tools for coordinate conversion, distance measurement, area calculation and bearing calculation.",
+    "YAJU tools for coordinate conversion, distance and area measurement, water storage and tank sizing, irrigation storage and bearing calculation.",
 };
 
 export default function GISToolsPage() {
   return (
     <ToolHubPage
-      eyebrow="YAJU Coordinates"
-      title="YAJU Coordinates"
-      subtitle="Convert coordinates, check locations on a map, measure GIS distances and calculate bearings from one clean workspace."
+      eyebrow="YAJU Coordinates & Engineering"
+      title="YAJU Coordinates & Engineering Tools"
+      subtitle="Convert coordinates, measure locations, size water storage for rainwater, pumping and irrigation systems, and calculate bearings from one clean workspace."
       backLink="/tools"
       backText="Back to Tools"
       tools={gisTools}

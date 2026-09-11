@@ -40,7 +40,7 @@ export default function Hero() {
           <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700">
             <Sparkles size={18} />
 
-            Smart Document Tools
+            YAJU Documents • Images • Coordinates • AI
           </div>
 
          
@@ -62,7 +62,7 @@ export default function Hero() {
             >
               <UploadCloud size={20} />
 
-              Upload File
+              Explore YAJU Tools
             </Link>
 
             <button
@@ -138,7 +138,7 @@ export default function Hero() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-                YAJU
+                YAJU Documents
               </p>
 
               <h3 className="mt-1 text-2xl font-bold text-gray-900">
@@ -170,7 +170,7 @@ export default function Hero() {
               className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"
             >
               <span className="font-medium text-gray-800">
-                📍 Coordinate Conversion
+                📍 YAJU Coordinates
               </span>
 
               <span className="font-semibold text-green-600">
@@ -183,7 +183,7 @@ export default function Hero() {
               className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"
             >
               <span className="font-medium text-gray-800">
-                🖼️ JPG → PNG
+                🖼️ YAJU Images
               </span>
 
               <span className="font-semibold text-green-600">
@@ -200,7 +200,7 @@ export default function Hero() {
               </span>
 
               <span className="font-semibold text-purple-600">
-                AI
+                YAJU AI
               </span>
             </Link>
 
@@ -213,7 +213,7 @@ export default function Hero() {
               </span>
 
               <span className="font-semibold text-purple-600">
-                AI
+                YAJU AI
               </span>
             </Link>
           </div>

@@ -9,9 +9,9 @@ import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 
 const toolLinks = [
+  { href: "/tools/gis", label: "YAJU Field Tools", icon: MapPinned },
   { href: "/tools/pdf", label: "YAJU Documents", icon: FileText },
   { href: "/tools/image", label: "YAJU Images", icon: ImageIcon },
-  { href: "/tools/gis", label: "YAJU Coordinates", icon: MapPinned },
 ];
 
 type Theme = "light" | "dark";
@@ -103,7 +103,7 @@ export default function Navbar() {
           </motion.div>
           <div className="min-w-0 leading-tight">
             <p><YajuWordmark /></p>
-            <p className="block max-w-[140px] whitespace-nowrap text-[9px] font-semibold uppercase tracking-wide text-gray-500 sm:max-w-none sm:text-[10px] dark:text-slate-400">Documents • Images • Coordinates • AI</p>
+            <p className="block max-w-[140px] whitespace-nowrap text-[9px] font-semibold uppercase tracking-wide text-gray-500 sm:max-w-none sm:text-[10px] dark:text-slate-400">Field Tools • Documents • Images • AI</p>
           </div>
         </Link>
 

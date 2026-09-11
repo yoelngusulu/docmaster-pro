@@ -72,9 +72,9 @@ function getPlans(): Plan[] {
 }
 
 export const metadata = {
-  title: "Pricing | DocMaster",
+  title: "Pricing | YAJU",
   description:
-    "DocMaster pricing for guests, registered users and premium users.",
+    "YAJU pricing for guests, registered users and premium users.",
 };
 
 export default function PricingPage() {
@@ -94,7 +94,7 @@ export default function PricingPage() {
           </h1>
 
           <p className="mt-4 text-lg leading-8 text-gray-600">
-            Use DocMaster free with daily limits, then upgrade to
+            Use YAJU free with daily limits, then upgrade to
             Premium when your workflow needs more power.
           </p>
         </div>

@@ -31,7 +31,7 @@ export default function CallToAction() {
 
           <p className="mt-6 text-lg text-blue-100">
             Convert PDFs, Office files and images in seconds
-            with DocMaster.
+            with YAJU.
           </p>
 
           <div className="mt-10 flex flex-wrap justify-center gap-4">
@@ -47,7 +47,7 @@ export default function CallToAction() {
               onClick={openAIAssistant}
               className="flex items-center gap-2 rounded-xl border border-white px-7 py-3 font-semibold transition hover:bg-white hover:text-blue-600"
             >
-              Ask DocMaster AI
+              Ask YAJU AI
               <ArrowRight size={18} />
             </button>
           </div>

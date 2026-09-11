@@ -11,27 +11,27 @@ import {
 const categories = [
   {
     icon: FileText,
-    title: "PDF Tools",
+    title: "YAJU Documents",
     href: "/tools/pdf",
     tools: "3 live tools + server tools coming soon",
     description:
-      "Merge, split and compress PDFs now. Advanced PDF conversion tools are being prepared for the production server.",
-  },
-  {
-    icon: MapPinned,
-    title: "GIS Tools",
-    href: "/tools/gis",
-    tools: "3 live tools",
-    description:
-      "Convert coordinates, preview locations, measure distance or area, and calculate bearings from GIS coordinate points.",
+      "Merge, split and compress PDFs now. Advanced document conversion tools are being prepared for the production server.",
   },
   {
     icon: ImageIcon,
-    title: "Image Tools",
+    title: "YAJU Images",
     href: "/tools/image",
     tools: "1 live tool + compression coming soon",
     description:
       "Convert images to PDF now while production image compression is being prepared.",
+  },
+  {
+    icon: MapPinned,
+    title: "YAJU Coordinates",
+    href: "/tools/gis",
+    tools: "3 live tools",
+    description:
+      "Convert coordinates, preview locations, measure distance or area, and calculate bearings from GIS coordinate points.",
   },
 ];
 
@@ -61,11 +61,11 @@ export default function ToolCategories() {
           className="mx-auto max-w-2xl text-center"
         >
           <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-            YAJU Tools
+            YAJU Product Suite
           </p>
 
           <h2 className="mt-3 text-3xl font-bold text-gray-900 sm:text-4xl">
-            Choose Your Tool
+            Choose Your Workspace
           </h2>
 
           <p className="mt-4 text-base leading-7 text-gray-600 sm:text-lg">

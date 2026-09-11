@@ -130,61 +130,33 @@ export default function AboutPage() {
           })}
         </div>
 
-        <section className="mt-12 rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-              Why YAJU?
+        <section className="mt-12 rounded-2xl bg-blue-600 p-7 text-white md:p-10">
+          <div className="max-w-5xl">
+            <h2 className="text-2xl font-bold leading-tight sm:text-3xl">
+              Built for people who work with coordinates, files and data every day.
+            </h2>
+
+            <p className="mt-4 max-w-5xl text-base leading-7 text-blue-50">
+              Convert coordinates between formats and coordinate systems, preview locations,
+              and measure distance and area. YAJU also brings together practical tools for
+              PDFs, images and AI-powered document work in one workspace.
             </p>
 
-            <h2 className="mt-3 text-3xl font-bold text-gray-900">
-              Simple tools for real work.
-            </h2>
-          </div>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {reasons.map((reason) => (
-              <div
-                key={reason.title}
-                className="rounded-xl border border-gray-200 bg-gray-50 p-5"
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/tools/coordinates-converter"
+                className="inline-flex justify-center rounded-lg bg-white px-5 py-3 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
               >
-                <h3 className="font-bold text-gray-900">
-                  {reason.title}
-                </h3>
+                Open Coordinate Converter
+              </Link>
 
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  {reason.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-12 rounded-2xl bg-blue-600 p-6 text-white md:p-8">
-          <h2 className="max-w-3xl text-3xl font-bold">
-            Built for people who work with coordinates, files and data every day.
-          </h2>
-
-          <p className="mt-4 max-w-4xl leading-7 text-blue-50">
-            From converting coordinates between formats and coordinate systems,
-            previewing locations and measuring distance and area to converting PDFs,
-            cleaning up images and using AI to understand documents, YAJU keeps
-            practical tools together in one workspace.
-          </p>
-
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/tools/coordinates-converter"
-              className="inline-flex justify-center rounded-lg bg-white px-5 py-3 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
-            >
-              Open Coordinate Converter
-            </Link>
-
-            <Link
-              href="/tools"
-              className="inline-flex justify-center rounded-lg border border-white/70 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Explore All Tools
-            </Link>
+              <Link
+                href="/tools"
+                className="inline-flex justify-center rounded-lg border border-white/70 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Explore All Tools
+              </Link>
+            </div>
           </div>
         </section>
 

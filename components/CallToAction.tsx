@@ -26,12 +26,11 @@ export default function CallToAction() {
           />
 
           <h2 className="text-3xl font-bold sm:text-4xl">
-            Ready to Transform Your Documents?
+            Ready to Transform Your Workflow?
           </h2>
 
           <p className="mt-6 text-lg text-blue-100">
-            Convert PDFs, Office files and images in seconds
-            with YAJU.
+            Convert coordinates, documents, and images in seconds with YAJU.
           </p>
 
           <div className="mt-10 flex flex-wrap justify-center gap-4">

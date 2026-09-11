@@ -103,7 +103,7 @@ export default function Navbar() {
           </motion.div>
           <div className="min-w-0 leading-tight">
             <p><YajuWordmark /></p>
-            <p className="block max-w-[140px] whitespace-nowrap text-[9px] font-semibold uppercase tracking-wide text-gray-500 sm:max-w-none sm:text-[10px] dark:text-slate-400">Field Tools • Documents • Images • AI</p>
+            <p className="block max-w-[160px] whitespace-nowrap text-[9px] font-semibold tracking-wide text-gray-500 sm:max-w-none sm:text-[10px] dark:text-slate-400">The Smartest Document Platform</p>
           </div>
         </Link>
 

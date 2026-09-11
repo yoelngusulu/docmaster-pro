@@ -46,7 +46,7 @@ export default function Footer() {
             >
               <Image
                 src="/images/logo.png"
-                alt="DocMaster logo"
+                alt="YAJU logo"
                 width={36}
                 height={18}
                 style={{

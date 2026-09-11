@@ -24,17 +24,17 @@ import { createClient } from "@/lib/supabase/client";
 const toolLinks = [
   {
     href: "/tools/pdf",
-    label: "PDF Tools",
+    label: "YAJU Documents",
     icon: FileText,
   },
   {
     href: "/tools/image",
-    label: "Image Tools",
+    label: "YAJU Images",
     icon: ImageIcon,
   },
   {
-    href: "/tools/coordinates-converter",
-    label: "Coordinates Converter",
+    href: "/tools/gis",
+    label: "YAJU Coordinates",
     icon: MapPinned,
   },
 ];
@@ -182,7 +182,7 @@ export default function Navbar() {
     </p>
 
     <p className="block max-w-[140px] whitespace-nowrap text-[9px] font-semibold uppercase tracking-wide text-gray-500 sm:max-w-none sm:text-[10px] dark:text-slate-400">
-      Smart Document Platform
+      Documents • Images • Coordinates • AI
     </p>
   </div>
 </Link>

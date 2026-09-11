@@ -11,6 +11,12 @@ import { siteConfig } from "@/lib/site/config";
 
 const capabilities = [
   {
+    title: "YAJU Coordinates",
+    description:
+      "Convert coordinates and process coordinate files for GIS, surveying, engineering and mapping tasks.",
+    icon: MapPinned,
+  },
+  {
     title: "YAJU Documents",
     description:
       "Convert, compress, merge, split, protect and manage PDF files without jumping between different apps.",
@@ -23,12 +29,6 @@ const capabilities = [
     icon: ImageIcon,
   },
   {
-    title: "YAJU Coordinates",
-    description:
-      "Convert coordinates and process coordinate files for GIS, surveying, engineering and mapping tasks.",
-    icon: MapPinned,
-  },
-  {
     title: "YAJU AI",
     description:
       "Use AI for helpful tasks like OCR, summaries, translation and image enhancement.",
@@ -39,7 +39,7 @@ const capabilities = [
 const reasons = [
   {
     title: "Practical",
-    description: "Focused on common file, image and data tasks.",
+    description: "Focused on coordinate, file, image and data tasks used in real work.",
   },
   {
     title: "Simple",
@@ -52,14 +52,14 @@ const reasons = [
   },
   {
     title: "Growing",
-    description: "New document, image, coordinate and AI tools are added over time.",
+    description: "New coordinate, document, image and AI tools are added over time.",
   },
 ];
 
 export const metadata = {
   title: `About ${siteConfig.productName} | ${siteConfig.legalOwnerName}`,
   description:
-    "Learn about YAJU, a workspace for documents, images, coordinates and AI-powered tools.",
+    "Learn about YAJU, a workspace for coordinates, documents, images and AI-powered tools.",
 };
 
 export default function AboutPage() {
@@ -73,7 +73,7 @@ export default function AboutPage() {
             </p>
 
             <h1 className="mt-3 max-w-4xl text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">
-              Useful tools for documents, images, coordinates and AI work.
+              Useful tools for coordinates, documents, images and AI work.
             </h1>
 
             <p className="mt-6 max-w-3xl text-lg leading-8 text-gray-600">
@@ -82,9 +82,9 @@ export default function AboutPage() {
 
             <p className="mt-4 max-w-3xl leading-7 text-gray-600">
               The goal is simple: make daily digital work easier. Whether
-              you are handling documents, preparing images or working
-              with location data, YAJU gives you practical tools in
-              one place.
+              you are converting coordinates, working with location data,
+              handling documents or preparing images, YAJU gives you
+              practical tools in one place.
             </p>
           </div>
 
@@ -98,9 +98,9 @@ export default function AboutPage() {
             </h2>
 
             <p className="mt-3 leading-7 text-gray-600">
-              YAJU brings YAJU Documents, YAJU Images, YAJU Coordinates
+              YAJU brings YAJU Coordinates, YAJU Documents, YAJU Images
               and YAJU AI together for people who regularly work with
-              files, data and automation.
+              location data, files and automation.
             </p>
           </div>
         </div>
@@ -161,28 +161,29 @@ export default function AboutPage() {
 
         <section className="mt-12 rounded-2xl bg-blue-600 p-6 text-white md:p-8">
           <h2 className="max-w-3xl text-3xl font-bold">
-            Built for people who work with files and data every day.
+            Built for people who work with coordinates, files and data every day.
           </h2>
 
           <p className="mt-4 max-w-4xl leading-7 text-blue-50">
-            From converting PDFs to cleaning up images, working with
-            coordinates or using AI to understand a document, YAJU
-            keeps useful tools together in one workspace.
+            From converting coordinates between formats and coordinate systems,
+            previewing locations, measuring distance and area, and working with GIS
+            data to converting PDFs, cleaning up images and using AI to understand
+            documents, YAJU keeps practical tools together in one workspace.
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Link
-              href="/tools"
+              href="/tools/coordinates-converter"
               className="inline-flex justify-center rounded-lg bg-white px-5 py-3 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
             >
-              Explore Tools
+              Open Coordinate Converter
             </Link>
 
             <Link
-              href="/pricing"
+              href="/tools"
               className="inline-flex justify-center rounded-lg border border-white/70 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
             >
-              View Pricing
+              Explore All Tools
             </Link>
           </div>
         </section>

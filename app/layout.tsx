@@ -10,7 +10,7 @@ const adsenseClient =
   process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "ca-pub-4368066697517385";
 
 export const metadata: Metadata = {
-  title: "DocMaster",
+  title: "YAJU",
   description: "The Smart Document Platform",
   icons: {
     icon: "/icon.svg",

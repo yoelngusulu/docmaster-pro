@@ -48,7 +48,7 @@ export default function Footer() {
               <Image src="/images/yaju-logo-v2.svg" alt="YAJU logo" width={42} height={40} className="h-10 w-auto object-contain" />
               <div className="leading-tight">
                 <p><YajuWordmark /></p>
-                <p className="text-xs text-gray-400">Field Tools • Documents • Images • AI</p>
+                <p className="text-xs text-gray-400">The Smartest Document Platform</p>
               </div>
             </Link>
             <p className="mt-5 text-sm leading-7">

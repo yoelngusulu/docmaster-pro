@@ -33,16 +33,16 @@ const gisTools = [
 ];
 
 export const metadata = {
-  title: "GIS Tools | DocMaster",
+  title: "YAJU Coordinates | YAJU",
   description:
-    "DocMaster GIS tools for coordinate conversion, distance measurement, area calculation and bearing calculation.",
+    "YAJU Coordinates tools for coordinate conversion, distance measurement, area calculation and bearing calculation.",
 };
 
 export default function GISToolsPage() {
   return (
     <ToolHubPage
-      eyebrow="GIS Tools"
-      title="GIS Tools"
+      eyebrow="YAJU Coordinates"
+      title="YAJU Coordinates"
       subtitle="Convert coordinates, check locations on a map, measure GIS distances and calculate bearings from one clean workspace."
       backLink="/tools"
       backText="Back to Tools"

@@ -8,7 +8,7 @@ export default function HowItWorks() {
     {
       number: "02",
       title: "Convert",
-      description: "Select the conversion type and let DocMaster process it.",
+      description: "Select the conversion type and let YAJU process it.",
     },
     {
       number: "03",

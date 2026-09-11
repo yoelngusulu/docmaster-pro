@@ -59,7 +59,7 @@ const reasons = [
 export const metadata = {
   title: `About ${siteConfig.productName} | ${siteConfig.legalOwnerName}`,
   description:
-    "Learn about DocMaster, a workspace for documents, images, GIS and AI-powered tools.",
+    "Learn about YAJU, a workspace for documents, images, GIS and AI-powered tools.",
 };
 
 export default function AboutPage() {
@@ -83,7 +83,7 @@ export default function AboutPage() {
             <p className="mt-4 max-w-3xl leading-7 text-gray-600">
               The goal is simple: make daily digital work easier. Whether
               you are handling documents, preparing images or working
-              with location data, DocMaster gives you practical tools in
+              with location data, YAJU gives you practical tools in
               one place.
             </p>
           </div>
@@ -98,7 +98,7 @@ export default function AboutPage() {
             </h2>
 
             <p className="mt-3 leading-7 text-gray-600">
-              DocMaster is designed for people who regularly work with
+              YAJU is designed for people who regularly work with
               files and data, and want tools that feel clear, organized
               and ready to use.
             </p>
@@ -133,7 +133,7 @@ export default function AboutPage() {
         <section className="mt-12 rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-              Why DocMaster?
+              Why YAJU?
             </p>
 
             <h2 className="mt-3 text-3xl font-bold text-gray-900">
@@ -166,7 +166,7 @@ export default function AboutPage() {
 
           <p className="mt-4 max-w-4xl leading-7 text-blue-50">
             From converting PDFs to cleaning up images, working with
-            coordinates or using AI to understand a document, DocMaster
+            coordinates or using AI to understand a document, YAJU
             keeps useful tools together in one workspace.
           </p>
 

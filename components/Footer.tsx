@@ -22,6 +22,38 @@ const productLinks = [
   },
 ];
 
+function YajuWordmark() {
+  return (
+    <span
+      className="inline-flex items-baseline text-2xl font-extrabold tracking-[-0.06em] text-white"
+      aria-label="YAJU"
+    >
+      <span>Y</span>
+      <span
+        className="relative mx-[0.01em] inline-block w-[0.78em]"
+        aria-hidden="true"
+      >
+        <span className="invisible">A</span>
+        <svg
+          viewBox="0 0 100 100"
+          className="absolute inset-0 h-full w-full overflow-visible"
+          focusable="false"
+        >
+          <path
+            d="M4 94 L42 8 Q50 -2 58 8 L96 94 H76 L50 35 L24 94 Z"
+            fill="currentColor"
+          />
+          <path
+            d="M38 78 L50 52 L62 78 Z"
+            fill="#1597F5"
+          />
+        </svg>
+      </span>
+      <span>JU</span>
+    </span>
+  );
+}
+
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300">
@@ -33,7 +65,7 @@ export default function Footer() {
               className="inline-flex items-center gap-3"
             >
               <Image
-                src="/images/yaju-logo.svg"
+                src="/images/yaju-logo-v2.svg"
                 alt="YAJU logo"
                 width={42}
                 height={40}
@@ -41,8 +73,8 @@ export default function Footer() {
               />
 
               <div className="leading-tight">
-                <p className="text-2xl font-bold text-white">
-                  {siteConfig.productName}
+                <p>
+                  <YajuWordmark />
                 </p>
                 <p className="text-xs text-gray-400">
                   Documents • Images • Coordinates • AI

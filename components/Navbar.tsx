@@ -35,8 +35,8 @@ function YajuWordmark() {
       <span className="relative mx-[0.01em] inline-block w-[0.78em]" aria-hidden="true">
         <span className="invisible">A</span>
         <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full overflow-visible" focusable="false">
-          <path d="M4 94 L42 8 Q50 -2 58 8 L96 94 H76 L50 35 L24 94 Z" fill="currentColor" />
-          <path d="M38 78 L50 52 L62 78 Z" fill="#1597F5" />
+          <path d="M4 94 L42 8 Q50 -2 58 8 L96 94 H76 L50 35 L24 94 Z" fill="#1597F5" />
+          <path d="M36 80 L50 49 L64 80 Z" fill="#0F6FD8" />
         </svg>
       </span>
       <span>JU</span>

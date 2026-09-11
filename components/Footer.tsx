@@ -41,11 +41,11 @@ function YajuWordmark() {
         >
           <path
             d="M4 94 L42 8 Q50 -2 58 8 L96 94 H76 L50 35 L24 94 Z"
-            fill="#1597F5"
+            fill="currentColor"
           />
           <path
-            d="M36 80 L50 49 L64 80 Z"
-            fill="#0F6FD8"
+            d="M34 82 L50 47 L66 82 Z"
+            fill="#1597F5"
           />
         </svg>
       </span>

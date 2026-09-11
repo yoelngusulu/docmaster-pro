@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Bot, ChevronDown, FileText, Image as ImageIcon, MapPinned, Menu, Moon, Sun, X } from "lucide-react";
+import { ChevronDown, FileText, Image as ImageIcon, MapPinned, Menu, Moon, Sun, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
@@ -41,27 +41,6 @@ function YajuWordmark() {
       </span>
       <span>JU</span>
     </span>
-  );
-}
-
-function ProductTagline() {
-  const products = [
-    { label: "Documents", icon: FileText },
-    { label: "Images", icon: ImageIcon },
-    { label: "Coordinates", icon: MapPinned },
-    { label: "AI", icon: Bot },
-  ];
-
-  return (
-    <div className="mt-0.5 flex max-w-[235px] items-center gap-1.5 whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.03em] text-gray-500 sm:max-w-none sm:gap-2 sm:text-[9px] dark:text-slate-400">
-      {products.map(({ label, icon: Icon }, index) => (
-        <span key={label} className="inline-flex items-center gap-0.5">
-          <Icon size={10} strokeWidth={2.2} className="shrink-0 text-blue-500" aria-hidden="true" />
-          <span>{label}</span>
-          {index < products.length - 1 && <span className="ml-1 text-gray-300 dark:text-slate-600">•</span>}
-        </span>
-      ))}
-    </div>
   );
 }
 
@@ -124,7 +103,7 @@ export default function Navbar() {
           </motion.div>
           <div className="min-w-0 leading-tight">
             <p><YajuWordmark /></p>
-            <ProductTagline />
+            <p className="block max-w-[140px] whitespace-nowrap text-[9px] font-semibold uppercase tracking-wide text-gray-500 sm:max-w-none sm:text-[10px] dark:text-slate-400">Documents • Images • Coordinates • AI</p>
           </div>
         </Link>
 

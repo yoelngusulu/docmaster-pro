@@ -65,7 +65,7 @@ export default function PremiumPaymentForm({
 
     if (!checkoutConfigured) {
       setError(
-        "Premium checkout is not configured yet. Please contact DocMaster support."
+        "Premium checkout is not configured yet. Please contact YAJU support."
       );
       return;
     }
@@ -195,7 +195,7 @@ export default function PremiumPaymentForm({
                   4. Select <strong>1 - Weka Lipa Namba</strong>.
                 </li>
                 <li>
-                  5. Enter the <strong>DocMaster Airtel Lipa Namba</strong> displayed below.
+                  5. Enter the <strong>YAJU Airtel Lipa Namba</strong> displayed below.
                 </li>
                 <li>
                   6. Enter the required payment amount shown on the checkout page.
@@ -207,7 +207,7 @@ export default function PremiumPaymentForm({
                   8. After payment is completed, copy the <strong>Airtel Money Transaction ID</strong> from the confirmation SMS.
                 </li>
                 <li>
-                  9. Enter the Transaction ID, amount paid and phone number in the DocMaster payment form.
+                  9. Enter the Transaction ID, amount paid and phone number in the YAJU payment form.
                 </li>
                 <li>
                   10. Click <strong>Submit Payment for Verification</strong>.
@@ -228,7 +228,7 @@ export default function PremiumPaymentForm({
                   4. Chagua <strong>1 - Weka Lipa Namba</strong>.
                 </li>
                 <li>
-                  5. Weka <strong>DocMaster Airtel Lipa Namba</strong> inayoonekana hapa chini.
+                  5. Weka <strong>YAJU Airtel Lipa Namba</strong> inayoonekana hapa chini.
                 </li>
                 <li>
                   6. Weka kiasi cha malipo kinachoonyeshwa kwenye ukurasa wa checkout.
@@ -240,7 +240,7 @@ export default function PremiumPaymentForm({
                   8. Baada ya malipo kukamilika, nakili <strong>Airtel Money Transaction ID</strong> kutoka kwenye SMS ya uthibitisho.
                 </li>
                 <li>
-                  9. Weka Transaction ID, kiasi ulicholipa na namba ya simu kwenye fomu ya malipo ya DocMaster.
+                  9. Weka Transaction ID, kiasi ulicholipa na namba ya simu kwenye fomu ya malipo ya YAJU.
                 </li>
                 <li>
                   10. Bonyeza <strong>Submit Payment for Verification</strong>.
@@ -252,14 +252,14 @@ export default function PremiumPaymentForm({
               {instructionLanguage === "en" ? (
                 <>
                   <strong className="text-gray-900">Important:</strong>{" "}
-                  Never enter your Airtel Money PIN on DocMaster. Your
+                  Never enter your Airtel Money PIN on YAJU. Your
                   PIN should only be entered through the Airtel Money
                   menu on your phone.
                 </>
               ) : (
                 <>
                   <strong className="text-gray-900">Muhimu:</strong>{" "}
-                  Usiweke Airtel Money PIN yako kwenye DocMaster. PIN
+                  Usiweke Airtel Money PIN yako kwenye YAJU. PIN
                   yako inapaswa kuwekwa tu kupitia menu ya Airtel Money
                   kwenye simu yako.
                 </>

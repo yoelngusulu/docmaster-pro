@@ -72,7 +72,7 @@ export default function Hero() {
             >
               <Sparkles size={20} />
 
-              Ask DocMaster AI
+              Ask YAJU AI
             </button>
           </div>
 
@@ -138,7 +138,7 @@ export default function Hero() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-                DocMaster
+                YAJU
               </p>
 
               <h3 className="mt-1 text-2xl font-bold text-gray-900">

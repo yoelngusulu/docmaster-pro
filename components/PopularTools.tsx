@@ -2,6 +2,7 @@ export default function PopularTools() {
   const tools = [
     "Coordinates Converter",
     "Measure Distance & Area",
+    "Water Storage & Tank Sizing",
     "PDF → Word",
     "Excel → PDF",
     "Merge PDF",
@@ -10,8 +11,7 @@ export default function PopularTools() {
     "Image → PDF",
     "PDF → JPG",
     "Protect PDF",
-    "Unlock PDF",
-    "Rotate PDF"
+    "Unlock PDF"
   ];
 
   return (
@@ -23,7 +23,7 @@ export default function PopularTools() {
         </h2>
 
         <p className="mt-4 text-center text-gray-600">
-          Convert coordinates, measure distance and area, and manage documents and images in one smart workspace.
+          Convert coordinates, measure distance and area, size water storage, and manage documents and images in one smart workspace.
         </p>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

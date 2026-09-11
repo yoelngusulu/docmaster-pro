@@ -12,9 +12,9 @@ import { requireAdmin } from "@/lib/admin/authorization";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = {
-  title: "Payment Verification | DocMaster",
+  title: "Payment Verification | YAJU",
   description:
-    "Admin payment verification for DocMaster Premium.",
+    "Admin payment verification for YAJU Premium.",
 };
 
 const statusStyles: Record<string, string> = {

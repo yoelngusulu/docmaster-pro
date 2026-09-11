@@ -105,9 +105,9 @@ const aiTools = [
 export default function AIToolsPage() {
   return (
     <ToolHubPage
-      eyebrow="AI Tools"
-      title="AI Tools"
-      subtitle="Edit, enhance, extract and prepare documents with the same tool navigation pattern used across DocMaster."
+      eyebrow="YAJU AI"
+      title="YAJU AI"
+      subtitle="Edit, enhance, extract and prepare documents with the same tool navigation pattern used across YAJU."
       tools={aiTools}
     />
   );

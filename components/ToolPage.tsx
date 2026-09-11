@@ -79,7 +79,7 @@ export default function ToolPage({
           <div className="lg:sticky lg:top-28">
             <p className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase text-blue-700">
               <Sparkles size={14} />
-              DocMaster Tool
+              YAJU Tool
             </p>
 
             <h1 className="mt-5 text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl lg:text-5xl">

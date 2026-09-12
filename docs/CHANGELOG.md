@@ -1,49 +1,122 @@
 # Changelog
 
-## Date
+All notable changes to the YAJU Field Tools project are documented in this file.
 
-2026-07-08
+## [0.7.0-alpha] - 2026-09-11
 
-## Chapter 5 Progress
+### Added
 
-### ✅ Backend Setup
+#### PDF and document tools
 
-* Created `app/api/convert/route.ts`.
-* Added the first Next.js API Route using the App Router.
-* Tested the API route successfully.
-* Confirmed frontend can communicate with backend.
+- Word to PDF.
+- PDF to Word.
+- PDF to Excel.
+- PDF to PowerPoint.
+- PDF to Image.
+- Image to PDF.
+- Merge PDF.
+- Split PDF.
+- Compress PDF.
+- Protect PDF.
+- Unlock PDF.
 
-### ✅ Frontend Improvements
+#### Image tools
 
-* Connected the **Convert to Word** button with the backend using `fetch()`.
-* Replaced the previous standalone simulation with a backend request followed by the existing progress simulation.
-* Confirmed the browser receives a successful JSON response from the backend.
+- Compress Image.
+- AI Image Editor pages and supporting AI processing route.
+- Background Remover.
+- Photo Enhancer.
+- Object Remover.
+- Face Retouch.
+- Image Upscaler.
+- Image Colorizer.
+- Image to Text OCR.
 
-### ✅ Upload Features
+#### GIS and field tools
 
-* Click to upload PDF.
-* Drag & Drop upload.
-* Display selected file name.
-* Display file size.
-* Remove selected file.
-* Conversion progress bar.
-* Loading spinner.
-* Conversion success screen.
-* Download simulation.
-* Convert another file.
+- Coordinates Converter.
+- CSV/Excel bulk coordinate conversion.
+- GIS Distance and Area Calculator with CSV import, DMS and UTM inputs.
+- GIS Bearing / Azimuth Calculator.
+- Water Storage Calculator.
+- Dedicated Field Tools hub and navigation category.
 
-### ✅ Current Project Status
+#### Platform features
 
-The application now includes:
+- User registration, login, logout and password-reset flows.
+- User dashboard and conversion history.
+- Usage limits and usage recording.
+- Pricing and About pages.
+- Premium payment request flow and admin payment actions.
+- Waitlist form.
+- Reusable Google AdSense component and ad placements.
+- Production sitemap and robots metadata.
+- Tools hub pages and expanded tools navigation.
 
-* Landing Page
-* PDF Tools Page
-* PDF to Word Tool
-* Upload Component
-* Drag & Drop Support
-* Backend API Route
-* Frontend ↔ Backend communication
+### Changed
 
-### Next Session Plan
+- Rebranded the user interface from DocMaster to **YAJU Field Tools**.
+- Updated the Navbar, Hero, About page, Footer, tool categories and supporting copy to use the YAJU identity.
+- Prioritized coordinate and GIS tools across the homepage, calls to action and popular tools.
+- Added the official YAJU logo, favicon and responsive wordmark treatment.
+- Refined the header logo animation to use a subtle periodic tilt.
+- Updated the project to the current Next.js 16 and React 19 dependency baseline.
+- Expanded the upload and conversion interface to support multiple document, PDF and image workflows.
 
-Continue with Chapter 5 by sending the uploaded PDF file to the backend using `FormData`, then prepare the backend for real PDF-to-Word conversion.
+### Fixed
+
+- Corrected the Bearing / Azimuth Calculator CSV error message.
+- Fixed Coordinate Converter hero markup.
+- Improved production metadata and private-route rules.
+- Improved responsive text layout on the About page.
+- Aligned branding across tool pages and category hubs.
+
+### Current validation status
+
+- The latest `main` deployment completed successfully on Vercel.
+- Core PDF, image and GIS tools are implemented.
+- AI tools are available in alpha and require additional individual testing.
+- Native conversion tools may require environment-specific executables and production compatibility checks.
+
+### Next steps
+
+1. Smoke-test every PDF tool.
+2. Smoke-test every image tool.
+3. Smoke-test all GIS and field tools.
+4. Test AI tools individually.
+5. Polish Dashboard and Conversion History.
+6. Complete premium-payment verification testing.
+7. Resolve remaining production warnings.
+8. Prepare the Beta release checklist.
+
+---
+
+## [0.1.0] - 2026-07-08
+
+### Chapter 5 foundation
+
+#### Backend setup
+
+- Created `app/api/convert/route.ts`.
+- Added the first Next.js API route using the App Router.
+- Connected the frontend to the backend successfully.
+
+#### Frontend and upload improvements
+
+- Connected the **Convert to Word** button to the backend using `fetch()`.
+- Added PDF selection through click and drag-and-drop.
+- Displayed the selected filename and file size.
+- Added file removal, conversion progress, loading, success and reset states.
+- Added the first simulated download flow.
+
+#### Project state at this milestone
+
+- Landing page.
+- PDF tools page.
+- PDF to Word tool.
+- Reusable upload component.
+- Frontend-to-backend communication.
+
+### Planned next step at the time
+
+Send the selected PDF to the backend using `FormData` and prepare the backend for real PDF-to-Word conversion.

@@ -15,6 +15,11 @@ type SitemapRoute = {
 const routes: SitemapRoute[] = [
   { path: "/", changeFrequency: "weekly", priority: 1 },
   { path: "/tools", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/docs", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/docs/yaju-user-guide", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/docs/getting-started", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/docs/documents", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/docs/images", changeFrequency: "monthly", priority: 0.8 },
   { path: "/tools/pdf", changeFrequency: "weekly", priority: 0.9 },
   { path: "/tools/image", changeFrequency: "weekly", priority: 0.85 },
   { path: "/tools/ai", changeFrequency: "weekly", priority: 0.85 },

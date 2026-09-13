@@ -16,10 +16,6 @@ const productLinks = [
     label: "YAJU Images",
     href: "/tools/image",
   },
-  {
-    label: "YAJU AI",
-    href: "/tools/ai",
-  },
 ];
 
 const supportLinks = [

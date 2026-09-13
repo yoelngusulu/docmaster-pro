@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import PrintGuideButton from "@/components/PrintGuideButton";
 
 export const metadata: Metadata = {
-  title: "YAJU User Guide PDF | Simple Document, Image, Coordinate and AI Conversions",
+  title: "YAJU User Guide PDF | Simple Document, Image and Coordinate Conversions",
   description:
-    "Printable YAJU user guide explaining how to use YAJU Documents, YAJU Images, YAJU Coordinates and YAJU AI for simple conversions.",
+    "Printable YAJU user guide explaining how to use YAJU Documents, YAJU Images and YAJU Coordinates for simple conversions.",
 };
 
 const documentTools = [
@@ -26,13 +26,6 @@ const coordinateTools = [
   ["Coordinate converter", "Enter or paste coordinates, choose the source and output format, then copy the converted result."],
   ["Distance and area", "Enter field points or coordinate values, calculate, then review the result before using it in a report."],
   ["Bearing and azimuth", "Enter start and end values, calculate direction, then copy the result into field notes."],
-];
-
-const aiTools = [
-  ["Chat with PDF", "Upload a document, ask a direct question, then verify the answer against the source file."],
-  ["Summarize PDF", "Upload a PDF and ask for a short, detailed or section-based summary."],
-  ["Translate document", "Provide the document text or file, choose the target language, then review the translation."],
-  ["AI image tools", "Choose an image AI tool, upload a clear image, then download the processed result when the tool is available."],
 ];
 
 function ToolTable({ title, rows }: { title: string; rows: string[][] }) {
@@ -60,7 +53,7 @@ export default function YajuUserGuidePage() {
             <p className="text-sm font-bold uppercase tracking-wide text-blue-600">Printable User Guide</p>
             <h1 className="mt-3 text-4xl font-bold tracking-tight text-gray-950 sm:text-5xl">YAJU User Guide</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-gray-600">
-              A simple guide for using YAJU Documents, YAJU Images, YAJU Coordinates and YAJU AI to complete everyday conversions quickly.
+              A simple guide for using YAJU Documents, YAJU Images and YAJU Coordinates to complete everyday conversions quickly.
             </p>
           </div>
           <PrintGuideButton />
@@ -69,7 +62,7 @@ export default function YajuUserGuidePage() {
         <section className="mt-10 break-inside-avoid">
           <h2 className="text-2xl font-bold text-gray-950">How YAJU works</h2>
           <ol className="mt-4 grid gap-3 sm:grid-cols-3 print:grid-cols-3">
-            <li className="rounded-lg border border-gray-200 p-4 print:border-gray-400"><strong>1. Choose a tool.</strong><br />Pick Documents, Images, Coordinates or AI.</li>
+            <li className="rounded-lg border border-gray-200 p-4 print:border-gray-400"><strong>1. Choose a tool.</strong><br />Pick Documents, Images or Coordinates.</li>
             <li className="rounded-lg border border-gray-200 p-4 print:border-gray-400"><strong>2. Add input.</strong><br />Upload a file or enter the values requested.</li>
             <li className="rounded-lg border border-gray-200 p-4 print:border-gray-400"><strong>3. Get output.</strong><br />Download, copy or review the finished result.</li>
           </ol>
@@ -78,14 +71,13 @@ export default function YajuUserGuidePage() {
         <ToolTable title="YAJU Documents" rows={documentTools} />
         <ToolTable title="YAJU Images" rows={imageTools} />
         <ToolTable title="YAJU Coordinates" rows={coordinateTools} />
-        <ToolTable title="YAJU AI" rows={aiTools} />
 
         <section className="mt-10 break-inside-avoid rounded-lg border border-blue-100 bg-blue-50 p-6 print:border-gray-400 print:bg-white">
           <h2 className="text-2xl font-bold text-gray-950">Tips for best results</h2>
           <ul className="mt-4 space-y-2 leading-7 text-gray-700">
             <li>Use clear, readable files and keep a copy of the original before conversion.</li>
             <li>Check page order before merging PDFs or creating a PDF from images.</li>
-            <li>Review AI answers and translations before using them for important work.</li>
+            <li>Review converted files before using them for important work.</li>
             <li>Use the website tools page to confirm which tools are currently available.</li>
           </ul>
         </section>

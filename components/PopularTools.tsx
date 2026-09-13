@@ -3,15 +3,11 @@ export default function PopularTools() {
     "Coordinates Converter",
     "Measure Distance & Area",
     "Water Storage & Tank Sizing",
-    "PDF → Word",
-    "Excel → PDF",
     "Merge PDF",
     "Split PDF",
     "Compress PDF",
     "Image → PDF",
-    "PDF → JPG",
-    "Protect PDF",
-    "Unlock PDF"
+    "Bearing & Azimuth"
   ];
 
   return (

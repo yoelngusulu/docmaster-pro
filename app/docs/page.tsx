@@ -4,13 +4,13 @@ import { ArrowRight, FileText, Image as ImageIcon, MapPinned, Printer } from "lu
 
 export const metadata: Metadata = {
   title: "Documentation | YAJU",
-  description: "Simple guides for using YAJU Documents, YAJU Images and YAJU Coordinates.",
+  description: "Simple guides for using YAJU Field Tools, YAJU Documents and YAJU Images.",
 };
 
 const sections = [
+  { title: "YAJU Field Tools", href: "/docs/yaju-user-guide", description: "Convert coordinates and calculate distance, area, bearing and azimuth.", icon: MapPinned },
   { title: "YAJU Documents", href: "/docs/documents", description: "Convert, merge, split, compress, protect and unlock PDF files.", icon: FileText },
   { title: "YAJU Images", href: "/docs/images", description: "Convert images to PDF and prepare lighter image files for sharing.", icon: ImageIcon },
-  { title: "YAJU Coordinates", href: "/docs/yaju-user-guide", description: "Convert coordinates and calculate distance, area, bearing and azimuth.", icon: MapPinned },
 ];
 
 const quickSteps = [
@@ -26,7 +26,7 @@ export default function DocumentationPage() {
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
           <p className="text-sm font-bold uppercase tracking-wide text-blue-600">YAJU Help Center</p>
           <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-gray-950 sm:text-5xl">Simple guides for every YAJU conversion tool.</h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-gray-600">YAJU is built so users can move from upload to finished result quickly. These guides explain how to complete common document, image and coordinate tasks.</p>
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-gray-600">YAJU is built so users can move from upload to finished result quickly. These guides explain how to complete common field, document and image tasks.</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/docs/yaju-user-guide" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"><Printer size={18} />Printable PDF Guide</Link>
             <Link href="/docs/getting-started" className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-5 py-3 font-semibold text-blue-600 transition hover:bg-blue-50">Start Here<ArrowRight size={18} /></Link>

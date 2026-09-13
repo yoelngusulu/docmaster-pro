@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import PrintGuideButton from "@/components/PrintGuideButton";
 
 export const metadata: Metadata = {
-  title: "YAJU User Guide PDF | Simple Document, Image and Coordinate Conversions",
+  title: "YAJU User Guide PDF | Simple Field, Document and Image Conversions",
   description:
-    "Printable YAJU user guide explaining how to use YAJU Documents, YAJU Images and YAJU Coordinates for simple conversions.",
+    "Printable YAJU user guide explaining how to use YAJU Field Tools, YAJU Documents and YAJU Images for simple conversions.",
 };
 
 const documentTools = [
@@ -22,7 +22,7 @@ const imageTools = [
   ["Prepare images", "Use clear images, rename files when order matters and keep original copies before compression."],
 ];
 
-const coordinateTools = [
+const fieldTools = [
   ["Coordinate converter", "Enter or paste coordinates, choose the source and output format, then copy the converted result."],
   ["Distance and area", "Enter field points or coordinate values, calculate, then review the result before using it in a report."],
   ["Bearing and azimuth", "Enter start and end values, calculate direction, then copy the result into field notes."],
@@ -53,7 +53,7 @@ export default function YajuUserGuidePage() {
             <p className="text-sm font-bold uppercase tracking-wide text-blue-600">Printable User Guide</p>
             <h1 className="mt-3 text-4xl font-bold tracking-tight text-gray-950 sm:text-5xl">YAJU User Guide</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-gray-600">
-              A simple guide for using YAJU Documents, YAJU Images and YAJU Coordinates to complete everyday conversions quickly.
+              A simple guide for using YAJU Field Tools, YAJU Documents and YAJU Images to complete everyday conversions quickly.
             </p>
           </div>
           <PrintGuideButton />
@@ -62,15 +62,15 @@ export default function YajuUserGuidePage() {
         <section className="mt-10 break-inside-avoid">
           <h2 className="text-2xl font-bold text-gray-950">How YAJU works</h2>
           <ol className="mt-4 grid gap-3 sm:grid-cols-3 print:grid-cols-3">
-            <li className="rounded-lg border border-gray-200 p-4 print:border-gray-400"><strong>1. Choose a tool.</strong><br />Pick Documents, Images or Coordinates.</li>
+            <li className="rounded-lg border border-gray-200 p-4 print:border-gray-400"><strong>1. Choose a tool.</strong><br />Pick Field Tools, Documents or Images.</li>
             <li className="rounded-lg border border-gray-200 p-4 print:border-gray-400"><strong>2. Add input.</strong><br />Upload a file or enter the values requested.</li>
             <li className="rounded-lg border border-gray-200 p-4 print:border-gray-400"><strong>3. Get output.</strong><br />Download, copy or review the finished result.</li>
           </ol>
         </section>
 
+        <ToolTable title="YAJU Field Tools" rows={fieldTools} />
         <ToolTable title="YAJU Documents" rows={documentTools} />
         <ToolTable title="YAJU Images" rows={imageTools} />
-        <ToolTable title="YAJU Coordinates" rows={coordinateTools} />
 
         <section className="mt-10 break-inside-avoid rounded-lg border border-blue-100 bg-blue-50 p-6 print:border-gray-400 print:bg-white">
           <h2 className="text-2xl font-bold text-gray-950">Tips for best results</h2>

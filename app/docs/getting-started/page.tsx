@@ -10,11 +10,11 @@ export const metadata: Metadata = {
 const steps = [
   {
     title: "Pick the right workspace",
-    body: "Use YAJU Documents for PDF and office file tasks, YAJU Images for image conversion and compression, and YAJU Coordinates for field data and calculations.",
+    body: "Use YAJU Field Tools for field data and calculations, YAJU Documents for PDF and office file tasks, and YAJU Images for image conversion and compression.",
   },
   {
     title: "Open a tool and add your file or data",
-    body: "Most tools work by uploading a file, selecting a small number of options, then pressing the action button. Coordinate tools may ask you to type values or paste rows instead of uploading a file.",
+    body: "Most tools work by uploading a file, selecting a small number of options, then pressing the action button. Field tools may ask you to type values or paste rows instead of uploading a file.",
   },
   {
     title: "Download or copy the result",
@@ -27,9 +27,9 @@ const steps = [
 ];
 
 const workspaceLinks = [
+  { label: "Open YAJU Field Tools", href: "/tools/gis" },
   { label: "Open YAJU Documents", href: "/tools/pdf" },
   { label: "Open YAJU Images", href: "/tools/image" },
-  { label: "Open YAJU Coordinates", href: "/tools/gis" },
 ];
 
 export default function GettingStartedPage() {

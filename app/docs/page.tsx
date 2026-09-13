@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, Bot, FileText, Image as ImageIcon, MapPinned } from "lucide-react";
+import { ArrowRight, Bot, FileText, Image as ImageIcon, MapPinned, Printer } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Documentation | YAJU",
@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 const sections = [
   { title: "YAJU Documents", href: "/docs/documents", description: "Convert, merge, split, compress, protect and unlock PDF files.", icon: FileText },
   { title: "YAJU Images", href: "/docs/images", description: "Convert images to PDF and prepare lighter image files for sharing.", icon: ImageIcon },
-  { title: "YAJU Coordinates", href: "/docs/coordinates", description: "Convert coordinates and calculate distance, area, bearing and azimuth.", icon: MapPinned },
-  { title: "YAJU AI", href: "/docs/ai", description: "Use AI assistance for documents, images, summaries, OCR and translation.", icon: Bot },
+  { title: "YAJU Coordinates", href: "/docs/yaju-user-guide", description: "Convert coordinates and calculate distance, area, bearing and azimuth.", icon: MapPinned },
+  { title: "YAJU AI", href: "/docs/yaju-user-guide", description: "Use AI assistance for documents, images, summaries, OCR and translation.", icon: Bot },
 ];
 
 const quickSteps = [
@@ -29,7 +29,8 @@ export default function DocumentationPage() {
           <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-gray-950 sm:text-5xl">Simple guides for every YAJU conversion tool.</h1>
           <p className="mt-5 max-w-3xl text-lg leading-8 text-gray-600">YAJU is built so users can move from upload to finished result quickly. These guides explain how to complete common document, image, coordinate and AI tasks.</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/docs/getting-started" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700">Start Here<ArrowRight size={18} /></Link>
+            <Link href="/docs/yaju-user-guide" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"><Printer size={18} />Printable PDF Guide</Link>
+            <Link href="/docs/getting-started" className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-5 py-3 font-semibold text-blue-600 transition hover:bg-blue-50">Start Here<ArrowRight size={18} /></Link>
             <Link href="/tools" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-3 font-semibold text-gray-800 transition hover:border-blue-300 hover:text-blue-600">Open Tools</Link>
           </div>
         </div>
@@ -49,7 +50,7 @@ export default function DocumentationPage() {
           {sections.map((section) => {
             const Icon = section.icon;
             return (
-              <Link key={section.href} href={section.href} className="group rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg">
+              <Link key={`${section.title}-${section.href}`} href={section.href} className="group rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white"><Icon size={24} /></div>
                   <div>

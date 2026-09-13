@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/site/config";
 
 const productLinks = [
   {
-    label: "YAJU Field Tools",
+    label: "YAJU Coordinates",
     href: "/tools/gis",
   },
   {
@@ -19,6 +19,25 @@ const productLinks = [
   {
     label: "YAJU AI",
     href: "/tools/ai",
+  },
+];
+
+const supportLinks = [
+  {
+    label: "Documentation",
+    href: "/docs",
+  },
+  {
+    label: "Printable PDF Guide",
+    href: "/docs/yaju-user-guide",
+  },
+  {
+    label: "Getting Started",
+    href: "/docs/getting-started",
+  },
+  {
+    label: "All Tools",
+    href: "/tools",
   },
 ];
 
@@ -70,7 +89,7 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-white">About</h3>
             <ul className="mt-4 space-y-3">
-              <li>About</li>
+              <li><Link href="/about" className="transition hover:text-white">About</Link></li>
               <li>Privacy Policy</li>
               <li>Terms of Service</li>
               <li>Contact</li>
@@ -80,10 +99,11 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-white">Support</h3>
             <ul className="mt-4 space-y-3">
-              <li>Help Center</li>
-              <li>Documentation</li>
-              <li>API</li>
-              <li>Email Support</li>
+              {supportLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="transition hover:text-white">{link.label}</Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

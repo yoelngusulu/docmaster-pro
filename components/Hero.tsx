@@ -15,9 +15,9 @@ export default function Hero() {
       <div className="pointer-events-none absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-16 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
         <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }} className="text-center lg:text-left">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700"><Sparkles size={18} />YAJU Field Tools • Documents • Images • AI</div>
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700"><Sparkles size={18} />YAJU Coordinates • Documents • Images</div>
           <h1 className="mt-4 text-4xl font-bold text-blue-600 sm:text-3xl md:text-5xl">Smart Tools for Fieldwork & Digital Work</h1>
-          <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-gray-600 sm:text-lg lg:mx-0">Convert coordinates, measure field data, size water storage, and work with documents, images and AI using fast, practical tools built for professionals.</p>
+          <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-gray-600 sm:text-lg lg:mx-0">Convert coordinates, measure field data, size water storage, and work with documents and images using fast, practical tools built for professionals.</p>
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row sm:flex-wrap lg:justify-start">
             <Link href="#tools" className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-4 font-semibold text-white shadow-md transition hover:bg-blue-700 hover:shadow-lg"><UploadCloud size={20} />Explore YAJU Tools</Link>
             <button type="button" onClick={openAIAssistant} className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-600 bg-white px-8 py-4 font-semibold text-blue-600 transition hover:bg-blue-50"><Sparkles size={20} />Ask YAJU AI</button>
@@ -37,7 +37,7 @@ export default function Hero() {
             <Link href="/tools/gis/distance-area-calculator" className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"><span className="font-medium text-gray-800">📏 Distance & Area</span><span className="font-semibold text-green-600">✓ Ready</span></Link>
             <Link href="/tools/gis/water-storage-calculator" className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"><span className="font-medium text-gray-800">💧 Water Storage & Tank Sizing</span><span className="font-semibold text-green-600">✓ Ready</span></Link>
             <Link href="/tools/pdf/pdf-to-word" className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"><span className="font-medium text-gray-800">📄 PDF → Word</span><span className="font-semibold text-green-600">✓ Ready</span></Link>
-            <Link href="/tools/ai/image-editor" className="flex items-center justify-between rounded-xl bg-purple-50 p-4 transition hover:bg-purple-100"><span className="font-medium text-gray-800">🤖 AI Image Editor</span><span className="font-semibold text-purple-600">YAJU AI</span></Link>
+            <Link href="/tools/image/image-to-pdf" className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"><span className="font-medium text-gray-800">🖼️ Image → PDF</span><span className="font-semibold text-green-600">✓ Ready</span></Link>
           </div>
           <div className="mt-6 rounded-xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-3 text-center text-sm text-gray-600">Practical tools for field, engineering and digital workflows.</div>
         </motion.div>

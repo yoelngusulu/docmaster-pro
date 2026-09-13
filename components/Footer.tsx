@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/site/config";
 
 const productLinks = [
   {
-    label: "YAJU Coordinates",
+    label: "YAJU Field Tools",
     href: "/tools/gis",
   },
   {

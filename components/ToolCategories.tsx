@@ -11,7 +11,7 @@ import {
 const categories = [
   {
     icon: MapPinned,
-    title: "YAJU Field Tools",
+    title: "YAJU Coordinates",
     href: "/tools/gis",
     tools: "4 live tools",
     description:

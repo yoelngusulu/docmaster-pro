@@ -3,7 +3,7 @@ import ToolCategories from "@/components/ToolCategories";
 export const metadata = {
   title: "Tools | YAJU",
   description:
-    "Choose YAJU Documents, YAJU Images and YAJU Coordinates tools.",
+    "Choose YAJU Field Tools, YAJU Documents and YAJU Images tools.",
 };
 
 export default function ToolsPage() {

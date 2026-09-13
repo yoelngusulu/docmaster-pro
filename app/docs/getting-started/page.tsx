@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const steps = [
   {
     title: "Pick the right workspace",
-    body: "Use YAJU Documents for PDF and office file tasks, YAJU Images for image conversion and compression, YAJU Coordinates for field data, and YAJU AI for assisted document or image work.",
+    body: "Use YAJU Documents for PDF and office file tasks, YAJU Images for image conversion and compression, and YAJU Coordinates for field data and calculations.",
   },
   {
     title: "Open a tool and add your file or data",
@@ -30,7 +30,6 @@ const workspaceLinks = [
   { label: "Open YAJU Documents", href: "/tools/pdf" },
   { label: "Open YAJU Images", href: "/tools/image" },
   { label: "Open YAJU Coordinates", href: "/tools/gis" },
-  { label: "Open YAJU AI", href: "/tools/ai" },
 ];
 
 export default function GettingStartedPage() {

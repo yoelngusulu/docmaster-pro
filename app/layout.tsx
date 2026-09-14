@@ -10,11 +10,19 @@ const adsenseClient =
   process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "ca-pub-4368066697517385";
 
 export const metadata: Metadata = {
-  title: "YAJU",
-  description: "The Smart Document Platform",
+  metadataBase: new URL("https://docmaster-pro-lemon.vercel.app"),
+  title: {
+    default: "YAJU",
+    template: "%s | YAJU",
+  },
+  description:
+    "YAJU provides field tools, document tools and image tools for coordinate conversion, measurements, PDF tasks and image to PDF workflows.",
   icons: {
     icon: "/icon.svg",
     shortcut: "/icon.svg",
+  },
+  alternates: {
+    canonical: "/",
   },
   verification: {
     google: "FppDEXu38DNorAFUEUKxvodn18B68YT6hF8uvmpBDuo",

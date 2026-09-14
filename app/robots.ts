@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const baseUrl = "https://docmaster-pro-lemon.vercel.app";
+const baseUrl = "https://yaju-tools.vercel.app";
 
 export default function robots(): MetadataRoute.Robots {
   return {

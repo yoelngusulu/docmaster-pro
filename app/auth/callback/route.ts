@@ -40,6 +40,6 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.redirect(
-    new URL(nextPath || "/update-password", requestUrl.origin)
+    new URL(nextPath || "/dashboard", requestUrl.origin)
   );
 }

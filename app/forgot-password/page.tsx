@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
           email.trim(),
           {
             redirectTo:
-              `${window.location.origin}/update-password`,
+              `${window.location.origin}/auth/callback?next=/update-password`,
           }
         );
 

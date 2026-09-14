@@ -21,9 +21,6 @@ export const metadata: Metadata = {
     icon: "/icon.svg",
     shortcut: "/icon.svg",
   },
-  alternates: {
-    canonical: "/",
-  },
   verification: {
     google: "FppDEXu38DNorAFUEUKxvodn18B68YT6hF8uvmpBDuo",
   },

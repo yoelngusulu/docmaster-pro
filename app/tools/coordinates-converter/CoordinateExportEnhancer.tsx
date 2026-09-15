@@ -284,7 +284,11 @@ function updateExportButtonState() {
   const hasPoints = readKmlPoints().points.length > 0;
 
   Array.from(group.querySelectorAll("button")).forEach((button) => {
-    button.toggleAttribute("disabled", !hasPoints && button.textContent !== "Download CSV");
+    if (button.textContent?.trim() === "Download CSV") {
+      return;
+    }
+
+    button.toggleAttribute("disabled", !hasPoints);
   });
 }
 

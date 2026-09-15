@@ -44,11 +44,11 @@ function getPlans(): Plan[] {
       description:
         "For short, one-day jobs that need paid features without a monthly subscription.",
       features: [
-        "Pro tools for 24 hours",
-        "Processing credits for heavier jobs",
+        "100 processing credits",
+        "Bulk coordinate conversion",
+        "Paid PDF tools within credit balance",
         "No ads during the pass",
-        "Larger file limits than Free",
-        "Bulk tools included within plan limits",
+        "Higher file limits than Free",
       ],
       cta: "Coming Soon",
     },
@@ -61,9 +61,9 @@ function getPlans(): Plan[] {
       description:
         "The main YAJU plan for regular GIS, coordinate and document workflows.",
       features: [
+        "1,500 processing credits / month",
         "All bulk coordinate conversions",
         "Batch and advanced PDF tools",
-        "Monthly processing credits",
         "No ads",
         "Higher file and processing limits",
       ],
@@ -79,9 +79,9 @@ function getPlans(): Plan[] {
       description:
         "The same Pro experience at a lower effective monthly cost.",
       features: [
-        "All Pro features",
+        "1,500 processing credits refreshed monthly",
         "All bulk coordinate conversions",
-        "Monthly processing credits",
+        "Batch and advanced PDF tools",
         "No ads",
         "Save TSh 26,000 versus monthly billing",
       ],
@@ -95,8 +95,8 @@ function getPlans(): Plan[] {
       description:
         "For professionals with high-volume GIS, document and data-processing workloads.",
       features: [
+        "6,000 processing credits / month",
         "High-volume bulk processing",
-        "Large monthly credit allowance",
         "Larger file and storage limits",
         "Priority processing",
         "Fair-use high-volume access",
@@ -211,14 +211,35 @@ export default function PricingPage() {
             How YAJU processing credits work
           </h2>
           <p className="mt-3 leading-7 text-gray-600">
-            Credits are reserved for operations that consume more server resources,
-            such as large bulk conversions and heavy PDF processing. Simple tools can
-            remain free and ad-supported, while paid plans receive larger credit
-            allowances and higher limits.
+            Credits are used only for operations that consume more server resources,
+            such as bulk conversions and heavy PDF processing. Simple tools can remain
+            free and ad-supported.
           </p>
-          <p className="mt-3 text-sm leading-6 text-gray-500">
-            Storage and file-size limits remain separate from credits so YAJU can
-            control infrastructure costs without restricting normal everyday use.
+
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-gray-900">
+                  <th className="py-3 pr-4 font-semibold">Operation</th>
+                  <th className="py-3 pr-4 font-semibold">Credits</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-600">
+                <tr className="border-b border-gray-100"><td className="py-3 pr-4">Bulk coordinates: up to 100 points</td><td className="py-3 pr-4">5</td></tr>
+                <tr className="border-b border-gray-100"><td className="py-3 pr-4">Bulk coordinates: 101-1,000 points</td><td className="py-3 pr-4">15</td></tr>
+                <tr className="border-b border-gray-100"><td className="py-3 pr-4">Bulk coordinates: over 1,000 points</td><td className="py-3 pr-4">40</td></tr>
+                <tr className="border-b border-gray-100"><td className="py-3 pr-4">PDF to Word</td><td className="py-3 pr-4">10</td></tr>
+                <tr className="border-b border-gray-100"><td className="py-3 pr-4">PDF to Excel</td><td className="py-3 pr-4">12</td></tr>
+                <tr className="border-b border-gray-100"><td className="py-3 pr-4">PDF to PowerPoint</td><td className="py-3 pr-4">12</td></tr>
+                <tr><td className="py-3 pr-4">Heavy AI/document processing</td><td className="py-3 pr-4">20</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p className="mt-5 text-sm leading-6 text-gray-500">
+            Storage and file-size limits remain separate from credits. YAJU can adjust
+            credit costs later if real server usage shows that an operation is much
+            lighter or heavier than expected.
           </p>
         </div>
       </section>

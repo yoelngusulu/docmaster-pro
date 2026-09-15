@@ -7,8 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 
 const GUEST_LIMIT = 5;
 const REGISTERED_LIMIT = 5;
-const COORDINATES_BULK_GUEST_LIMIT = 5;
-const COORDINATES_BULK_REGISTERED_LIMIT = 5;
+const COORDINATES_BULK_GUEST_LIMIT = 0;
+const COORDINATES_BULK_REGISTERED_LIMIT = 0;
 const WINDOW_HOURS = 24;
 const UNLIMITED_LIMIT = 999999;
 const GUEST_COOKIE_NAME = "docmaster_guest_id";
@@ -132,14 +132,16 @@ function buildLimitReason(
   identityType?: UsageIdentityType
 ) {
   if (normalizeTool(tool) === "coordinates-bulk") {
+    if (limit === 0) {
+      return identityType === "guest"
+        ? "Bulk coordinate conversion is a Pro feature. Sign in and upgrade to a paid YAJU plan to use CSV/Excel bulk conversion."
+        : "Bulk coordinate conversion is a Pro feature. Upgrade to a paid YAJU plan to use CSV/Excel bulk conversion.";
+    }
+
     const conversionText =
       limit === 1 ? "conversion" : "conversions";
 
-    if (identityType === "guest") {
-      return `You have reached your CSV/Excel bulk limit of ${limit} ${conversionText} per day. Log in or upgrade to Premium for more access.`;
-    }
-
-    return `You have reached your CSV/Excel bulk limit of ${limit} ${conversionText} per day. Upgrade to Premium for unlimited bulk conversions.`;
+    return `You have reached your CSV/Excel bulk limit of ${limit} ${conversionText} per day.`;
   }
 
   return `You have reached your ${limit} conversion limit for the last 24 hours.`;

@@ -12,6 +12,7 @@ type KmlPoint = {
 };
 
 const EXPORT_GROUP_ID = "yaju-coordinate-export-actions";
+const MENU_ID = "yaju-coordinate-export-menu";
 
 function escapeXml(value: string) {
   return value
@@ -236,14 +237,25 @@ async function downloadKmz() {
   downloadBlob(blob, `${baseName}-converted.kmz`);
 }
 
-function createExportButton(label: string, onClick: () => void | Promise<void>) {
+function closeMenu() {
+  const menu = document.getElementById(MENU_ID);
+  menu?.classList.add("hidden");
+}
+
+function createMenuItem(
+  label: string,
+  onClick: () => void | Promise<void>,
+  requiresPoints: boolean
+) {
   const button = document.createElement("button");
 
   button.type = "button";
   button.textContent = label;
+  button.dataset.requiresPoints = requiresPoints ? "true" : "false";
   button.className =
-    "rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50";
+    "block w-full px-4 py-3 text-left text-sm font-semibold text-gray-700 transition hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:text-gray-400 disabled:hover:bg-transparent disabled:hover:text-gray-400";
   button.addEventListener("click", () => {
+    closeMenu();
     void onClick();
   });
 
@@ -262,14 +274,42 @@ function syncExportButtons() {
 
   const group = document.createElement("div");
   group.id = EXPORT_GROUP_ID;
-  group.className = "flex flex-wrap gap-3";
+  group.className = "relative inline-flex";
+
+  const trigger = document.createElement("button");
+  trigger.type = "button";
+  trigger.textContent = "Download";
+  trigger.className =
+    "rounded-md bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50";
+  trigger.addEventListener("click", () => {
+    const menu = document.getElementById(MENU_ID);
+    menu?.classList.toggle("hidden");
+  });
+
+  const menu = document.createElement("div");
+  menu.id = MENU_ID;
+  menu.className =
+    "hidden absolute right-0 top-full z-30 mt-2 min-w-44 overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg";
+
+  menu.appendChild(
+    createMenuItem(
+      "CSV",
+      () => {
+        csvButton.click();
+      },
+      false
+    )
+  );
+  menu.appendChild(createMenuItem("KML", downloadKml, true));
+  menu.appendChild(createMenuItem("KMZ", downloadKmz, true));
 
   const parent = csvButton.parentElement;
 
   parent?.insertBefore(group, csvButton);
-  group.appendChild(csvButton);
-  group.appendChild(createExportButton("Download KML", downloadKml));
-  group.appendChild(createExportButton("Download KMZ", downloadKmz));
+  csvButton.classList.add("hidden");
+  csvButton.setAttribute("aria-hidden", "true");
+  group.appendChild(trigger);
+  group.appendChild(menu);
 
   updateExportButtonState();
 }
@@ -281,15 +321,17 @@ function updateExportButtonState() {
     return;
   }
 
+  const hasRows = Boolean(getResultsPanel()?.querySelector("table tbody tr"));
   const hasPoints = readKmlPoints().points.length > 0;
+  const trigger = group.querySelector("button");
 
-  Array.from(group.querySelectorAll("button")).forEach((button) => {
-    if (button.textContent?.trim() === "Download CSV") {
-      return;
+  trigger?.toggleAttribute("disabled", !hasRows);
+
+  Array.from(group.querySelectorAll<HTMLButtonElement>("[data-requires-points='true']")).forEach(
+    (button) => {
+      button.toggleAttribute("disabled", !hasPoints);
     }
-
-    button.toggleAttribute("disabled", !hasPoints);
-  });
+  );
 }
 
 export default function CoordinateExportEnhancer() {
@@ -302,7 +344,20 @@ export default function CoordinateExportEnhancer() {
       subtree: true,
     });
 
-    return () => observer.disconnect();
+    const handleDocumentClick = (event: MouseEvent) => {
+      const group = document.getElementById(EXPORT_GROUP_ID);
+
+      if (group && !group.contains(event.target as Node)) {
+        closeMenu();
+      }
+    };
+
+    document.addEventListener("click", handleDocumentClick);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("click", handleDocumentClick);
+    };
   }, []);
 
   return null;

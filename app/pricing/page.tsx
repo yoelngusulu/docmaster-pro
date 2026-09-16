@@ -1,10 +1,5 @@
 import Link from "next/link";
 
-import {
-  formatTzs,
-  getPremiumPlanConfig,
-} from "@/lib/billing/config";
-
 type Plan = {
   name: string;
   price: string;
@@ -18,9 +13,6 @@ type Plan = {
 };
 
 function getPlans(): Plan[] {
-  const premiumPlan = getPremiumPlanConfig();
-  const premiumReady = premiumPlan.checkoutConfigured;
-
   return [
     {
       name: "Free",
@@ -54,9 +46,7 @@ function getPlans(): Plan[] {
     },
     {
       name: "Pro Monthly",
-      price: premiumReady
-        ? formatTzs(premiumPlan.amountTzs)
-        : "TSh 10,500",
+      price: "TSh 10,500",
       cadence: "/ month",
       description:
         "The main YAJU plan for regular GIS, coordinate and document workflows.",
@@ -67,8 +57,7 @@ function getPlans(): Plan[] {
         "No ads",
         "Higher file and processing limits",
       ],
-      cta: premiumReady ? "Upgrade to Pro" : "Coming Soon",
-      href: premiumReady ? "/checkout/premium" : undefined,
+      cta: "Coming Soon",
       featured: true,
       badge: "Most Popular",
     },
@@ -114,7 +103,7 @@ export const metadata = {
 
 export default function PricingPage() {
   const plans = getPlans();
-  const premiumReady = getPremiumPlanConfig().checkoutConfigured;
+  const paidCheckoutReady = false;
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-16">
@@ -135,7 +124,7 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {!premiumReady && (
+        {!paidCheckoutReady && (
           <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center text-sm leading-6 text-amber-800">
             Paid checkout is still being configured. Free tools remain available
             while billing is being prepared.

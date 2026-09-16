@@ -32,7 +32,7 @@ function getPlans(): Plan[] {
         "Distance and area tools",
         "PDF split and merge",
         "Other basic tools with ads",
-        "Bulk processing is not included",
+        "2 free bulk coordinate conversions per 24 hours",
       ],
       cta: "Use Free Tools",
       href: "/tools",

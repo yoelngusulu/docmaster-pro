@@ -7,8 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 
 const GUEST_LIMIT = 5;
 const REGISTERED_LIMIT = 5;
-const COORDINATES_BULK_GUEST_LIMIT = 5;
-const COORDINATES_BULK_REGISTERED_LIMIT = 5;
+const COORDINATES_BULK_GUEST_LIMIT = 2;
+const COORDINATES_BULK_REGISTERED_LIMIT = 2;
 const WINDOW_HOURS = 24;
 const UNLIMITED_LIMIT = 999999;
 const GUEST_COOKIE_NAME = "docmaster_guest_id";
@@ -136,10 +136,10 @@ function buildLimitReason(
       limit === 1 ? "conversion" : "conversions";
 
     if (identityType === "guest") {
-      return `You have reached your CSV/Excel bulk limit of ${limit} ${conversionText} per day. Log in or upgrade to Premium for more access.`;
+      return `You have reached your free CSV/Excel bulk limit of ${limit} ${conversionText} in the last 24 hours. Upgrade to a paid YAJU plan for more bulk processing.`;
     }
 
-    return `You have reached your CSV/Excel bulk limit of ${limit} ${conversionText} per day. Upgrade to Premium for unlimited bulk conversions.`;
+    return `You have reached your free CSV/Excel bulk limit of ${limit} ${conversionText} in the last 24 hours. Upgrade to a paid YAJU plan for more bulk processing.`;
   }
 
   return `You have reached your ${limit} conversion limit for the last 24 hours.`;

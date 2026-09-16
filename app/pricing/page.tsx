@@ -34,13 +34,13 @@ function getPlans(): Plan[] {
       price: "TSh 700",
       cadence: "/ 24 hours",
       description:
-        "For short, one-day jobs that need paid features without a monthly subscription.",
+        "For short, one-day jobs when you want paid YAJU tools without a monthly subscription.",
       features: [
-        "100 processing credits",
+        "Full-day access to paid tools",
         "Bulk coordinate conversion",
-        "Paid PDF tools within credit balance",
+        "Paid PDF tools included during the pass",
         "No ads during the pass",
-        "Higher file limits than Free",
+        "More room for larger files than Free",
       ],
       cta: "Coming Soon",
     },
@@ -51,11 +51,11 @@ function getPlans(): Plan[] {
       description:
         "The main YAJU plan for regular GIS, coordinate and document workflows.",
       features: [
-        "1,500 processing credits / month",
+        "Monthly access for regular work",
         "All bulk coordinate conversions",
         "Batch and advanced PDF tools",
         "No ads",
-        "Higher file and processing limits",
+        "More room for larger files and heavier processing",
       ],
       cta: "Coming Soon",
       featured: true,
@@ -68,7 +68,7 @@ function getPlans(): Plan[] {
       description:
         "The same Pro experience at a lower effective monthly cost.",
       features: [
-        "1,500 processing credits refreshed monthly",
+        "Monthly Pro access refreshed throughout the year",
         "All bulk coordinate conversions",
         "Batch and advanced PDF tools",
         "No ads",
@@ -84,9 +84,9 @@ function getPlans(): Plan[] {
       description:
         "For professionals with high-volume GIS, document and data-processing workloads.",
       features: [
-        "6,000 processing credits / month",
+        "High-volume monthly access",
         "High-volume bulk processing",
-        "Larger file and storage limits",
+        "Larger temporary workspace and file capacity",
         "Priority processing",
         "Fair-use high-volume access",
       ],
@@ -119,8 +119,8 @@ export default function PricingPage() {
 
           <p className="mt-4 text-lg leading-8 text-gray-600">
             Basic YAJU tools stay useful and ad-supported. Bulk processing,
-            heavier document conversions and higher resource limits belong to
-            paid plans.
+            heavier document conversions and premium capacity belong to paid
+            plans.
           </p>
         </div>
 
@@ -200,9 +200,9 @@ export default function PricingPage() {
             How YAJU processing credits work
           </h2>
           <p className="mt-3 leading-7 text-gray-600">
-            Credits are used only for operations that consume more server resources,
-            such as bulk conversions and heavy PDF processing. Simple tools can remain
-            free and ad-supported.
+            Credits help YAJU manage operations that consume more server
+            resources, such as bulk conversions and heavy PDF processing.
+            Simple tools can remain free and ad-supported.
           </p>
 
           <div className="mt-6 overflow-x-auto">
@@ -226,9 +226,9 @@ export default function PricingPage() {
           </div>
 
           <p className="mt-5 text-sm leading-6 text-gray-500">
-            Storage and file-size limits remain separate from credits. YAJU can adjust
-            credit costs later if real server usage shows that an operation is much
-            lighter or heavier than expected.
+            Temporary storage and file-size capacity remain separate from
+            credits. YAJU can adjust credit costs later if real server usage
+            shows that an operation is much lighter or heavier than expected.
           </p>
         </div>
       </section>

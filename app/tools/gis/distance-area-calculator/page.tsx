@@ -1852,7 +1852,7 @@ export default function DistanceAreaCalculatorPage() {
     const link = document.createElement("a");
 
     link.href = url;
-    link.download = "docmaster-gis-measurement.csv";
+    link.download = "yaju-field-measurement.csv";
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -1879,7 +1879,7 @@ export default function DistanceAreaCalculatorPage() {
               </p>
 
               <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl">
-                Distance & Area Calculator
+                Distance, Area & Bearing Calculator
               </h1>
 
               <p className="mt-3 max-w-3xl text-base leading-7 text-gray-600">

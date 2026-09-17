@@ -23,7 +23,7 @@ export default function Hero() {
             <button type="button" onClick={openAIAssistant} className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-600 bg-white px-8 py-4 font-semibold text-blue-600 transition hover:bg-blue-50"><Sparkles size={20} />Ask YAJU AI</button>
           </div>
           <div className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-4">
-            <div><h3 className="text-3xl font-bold text-blue-600">8</h3><p className="mt-1 text-sm text-gray-600">Tools Available</p></div>
+            <div><h3 className="text-3xl font-bold text-blue-600">9</h3><p className="mt-1 text-sm text-gray-600">Tools Available</p></div>
             <div><h3 className="text-3xl font-bold text-blue-600">Smart</h3><p className="mt-1 text-sm text-gray-600">Workflow</p></div>
             <div><h3 className="text-3xl font-bold text-blue-600">Private</h3><p className="mt-1 text-sm text-gray-600">By Design</p></div>
             <div><h3 className="text-3xl font-bold text-blue-600">Fast</h3><p className="mt-1 text-sm text-gray-600">Processing</p></div>

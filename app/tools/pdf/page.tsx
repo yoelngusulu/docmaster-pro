@@ -1,5 +1,6 @@
 import {
   Archive,
+  FileCode2,
   FileImage,
   FileText,
   Lock,
@@ -13,6 +14,15 @@ import {
 import ToolHubPage from "@/components/ToolHubPage";
 
 const pdfTools = [
+  {
+    title: "HTML to PDF",
+    description:
+      "Open HEC-HMS reports and other HTML files, preview the layout, and save them as PDF in your browser.",
+    href: "/tools/pdf/html-to-pdf",
+    icon: FileCode2,
+    badge: "New",
+    status: "available" as const,
+  },
   {
     title: "Merge PDF",
     description:

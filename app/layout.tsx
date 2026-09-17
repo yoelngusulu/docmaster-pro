@@ -17,6 +17,14 @@ export const metadata: Metadata = {
   },
   description:
     "YAJU provides field tools, document tools and image tools for coordinate conversion, measurements, PDF tasks and image to PDF workflows.",
+  applicationName: "YAJU",
+  alternates: {
+    canonical: "./",
+  },
+  openGraph: {
+    siteName: "YAJU",
+    type: "website",
+  },
   icons: {
     icon: "/icon.svg",
     shortcut: "/icon.svg",

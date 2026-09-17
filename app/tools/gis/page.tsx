@@ -1,4 +1,4 @@
-import { Compass, Droplets, MapPinned, Ruler } from "lucide-react";
+import { Compass, Database, Droplets, MapPinned, Ruler } from "lucide-react";
 
 import ToolHubPage from "@/components/ToolHubPage";
 
@@ -10,6 +10,15 @@ const fieldTools = [
     href: "/tools/coordinates-converter",
     icon: MapPinned,
     badge: "Live",
+    status: "available" as const,
+  },
+  {
+    title: "EPSG / CRS Finder",
+    description:
+      "Find coordinate reference systems used in Tanzania and East Africa by EPSG code, name or area.",
+    href: "/tools/gis/epsg-crs-finder",
+    icon: Database,
+    badge: "New",
     status: "available" as const,
   },
   {

@@ -1281,6 +1281,54 @@ function calculateDistanceMeters(
   );
 }
 
+function toDegrees(value: number) {
+  return (value * 180) / Math.PI;
+}
+
+function wrapDegrees(value: number) {
+  return ((value % 360) + 360) % 360;
+}
+
+function calculateBearingDegrees(
+  start: CoordinatePoint,
+  end: CoordinatePoint
+) {
+  const startLatitude = toRadians(start.latitude);
+  const endLatitude = toRadians(end.latitude);
+  const longitudeDelta = toRadians(end.longitude - start.longitude);
+  const y = Math.sin(longitudeDelta) * Math.cos(endLatitude);
+  const x =
+    Math.cos(startLatitude) * Math.sin(endLatitude) -
+    Math.sin(startLatitude) *
+      Math.cos(endLatitude) *
+      Math.cos(longitudeDelta);
+
+  return wrapDegrees(toDegrees(Math.atan2(y, x)));
+}
+
+function getCompassDirection(value: number) {
+  const directions = [
+    "N",
+    "NNE",
+    "NE",
+    "ENE",
+    "E",
+    "ESE",
+    "SE",
+    "SSE",
+    "S",
+    "SSW",
+    "SW",
+    "WSW",
+    "W",
+    "WNW",
+    "NW",
+    "NNW",
+  ];
+
+  return directions[Math.round(value / 22.5) % 16];
+}
+
 function calculateAreaSquareMeters(points: CoordinatePoint[]) {
   if (points.length < 3) {
     return 0;
@@ -1312,6 +1360,10 @@ function formatDistance(value: number) {
   }
 
   return `${formatNumber(value / 1000, 3)} km`;
+}
+
+function formatBearing(value: number) {
+  return `${formatNumber(value, 2)} deg`;
 }
 
 function formatArea(value: number) {
@@ -1584,11 +1636,21 @@ export default function DistanceAreaCalculatorPage() {
 
   const distanceSegments = useMemo(
     () =>
-      points.slice(1).map((point, index) => ({
-        from: points[index],
-        to: point,
-        distanceMeters: calculateDistanceMeters(points[index], point),
-      })),
+      points.slice(1).map((point, index) => {
+        const from = points[index];
+        const initialBearing = calculateBearingDegrees(from, point);
+
+        return {
+          from,
+          to: point,
+          distanceMeters: calculateDistanceMeters(from, point),
+          initialBearing,
+          finalBearing: wrapDegrees(
+            calculateBearingDegrees(point, from) + 180
+          ),
+          reverseBearing: wrapDegrees(initialBearing + 180),
+        };
+      }),
     [points]
   );
 
@@ -1622,6 +1684,12 @@ export default function DistanceAreaCalculatorPage() {
 
     if (points.length >= 2) {
       lines.push(`Total distance: ${formatDistance(totalDistanceMeters)}`);
+
+      distanceSegments.forEach((segment, index) => {
+        lines.push(
+          `Segment ${index + 1}: ${formatBearing(segment.initialBearing)} ${getCompassDirection(segment.initialBearing)}; reverse ${formatBearing(segment.reverseBearing)}`
+        );
+      });
     }
 
     if (mode === "area" && points.length >= 3) {
@@ -1634,6 +1702,7 @@ export default function DistanceAreaCalculatorPage() {
     return lines;
   }, [
     areaSquareMeters,
+    distanceSegments,
     inputFormat,
     mode,
     points.length,
@@ -1748,7 +1817,16 @@ export default function DistanceAreaCalculatorPage() {
 
     if (distanceSegments.length > 0) {
       rows.push([]);
-      rows.push(["Segment", "From", "To", "Distance"]);
+      rows.push([
+        "Segment",
+        "From",
+        "To",
+        "Distance",
+        "Initial azimuth",
+        "Direction",
+        "Final bearing",
+        "Reverse bearing",
+      ]);
 
       distanceSegments.forEach((segment, index) => {
         rows.push([
@@ -1756,6 +1834,10 @@ export default function DistanceAreaCalculatorPage() {
           segment.from.label,
           segment.to.label,
           formatDistance(segment.distanceMeters),
+          formatBearing(segment.initialBearing),
+          getCompassDirection(segment.initialBearing),
+          formatBearing(segment.finalBearing),
+          formatBearing(segment.reverseBearing),
         ]);
       });
     }
@@ -1801,7 +1883,7 @@ export default function DistanceAreaCalculatorPage() {
               </h1>
 
               <p className="mt-3 max-w-3xl text-base leading-7 text-gray-600">
-                Measure distance, perimeter and approximate polygon area from
+                Measure distance, bearings, perimeter and approximate polygon area from
                 Decimal, DMS, UTM or CSV coordinate points.
               </p>
             </div>
@@ -1860,7 +1942,7 @@ export default function DistanceAreaCalculatorPage() {
 
               {inputFormat === "utm" && (
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-4 sm:grid-cols-3">
                     <label className="block">
                       <span className="text-sm font-semibold text-gray-800">
                         Source CRS
@@ -2049,7 +2131,23 @@ export default function DistanceAreaCalculatorPage() {
                   </p>
                 </div>
 
-                <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:col-span-2">
+                <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                  <p className="text-sm font-semibold text-gray-500">
+                    First Azimuth
+                  </p>
+                  <p className="mt-2 text-2xl font-bold text-gray-950">
+                    {distanceSegments[0]
+                      ? formatBearing(distanceSegments[0].initialBearing)
+                      : "-"}
+                  </p>
+                  {distanceSegments[0] && (
+                    <p className="mt-1 text-sm font-semibold text-blue-600">
+                      {getCompassDirection(distanceSegments[0].initialBearing)}
+                    </p>
+                  )}
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:col-span-3">
                   <p className="text-sm font-semibold text-gray-500">
                     Area
                   </p>
@@ -2103,6 +2201,10 @@ export default function DistanceAreaCalculatorPage() {
                     <th className="px-4 py-3 font-semibold">Latitude</th>
                     <th className="px-4 py-3 font-semibold">Longitude</th>
                     <th className="px-4 py-3 font-semibold">Next segment</th>
+                    <th className="px-4 py-3 font-semibold">Initial azimuth</th>
+                    <th className="px-4 py-3 font-semibold">Direction</th>
+                    <th className="px-4 py-3 font-semibold">Final bearing</th>
+                    <th className="px-4 py-3 font-semibold">Reverse bearing</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 bg-white text-gray-700">
@@ -2123,6 +2225,26 @@ export default function DistanceAreaCalculatorPage() {
                         <td className="px-4 py-3">
                           {segment
                             ? formatDistance(segment.distanceMeters)
+                            : "-"}
+                        </td>
+                        <td className="px-4 py-3">
+                          {segment
+                            ? formatBearing(segment.initialBearing)
+                            : "-"}
+                        </td>
+                        <td className="px-4 py-3 font-semibold text-blue-600">
+                          {segment
+                            ? getCompassDirection(segment.initialBearing)
+                            : "-"}
+                        </td>
+                        <td className="px-4 py-3">
+                          {segment
+                            ? formatBearing(segment.finalBearing)
+                            : "-"}
+                        </td>
+                        <td className="px-4 py-3">
+                          {segment
+                            ? formatBearing(segment.reverseBearing)
                             : "-"}
                         </td>
                       </tr>

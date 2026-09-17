@@ -22,9 +22,9 @@ const fieldTools = [
     status: "available" as const,
   },
   {
-    title: "Distance & Area Calculator",
+    title: "Distance, Area & Bearing Calculator",
     description:
-      "Measure distance, perimeter and approximate area from Decimal, DMS, UTM or CSV coordinate points.",
+      "Measure distance, bearings, perimeter and approximate area from Decimal, DMS, UTM or CSV coordinate points.",
     href: "/tools/gis/distance-area-calculator",
     icon: Ruler,
     badge: "Live",

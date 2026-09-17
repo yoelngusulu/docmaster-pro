@@ -1,4 +1,4 @@
-import { Compass, Database, Droplets, MapPinned, Ruler } from "lucide-react";
+import { Database, Droplets, MapPinned, Ruler } from "lucide-react";
 
 import ToolHubPage from "@/components/ToolHubPage";
 
@@ -37,15 +37,6 @@ const fieldTools = [
     href: "/tools/gis/water-storage-calculator",
     icon: Droplets,
     badge: "New",
-    status: "available" as const,
-  },
-  {
-    title: "Bearing / Azimuth Calculator",
-    description:
-      "Calculate initial bearing, final bearing, reverse bearing and distance from Decimal, DMS, UTM or CSV coordinate points.",
-    href: "/tools/gis/bearing-azimuth-calculator",
-    icon: Compass,
-    badge: "Live",
     status: "available" as const,
   },
 ];

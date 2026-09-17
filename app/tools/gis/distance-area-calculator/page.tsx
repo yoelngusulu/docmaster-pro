@@ -1366,6 +1366,10 @@ function formatBearing(value: number) {
   return `${formatNumber(value, 2)} deg`;
 }
 
+function formatBearingWithDirection(value: number) {
+  return `${formatBearing(value)} - ${getCompassDirection(value)}`;
+}
+
 function formatArea(value: number) {
   if (value < 1000000) {
     return `${formatNumber(value, 2)} sq m`;
@@ -1687,7 +1691,7 @@ export default function DistanceAreaCalculatorPage() {
 
       distanceSegments.forEach((segment, index) => {
         lines.push(
-          `Segment ${index + 1}: ${formatBearing(segment.initialBearing)} ${getCompassDirection(segment.initialBearing)}; reverse ${formatBearing(segment.reverseBearing)}`
+          `Segment ${index + 1}: initial ${formatBearingWithDirection(segment.initialBearing)}; final ${formatBearingWithDirection(segment.finalBearing)}; reverse ${formatBearingWithDirection(segment.reverseBearing)}`
         );
       });
     }
@@ -1825,7 +1829,9 @@ export default function DistanceAreaCalculatorPage() {
         "Initial azimuth",
         "Direction",
         "Final bearing",
+        "Final direction",
         "Reverse bearing",
+        "Reverse direction",
       ]);
 
       distanceSegments.forEach((segment, index) => {
@@ -1837,7 +1843,9 @@ export default function DistanceAreaCalculatorPage() {
           formatBearing(segment.initialBearing),
           getCompassDirection(segment.initialBearing),
           formatBearing(segment.finalBearing),
+          getCompassDirection(segment.finalBearing),
           formatBearing(segment.reverseBearing),
+          getCompassDirection(segment.reverseBearing),
         ]);
       });
     }
@@ -2137,14 +2145,11 @@ export default function DistanceAreaCalculatorPage() {
                   </p>
                   <p className="mt-2 text-2xl font-bold text-gray-950">
                     {distanceSegments[0]
-                      ? formatBearing(distanceSegments[0].initialBearing)
+                      ? formatBearingWithDirection(
+                          distanceSegments[0].initialBearing
+                        )
                       : "-"}
                   </p>
-                  {distanceSegments[0] && (
-                    <p className="mt-1 text-sm font-semibold text-blue-600">
-                      {getCompassDirection(distanceSegments[0].initialBearing)}
-                    </p>
-                  )}
                 </div>
 
                 <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:col-span-3">
@@ -2202,7 +2207,6 @@ export default function DistanceAreaCalculatorPage() {
                     <th className="px-4 py-3 font-semibold">Longitude</th>
                     <th className="px-4 py-3 font-semibold">Next segment</th>
                     <th className="px-4 py-3 font-semibold">Initial azimuth</th>
-                    <th className="px-4 py-3 font-semibold">Direction</th>
                     <th className="px-4 py-3 font-semibold">Final bearing</th>
                     <th className="px-4 py-3 font-semibold">Reverse bearing</th>
                   </tr>
@@ -2229,22 +2233,23 @@ export default function DistanceAreaCalculatorPage() {
                         </td>
                         <td className="px-4 py-3">
                           {segment
-                            ? formatBearing(segment.initialBearing)
-                            : "-"}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-blue-600">
-                          {segment
-                            ? getCompassDirection(segment.initialBearing)
+                            ? formatBearingWithDirection(
+                                segment.initialBearing
+                              )
                             : "-"}
                         </td>
                         <td className="px-4 py-3">
                           {segment
-                            ? formatBearing(segment.finalBearing)
+                            ? formatBearingWithDirection(
+                                segment.finalBearing
+                              )
                             : "-"}
                         </td>
                         <td className="px-4 py-3">
                           {segment
-                            ? formatBearing(segment.reverseBearing)
+                            ? formatBearingWithDirection(
+                                segment.reverseBearing
+                              )
                             : "-"}
                         </td>
                       </tr>

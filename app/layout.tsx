@@ -12,11 +12,11 @@ const adsenseClient =
 export const metadata: Metadata = {
   metadataBase: new URL("https://yaju-tools.vercel.app"),
   title: {
-    default: "YAJU",
+    default: "YAJU Utility: Free PDF, Image & Field Tools",
     template: "%s | YAJU",
   },
   description:
-    "YAJU provides field tools, document tools and image tools for coordinate conversion, measurements, PDF tasks and image to PDF workflows.",
+    "Use free YAJU Utility tools to merge, split and compress PDFs, convert images to PDF, convert coordinates and calculate field measurements online.",
   applicationName: "YAJU",
   alternates: {
     canonical: "./",

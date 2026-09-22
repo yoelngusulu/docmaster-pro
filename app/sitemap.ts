@@ -21,6 +21,7 @@ const routes: SitemapRoute[] = [
   { path: "/tools/coordinates-converter", changeFrequency: "monthly", priority: 0.85 },
   { path: "/tools/gis/epsg-crs-finder", changeFrequency: "monthly", priority: 0.8 },
   { path: "/tools/gis/distance-area-calculator", changeFrequency: "monthly", priority: 0.8 },
+  { path: "/tools/gis/bearing-azimuth-calculator", changeFrequency: "monthly", priority: 0.8 },
   { path: "/tools/gis/water-storage-calculator", changeFrequency: "monthly", priority: 0.8 },
   { path: "/tools/pdf/html-to-pdf", changeFrequency: "monthly", priority: 0.85 },
   { path: "/tools/pdf/merge-pdf", changeFrequency: "monthly", priority: 0.8 },

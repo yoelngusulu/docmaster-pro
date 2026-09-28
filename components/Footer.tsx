@@ -67,7 +67,7 @@ export default function Footer() {
               </div>
             </Link>
             <p className="mt-5 text-sm leading-7">
-              Fast, secure and professional productivity platform developed by {siteConfig.legalOwnerName}.
+              Fast, secure and professional.
             </p>
           </div>
 

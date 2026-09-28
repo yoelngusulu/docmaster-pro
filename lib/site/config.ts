@@ -1,7 +1,7 @@
 export const siteConfig = {
   productName: "YAJU",
   displayName: "YAJU",
-  tagline: "Field tools, documents and images in one workspace.",
+  tagline: "Smart digital tools for documents & fieldwork.",
   platformDescription:
     "YAJU is an independent productivity platform developed by Yoel Ngusulu, bringing together YAJU Field Tools, YAJU Documents and YAJU Images in one simple and professional workspace.",
   legalOwnerName: "Yoel Ngusulu",

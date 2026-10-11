@@ -35,6 +35,7 @@ const routes: SitemapRoute[] = [
   { path: "/docs/images", changeFrequency: "monthly", priority: 0.75 },
   { path: "/pricing", changeFrequency: "monthly", priority: 0.6 },
   { path: "/about", changeFrequency: "monthly", priority: 0.6 },
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.4 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
         destination: "/tools/gis/distance-area-calculator",
         permanent: true,
       },
-];
+    ];
   },
 };
 

@@ -627,7 +627,7 @@ export default function MergePdfUploadArea() {
 
     const link = document.createElement("a");
     link.href = convertedFileUrl;
-    link.download = convertedFileName || "DocMaster_Merged.pdf";
+    link.download = convertedFileName || "YAJU_Merged.pdf";
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -740,7 +740,7 @@ export default function MergePdfUploadArea() {
     const mergedBlob = new Blob([responseBuffer], {
       type: contentType,
     });
-    const fileName = getFilenameFromResponse(response, "DocMaster_Merged.pdf");
+    const fileName = getFilenameFromResponse(response, "YAJU_Merged.pdf");
     const pageCountHeader = response.headers.get("x-merged-page-count");
     const serverPageCount = pageCountHeader ? Number(pageCountHeader) : NaN;
     const finalPageCount =
@@ -991,7 +991,7 @@ export default function MergePdfUploadArea() {
               Google AdSense placement will appear here
             </div>
             <p className="mt-4 text-sm leading-6 text-gray-600">
-              Free tools are supported by ads so more users can access DocMaster.
+              Free tools are supported by ads so more users can access YAJU.
             </p>
           </div>
         </div>

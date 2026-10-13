@@ -7,7 +7,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 export default function CallToAction() {
   const openAIAssistant = () => {
     window.dispatchEvent(
-      new CustomEvent("open-docmaster-ai")
+      new CustomEvent("open-yaju-ai")
     );
   };
 

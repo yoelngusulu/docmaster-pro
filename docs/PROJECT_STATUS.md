@@ -39,7 +39,7 @@ Features zilizopo lakini zinahitaji testing zaidi:
 🟡 Translate Document
 🟡 Resume Builder  
 Project status:
-DocMaster ipo kwenye Version 0.7 Alpha. Core PDF tools, Image tools, GIS Coordinates Converter, GIS Distance & Area Calculator, GIS Bearing / Azimuth Calculator, dashboard, history, usage limits, tools navigation, pricing page, and about page zimekamilika na build inapaswa kupita baada ya local validation.
+YAJU ipo kwenye Version 0.7 Alpha. Core PDF tools, Image tools, GIS Coordinates Converter, GIS Distance & Area Calculator, GIS Bearing / Azimuth Calculator, dashboard, history, usage limits, tools navigation, pricing page, and about page zimekamilika na build inapaswa kupita baada ya local validation.
 
 Next steps:
 1. Smoke test PDF tools zote

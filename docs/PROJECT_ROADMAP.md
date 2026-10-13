@@ -1,8 +1,8 @@
-# DocMaster - Project Roadmap
+# YAJU - Project Roadmap
 
 ## Project Information
 
-**Project Name:** DocMaster
+**Project Name:** YAJU
 
 **Current Owner/Developer:** Yoel Ngusulu
 

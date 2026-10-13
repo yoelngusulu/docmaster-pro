@@ -157,7 +157,7 @@ export async function POST(
 
     tempDir = path.join(
       os.tmpdir(),
-      `docmaster-pdf-images-${randomUUID()}`
+      `yaju-pdf-images-${randomUUID()}`
     );
 
     const outputFolder =

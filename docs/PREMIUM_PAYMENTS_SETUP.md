@@ -1,6 +1,6 @@
-# DocMaster Premium Manual Payment Setup
+# YAJU Premium Manual Payment Setup
 
-DocMaster Premium uses a manual Airtel Money verification flow. Users submit payment details, but Premium access is activated only after an authorized admin approves the payment.
+YAJU Premium uses a manual Airtel Money verification flow. Users submit payment details, but Premium access is activated only after an authorized admin approves the payment.
 
 ## 1. Run Supabase migrations
 
@@ -24,12 +24,12 @@ They create:
 Set these in `.env.local` for development and in the production host environment:
 
 ```env
-DOCMASTER_PREMIUM_PRICE_TZS=2000
-DOCMASTER_PREMIUM_BILLING_MONTHS=1
-DOCMASTER_PAYMENT_REQUEST_EXPIRY_HOURS=48
-DOCMASTER_PAYMENT_REFERENCE_PREFIX=DOCMASTER
-DOCMASTER_AIRTEL_LIPA_NAMBA=your_airtel_lipa_namba
-DOCMASTER_ADMIN_EMAILS=admin@example.com
+YAJU_PREMIUM_PRICE_TZS=2000
+YAJU_PREMIUM_BILLING_MONTHS=1
+YAJU_PAYMENT_REQUEST_EXPIRY_HOURS=48
+YAJU_PAYMENT_REFERENCE_PREFIX=YAJU
+YAJU_AIRTEL_LIPA_NAMBA=your_airtel_lipa_namba
+YAJU_ADMIN_EMAILS=admin@example.com
 ```
 
 Do not commit `.env.local` or real Airtel details to GitHub.
@@ -38,7 +38,7 @@ Do not commit `.env.local` or real Airtel details to GitHub.
 
 An admin is authorized when either:
 
-- their email is listed in `DOCMASTER_ADMIN_EMAILS`, or
+- their email is listed in `YAJU_ADMIN_EMAILS`, or
 - their Supabase Auth `app_metadata.role` is `admin`, or
 - their Supabase Auth `app_metadata.is_admin` is `true`.
 

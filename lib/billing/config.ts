@@ -32,29 +32,29 @@ export function formatTzs(amount: number) {
 
 export function getPremiumPlanConfig(): PremiumPlanConfig {
   const amountTzs = parsePositiveInteger(
-    process.env.DOCMASTER_PREMIUM_PRICE_TZS,
+    process.env.YAJU_PREMIUM_PRICE_TZS,
     process.env.NODE_ENV === "production" ? 0 : 2000
   );
 
   const billingPeriodMonths = parsePositiveInteger(
-    process.env.DOCMASTER_PREMIUM_BILLING_MONTHS,
+    process.env.YAJU_PREMIUM_BILLING_MONTHS,
     1
   );
 
   const requestExpiryHours = parsePositiveInteger(
-    process.env.DOCMASTER_PAYMENT_REQUEST_EXPIRY_HOURS,
+    process.env.YAJU_PAYMENT_REQUEST_EXPIRY_HOURS,
     48
   );
 
   const airtelLipaNamba = (
-    process.env.DOCMASTER_AIRTEL_LIPA_NAMBA || ""
+    process.env.YAJU_AIRTEL_LIPA_NAMBA || ""
   ).trim();
 
   const paymentReferencePrefix =
     (
-      process.env.DOCMASTER_PAYMENT_REFERENCE_PREFIX ||
-      "DOCMASTER"
-    ).trim() || "DOCMASTER";
+      process.env.YAJU_PAYMENT_REFERENCE_PREFIX ||
+      "YAJU"
+    ).trim() || "YAJU";
 
   return {
     plan: "PREMIUM",

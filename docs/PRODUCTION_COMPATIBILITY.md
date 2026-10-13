@@ -1,12 +1,12 @@
-# DocMaster Production Compatibility
+# YAJU Production Compatibility
 
-DocMaster is deployed publicly on Vercel. Vercel is suitable for the Next.js application, Supabase authentication, dashboard, billing, usage limits, AI API calls, and lightweight JavaScript-based conversion tools.
+YAJU is deployed publicly on Vercel. Vercel is suitable for the Next.js application, Supabase authentication, dashboard, billing, usage limits, AI API calls, and lightweight JavaScript-based conversion tools.
 
 Some conversion routes depend on native runtimes such as QPDF, LibreOffice, or Python packages. These can work on local Windows when the tools are installed, but they are not guaranteed in Vercel serverless production.
 
 ## Vercel MVP Mode
 
-For the public Vercel deployment, DocMaster should expose only tools that can produce real output on Vercel. Tools that require native/heavy server processing are shown in the interface as `Server soon` and their upload forms are hidden until a dedicated conversion worker is ready.
+For the public Vercel deployment, YAJU should expose only tools that can produce real output on Vercel. Tools that require native/heavy server processing are shown in the interface as `Server soon` and their upload forms are hidden until a dedicated conversion worker is ready.
 
 Live on Vercel now:
 
@@ -88,10 +88,10 @@ Recommended production architecture for native converters:
 
 ```txt
 User
--> DocMaster Next.js on Vercel
--> DocMaster conversion API/worker
+-> YAJU Next.js on Vercel
+-> YAJU conversion API/worker
 -> Linux VPS with LibreOffice, QPDF, Python packages
--> Converted file returned to DocMaster
+-> Converted file returned to YAJU
 ```
 
 Do not replace high-quality conversion engines with mock outputs just to make Vercel return HTTP 200. A converter should be considered working only when the generated output file is valid and usable.

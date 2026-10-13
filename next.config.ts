@@ -8,17 +8,6 @@ const nextConfig: NextConfig = {
         destination: "/tools/gis/distance-area-calculator",
         permanent: true,
       },
-      {
-        source: "/:path*",
-        has: [
-          {
-            type: "host",
-            value: "docmaster-pro-lemon.vercel.app",
-          },
-        ],
-        destination: "https://yaju-tools.vercel.app/:path*",
-        permanent: true,
-      },
     ];
   },
 };

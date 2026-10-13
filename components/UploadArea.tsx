@@ -1724,7 +1724,7 @@ if (
             </div>
 
             <p className="mt-4 text-sm leading-6 text-gray-600">
-              Free tools are supported by ads so more users can access DocMaster.
+              Free tools are supported by ads so more users can access YAJU.
             </p>
           </div>
         </div>

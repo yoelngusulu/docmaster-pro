@@ -11,7 +11,7 @@ const COORDINATES_BULK_GUEST_LIMIT = 2;
 const COORDINATES_BULK_REGISTERED_LIMIT = 2;
 const WINDOW_HOURS = 24;
 const UNLIMITED_LIMIT = 999999;
-const GUEST_COOKIE_NAME = "docmaster_guest_id";
+const GUEST_COOKIE_NAME = "yaju_guest_id";
 
 const LIMITED_TOOLS = new Set([
   "pdf-to-word",

@@ -19,14 +19,14 @@ type Theme = "light" | "dark";
 
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") return "light";
-  const storedTheme = localStorage.getItem("docmaster-theme");
+  const storedTheme = localStorage.getItem("yaju-theme");
   if (storedTheme === "dark" || storedTheme === "light") return storedTheme;
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 function applyTheme(theme: Theme) {
   document.documentElement.classList.toggle("dark", theme === "dark");
-  localStorage.setItem("docmaster-theme", theme);
+  localStorage.setItem("yaju-theme", theme);
 }
 
 function YajuWordmark() {

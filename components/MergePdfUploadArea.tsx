@@ -627,7 +627,7 @@ export default function MergePdfUploadArea() {
 
     const link = document.createElement("a");
     link.href = convertedFileUrl;
-    link.download = convertedFileName || "YAJU_Merged.pdf";
+    link.download = convertedFileName || "Merged Document.pdf";
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -740,7 +740,7 @@ export default function MergePdfUploadArea() {
     const mergedBlob = new Blob([responseBuffer], {
       type: contentType,
     });
-    const fileName = getFilenameFromResponse(response, "YAJU_Merged.pdf");
+    const fileName = getFilenameFromResponse(response, "Merged Document.pdf");
     const pageCountHeader = response.headers.get("x-merged-page-count");
     const serverPageCount = pageCountHeader ? Number(pageCountHeader) : NaN;
     const finalPageCount =

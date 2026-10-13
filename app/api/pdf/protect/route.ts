@@ -133,7 +133,7 @@ export async function POST(
       await mkdtemp(
         path.join(
           os.tmpdir(),
-          "docmaster-protect-"
+          "yaju-protect-"
         )
       );
 

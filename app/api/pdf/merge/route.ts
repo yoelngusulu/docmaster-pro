@@ -290,7 +290,7 @@ export async function POST(
       identityId: usage.identityId,
     });
 
-    const outputFileName = "DocMaster_Merged.pdf";
+    const outputFileName = "YAJU_Merged.pdf";
 
     console.log("Merge completed:", {
       fileCount: uploadedFiles.length,

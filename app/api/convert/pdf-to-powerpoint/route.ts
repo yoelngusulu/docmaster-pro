@@ -40,7 +40,7 @@ export async function POST(
 
   const tempDirectory = path.join(
     os.tmpdir(),
-    `docmaster-pdf-to-ppt-${crypto.randomUUID()}`
+    `yaju-pdf-to-ppt-${crypto.randomUUID()}`
   );
 
   try {

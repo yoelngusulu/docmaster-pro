@@ -18,19 +18,18 @@ type ChatMessage = {
   id: string;
   sender: "user" | "bot";
   text: string;
-  link?: {
-    label: string;
-    href: string;
-  };
+  links?: { label: string; href: string }[];
 };
 
 type BotReply = Omit<ChatMessage, "id">;
 
 const quickActions = [
+  "Coordinates Converter",
   "PDF to Word",
-  "Word to PDF",
+  "Merge PDF",
   "Compress PDF",
-  "Remove Background",
+  "Measure distance and area",
+  "Water storage calculator",
 ];
 
 export default function AIAssistant() {
@@ -47,8 +46,13 @@ export default function AIAssistant() {
     {
       id: "welcome",
       sender: "bot",
-      text:
-        "👋 Welcome to YAJU AI!\n\nI can help you convert PDFs, Office documents and images.\n\nTell me what you would like to do today.",
+      text: "👋 Welcome to YAJU AI! I can help you find the right tool for documents, images, GIS and fieldwork. Tell me what you want to do, and I’ll give you a direct link to the most relevant tool.",
+      links: [
+        { label: "Coordinates Converter", href: "/tools/coordinates-converter" },
+        { label: "PDF to Word", href: "/tools/pdf/pdf-to-word" },
+        { label: "Merge PDF", href: "/tools/pdf/merge-pdf" },
+        { label: "Explore Field Tools", href: "/tools/gis" },
+      ],
     },
   ]);
 
@@ -78,265 +82,60 @@ export default function AIAssistant() {
     });
   }, [messages, isTyping]);
 
-  const getBotReply = (
-    userMessage: string
-  ): BotReply => {
-    const text = userMessage.toLowerCase();
-
-    if (
-      text.includes("pdf to word") ||
-      text.includes("convert pdf to word")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "I found the PDF to Word tool. Open it to upload your PDF.",
-        link: {
-          label: "Open PDF to Word",
-          href: "/tools/pdf/pdf-to-word",
-        },
-      };
-    }
-
-    if (
-      text.includes("pdf to excel") ||
-      text.includes("convert pdf to excel")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "Use PDF to Excel to convert PDF tables into an editable spreadsheet.",
-        link: {
-          label: "Open PDF to Excel",
-          href: "/tools/pdf/pdf-to-excel",
-        },
-      };
-    }
-
-    if (
-      text.includes("pdf to powerpoint") ||
-      text.includes("pdf to ppt")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "You can convert your PDF into a PowerPoint presentation.",
-        link: {
-          label: "Open PDF to PowerPoint",
-          href: "/tools/pdf/pdf-to-powerpoint",
-        },
-      };
-    }
-
-    if (
-      text.includes("word to pdf") ||
-      text.includes("convert word to pdf")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "You can convert a Word document using the Word to PDF tool.",
-        link: {
-          label: "Open Word to PDF",
-          href: "/tools/pdf/word-to-pdf",
-        },
-      };
-    }
-
-    if (
-      text.includes("excel to pdf") ||
-      text.includes("spreadsheet to pdf")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "Excel to PDF is not available yet. You can use PDF to Excel for table extraction.",
-        link: {
-          label: "Open PDF to Excel",
-          href: "/tools/pdf/pdf-to-excel",
-        },
-      };
-    }
-
-    if (
-      text.includes("powerpoint to pdf") ||
-      text.includes("ppt to pdf")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "PowerPoint to PDF is not available yet. You can use PDF to PowerPoint for slide generation.",
-        link: {
-          label: "Open PDF to PowerPoint",
-          href:
-            "/tools/pdf/pdf-to-powerpoint",
-        },
-      };
-    }
-
-    if (
-      text.includes("compress") &&
-      text.includes("pdf")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "Use Compress PDF to reduce your PDF file size.",
-        link: {
-          label: "Open Compress PDF",
-          href: "/tools/pdf/compress-pdf",
-        },
-      };
-    }
-
-    if (
-      text.includes("merge") &&
-      text.includes("pdf")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "You can combine multiple PDF files using Merge PDF.",
-        link: {
-          label: "Open Merge PDF",
-          href: "/tools/pdf/merge-pdf",
-        },
-      };
-    }
-
-    if (
-      text.includes("split") &&
-      text.includes("pdf")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "Use Split PDF to divide a document into smaller PDF files.",
-        link: {
-          label: "Open Split PDF",
-          href: "/tools/pdf/split-pdf",
-        },
-      };
-    }
-
-    if (
-      text.includes("protect") &&
-      text.includes("pdf")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "Use Protect PDF to add password protection.",
-        link: {
-          label: "Open Protect PDF",
-          href: "/tools/pdf/protect-pdf",
-        },
-      };
-    }
-
-    if (
-      text.includes("unlock") &&
-      text.includes("pdf")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "Use Unlock PDF to remove password protection from your document.",
-        link: {
-          label: "Open Unlock PDF",
-          href: "/tools/pdf/unlock-pdf",
-        },
-      };
-    }
-
-    if (
-      text.includes("remove background") ||
-      text.includes("background remover")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "The Background Remover can help remove the background from your image.",
-        link: {
-          label: "Open Background Remover",
-          href:
-            "/tools/ai/background-remover",
-        },
-      };
-    }
-
-    if (
-      text.includes("image editor") ||
-      text.includes("edit image") ||
-      text.includes("retouch")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "Open AI Image Editor to enhance, retouch, colorize or upscale your image.",
-        link: {
-          label: "Open AI Image Editor",
-          href: "/tools/ai/image-editor",
-        },
-      };
-    }
-
-    if (
-      text.includes("jpg to png") ||
-      text.includes("jpeg to png")
-    ) {
-      return {
-        sender: "bot",
-        text:
-          "Use JPG to PNG to convert your image.",
-        link: {
-          label: "Open JPG to PNG",
-          href: "/tools/image/jpg-to-png",
-        },
-      };
-    }
-
-    if (text.includes("png to jpg")) {
-      return {
-        sender: "bot",
-        text:
-          "Use PNG to JPG to convert your image.",
-        link: {
-          label: "Open PNG to JPG",
-          href: "/tools/image/png-to-jpg",
-        },
-      };
-    }
-
-    if (text.includes("webp to jpg")) {
-      return {
-        sender: "bot",
-        text:
-          "Use WEBP to JPG to convert the image format.",
-        link: {
-          label: "Open WEBP to JPG",
-          href: "/tools/image/webp-to-jpg",
-        },
-      };
-    }
-
-    if (text.includes("webp to png")) {
-      return {
-        sender: "bot",
-        text:
-          "Use WEBP to PNG to convert the image format.",
-        link: {
-          label: "Open WEBP to PNG",
-          href: "/tools/image/webp-to-png",
-        },
-      };
-    }
-
-    return {
-      sender: "bot",
-      text:
-        "I can help you find PDF, Office, Image and AI tools.\n\nTry asking:\n• Convert PDF to Word\n• Merge PDF\n• Compress PDF\n• Remove image background",
+  const getBotReply = (userMessage: string): BotReply => {
+    const text = userMessage.toLowerCase().trim();
+    const has = (...terms: string[]) => terms.some((term) => text.includes(term));
+    const links = {
+      coordinates: { label: "Open Coordinates Converter", href: "/tools/coordinates-converter" },
+      distance: { label: "Open Distance & Area Calculator", href: "/tools/gis/distance-area-calculator" },
+      water: { label: "Open Water Storage Calculator", href: "/tools/gis/water-storage-calculator" },
+      bearing: { label: "Open Bearing & Azimuth", href: "/tools/gis/bearing-azimuth-calculator" },
+      pdfWord: { label: "Open PDF to Word", href: "/tools/pdf/pdf-to-word" },
+      pdfExcel: { label: "Open PDF to Excel", href: "/tools/pdf/pdf-to-excel" },
+      pdfPpt: { label: "Open PDF to PowerPoint", href: "/tools/pdf/pdf-to-powerpoint" },
+      wordPdf: { label: "Open Word to PDF", href: "/tools/pdf/word-to-pdf" },
+      compress: { label: "Open Compress PDF", href: "/tools/pdf/compress-pdf" },
+      merge: { label: "Open Merge PDF", href: "/tools/pdf/merge-pdf" },
+      split: { label: "Open Split PDF", href: "/tools/pdf/split-pdf" },
+      protect: { label: "Open Protect PDF", href: "/tools/pdf/protect-pdf" },
+      unlock: { label: "Open Unlock PDF", href: "/tools/pdf/unlock-pdf" },
+      imagePdf: { label: "Open Image to PDF", href: "/tools/image/image-to-pdf" },
+      bg: { label: "Open Background Remover", href: "/tools/ai/background-remover" },
+      imageEditor: { label: "Open AI Image Editor", href: "/tools/ai/image-editor" },
+      jpgPng: { label: "Open JPG to PNG", href: "/tools/image/jpg-to-png" },
+      pngJpg: { label: "Open PNG to JPG", href: "/tools/image/png-to-jpg" },
+      webpJpg: { label: "Open WEBP to JPG", href: "/tools/image/webp-to-jpg" },
+      webpPng: { label: "Open WEBP to PNG", href: "/tools/image/webp-to-png" },
+      fieldHub: { label: "Explore YAJU Field Tools", href: "/tools/gis" },
+      pdfHub: { label: "Explore Document Tools", href: "/tools/pdf" },
+      imageHub: { label: "Explore Image Tools", href: "/tools/image" },
     };
+
+    if (has("hello", "hi", "hey", "habari", "mambo", "hujambo", "niaje")) return { sender: "bot", text: "Hi! 👋 Welcome to YAJU. Tell me what you want to do and I’ll take you straight to the right tool. You can start with our fieldwork tools, document tools, or image tools.", links: [links.coordinates, links.pdfHub, links.imageHub] };
+    if (has("coordinate", "coordinates", "lat long", "latitude", "longitude", "utm", "convert gps", "gps location", "badili koordinat")) return { sender: "bot", text: "Need to convert coordinates? YAJU’s Coordinates Converter helps with coordinate conversion for GIS and fieldwork. Open it directly below.", links: [links.coordinates, links.fieldHub] };
+    if (has("distance", "measure area", "area calculator", "calculate area", "calculate distance", "pima eneo", "pima umbali", "eneo na umbali")) return { sender: "bot", text: "For field measurements, use YAJU’s Distance & Area Calculator. It’s part of our practical GIS and surveying tools.", links: [links.distance, links.fieldHub] };
+    if (has("water storage", "tank sizing", "tank size", "water tank", "storage tank", "ujazo wa tank", "tanki la maji", "water volume")) return { sender: "bot", text: "Planning water storage? Open the YAJU Water Storage & Tank Sizing Calculator to work out storage requirements.", links: [links.water, links.fieldHub] };
+    if (has("bearing", "azimuth", "direction angle", "mwelekeo")) return { sender: "bot", text: "Use YAJU Bearing & Azimuth for bearing and direction calculations used in surveying and fieldwork.", links: [links.bearing, links.fieldHub] };
+    if (has("pdf to word", "convert pdf to word", "pdf into word", "pdf to docx", "pdf kuwa word", "badili pdf kuwa word")) return { sender: "bot", text: "YAJU has a PDF to Word page for this task. Open it to check the available conversion workflow. If server-side conversion is not enabled yet, the tool may not complete the conversion.", links: [links.pdfWord, links.pdfHub] };
+    if (has("pdf to excel", "convert pdf to excel", "pdf to spreadsheet", "pdf to xlsx")) return { sender: "bot", text: "Need tables in a spreadsheet? Open YAJU PDF to Excel. Server-side conversion availability depends on the current deployment.", links: [links.pdfExcel, links.pdfHub] };
+    if (has("pdf to powerpoint", "pdf to ppt", "convert pdf to slides")) return { sender: "bot", text: "Open YAJU PDF to PowerPoint to check the current PDF-to-presentation workflow.", links: [links.pdfPpt, links.pdfHub] };
+    if (has("word to pdf", "docx to pdf", "convert word", "word kuwa pdf")) return { sender: "bot", text: "Open YAJU Word to PDF to access the document conversion workflow.", links: [links.wordPdf, links.pdfHub] };
+    if (has("compress", "reduce pdf size", "smaller pdf", "punguza ukubwa wa pdf", "pdf kubwa")) return { sender: "bot", text: "Need a smaller PDF? YAJU’s Compress PDF tool is the direct place to start.", links: [links.compress, links.pdfHub] };
+    if (has("merge pdf", "combine pdf", "join pdf", "unganisha pdf")) return { sender: "bot", text: "Combine PDF files with YAJU Merge PDF. Open the tool to select your files.", links: [links.merge, links.pdfHub] };
+    if (has("split pdf", "separate pdf", "divide pdf", "gawanya pdf")) return { sender: "bot", text: "Use YAJU Split PDF to separate a PDF into smaller files or sections.", links: [links.split, links.pdfHub] };
+    if (has("protect pdf", "password pdf", "lock pdf", "secure pdf")) return { sender: "bot", text: "Open YAJU Protect PDF to access the PDF password-protection tool.", links: [links.protect, links.pdfHub] };
+    if (has("unlock pdf", "remove pdf password", "unprotect pdf")) return { sender: "bot", text: "Open YAJU Unlock PDF to check the available PDF unlocking workflow.", links: [links.unlock, links.pdfHub] };
+    if (has("image to pdf", "photo to pdf", "picture to pdf", "picha kuwa pdf")) return { sender: "bot", text: "Turn an image into a PDF with YAJU Image to PDF.", links: [links.imagePdf, links.imageHub] };
+    if (has("remove background", "background remover", "transparent background", "futa background", "ondoa background")) return { sender: "bot", text: "Want to remove an image background? Open YAJU Background Remover. AI processing availability depends on whether its service is configured.", links: [links.bg, links.imageHub] };
+    if (has("image editor", "edit image", "retouch", "enhance image", "boresha picha")) return { sender: "bot", text: "Open YAJU AI Image Editor to check image editing options.", links: [links.imageEditor, links.imageHub] };
+    if (has("jpg to png", "jpeg to png")) return { sender: "bot", text: "Convert JPG/JPEG images to PNG using this YAJU tool.", links: [links.jpgPng, links.imageHub] };
+    if (has("png to jpg", "png to jpeg")) return { sender: "bot", text: "Convert PNG images to JPG using this YAJU tool.", links: [links.pngJpg, links.imageHub] };
+    if (has("webp to jpg")) return { sender: "bot", text: "Convert WEBP images to JPG using this YAJU tool.", links: [links.webpJpg, links.imageHub] };
+    if (has("webp to png")) return { sender: "bot", text: "Convert WEBP images to PNG using this YAJU tool.", links: [links.webpPng, links.imageHub] };
+    if (has("gis", "survey", "surveying", "fieldwork", "field work", "hydrology", "ramani", "upimaji", "maji", "mapping", "map")) return { sender: "bot", text: "For GIS, surveying, mapping and fieldwork, explore YAJU Field Tools. You can access coordinate conversion, distance and area measurement, bearing/azimuth, and water-storage sizing.", links: [links.coordinates, links.distance, links.water, links.fieldHub] };
+    if (has("document", "pdf", "word", "excel", "powerpoint", "office", "file", "nyaraka")) return { sender: "bot", text: "YAJU helps with common document workflows. Choose the tool you need below, or browse all document tools.", links: [links.pdfWord, links.merge, links.compress, links.pdfHub] };
+    if (has("image", "photo", "picture", "picha", "png", "jpg", "webp")) return { sender: "bot", text: "Looking for an image tool? YAJU offers image-to-PDF and image utilities. Browse the image tools below.", links: [links.imagePdf, links.imageHub] };
+    return { sender: "bot", text: "I can help you find the right YAJU tool. Try asking for converting coordinates, measuring distance or area, sizing a water tank, converting PDF to Word, merging PDF files, compressing a PDF, or converting an image to PDF. Choose a popular tool below to get started.", links: [links.coordinates, links.pdfWord, links.merge, links.water, links.fieldHub, links.pdfHub] };
   };
 
   const sendMessage = (
@@ -374,7 +173,7 @@ export default function AIAssistant() {
       ]);
 
       setIsTyping(false);
-    }, 900);
+    }, 300);
   };
 
   const handleSubmit = (
@@ -401,7 +200,7 @@ export default function AIAssistant() {
                 </h3>
 
                 <p className="text-xs text-blue-100">
-                  AI Assistant • Online
+                  Tool Finder • Ready to help
                 </p>
               </div>
             </div>
@@ -443,23 +242,14 @@ export default function AIAssistant() {
                       {chatMessage.text}
                     </p>
 
-                    {chatMessage.link && (
-                      <Link
-                        href={
-                          chatMessage.link
-                            .href
-                        }
-                        onClick={() =>
-                          setIsOpen(false)
-                        }
-                        className="mt-3 inline-block rounded-lg bg-white px-3 py-2 font-semibold text-blue-600 shadow-sm transition hover:bg-blue-50"
-                      >
-                        {
-                          chatMessage.link
-                            .label
-                        }{" "}
-                        →
-                      </Link>
+                    {chatMessage.links && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {chatMessage.links.map((link) => (
+                          <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)} className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-2 font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50">
+                            {link.label} →
+                          </Link>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -490,7 +280,7 @@ export default function AIAssistant() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick actions */}
+          {/* Try a tool */}
           <div className="border-t border-gray-200 px-4 pt-3">
             <p className="mb-2 text-xs font-medium text-gray-500">
               Quick actions
@@ -529,7 +319,7 @@ export default function AIAssistant() {
                   )
                 }
                 disabled={isTyping}
-                placeholder="Ask YAJU AI..."
+                placeholder="What do you want to do?"
                 className="min-w-0 flex-1 rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 disabled:bg-gray-100"
               />
 

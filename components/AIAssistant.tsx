@@ -173,7 +173,7 @@ export default function AIAssistant() {
       ]);
 
       setIsTyping(false);
-    }, 300);
+    }, 1200);
   };
 
   const handleSubmit = (

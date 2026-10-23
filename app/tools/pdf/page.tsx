@@ -53,29 +53,29 @@ const pdfTools = [
   {
     title: "PDF to Word",
     description:
-      "Prepared for the dedicated document conversion server required for reliable Word output.",
+      "Convert PDF documents into editable Word files.",
     href: "/tools/pdf/pdf-to-word",
     icon: FileText,
-    badge: "Server soon",
-    status: "server-coming-soon" as const,
+    badge: "Live",
+    status: "available" as const,
   },
   {
     title: "PDF to Excel",
     description:
-      "Prepared for the dedicated document conversion server required for reliable table extraction.",
+      "Convert PDF tables into editable Excel spreadsheets.",
     href: "/tools/pdf/pdf-to-excel",
     icon: Table2,
-    badge: "Server soon",
-    status: "server-coming-soon" as const,
+    badge: "Live",
+    status: "available" as const,
   },
   {
     title: "PDF to PowerPoint",
     description:
-      "Prepared for the dedicated document conversion server required for presentation output.",
+      "Convert PDF pages into PowerPoint presentations.",
     href: "/tools/pdf/pdf-to-powerpoint",
     icon: Presentation,
-    badge: "Server soon",
-    status: "server-coming-soon" as const,
+    badge: "Live",
+    status: "available" as const,
   },
   {
     title: "PDF to Image",

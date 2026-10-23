@@ -131,6 +131,9 @@ export default function ToolPage({
   const config = toolConfig[tool];
   const seo = toolSeoContent[tool];
   const isServerComingSoon =
+    tool !== "pdf-to-word" &&
+    tool !== "pdf-to-excel" &&
+    tool !== "pdf-to-powerpoint" &&
     "availability" in config &&
     config.availability === "server-coming-soon";
   const availabilityTitle =

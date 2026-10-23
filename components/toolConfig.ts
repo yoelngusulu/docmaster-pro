@@ -6,10 +6,6 @@ export const toolConfig = {
     success: "Your Word document is ready.",
     accept: ".pdf",
     multiple: false,
-    availability: "server-coming-soon",
-    availabilityTitle: "Server processing coming soon",
-    availabilityMessage:
-      "This converter needs a dedicated document conversion server to produce reliable Word files. It is temporarily unavailable on Vercel while we prepare the production worker.",
   },
 
   "pdf-to-excel": {
@@ -19,10 +15,6 @@ export const toolConfig = {
     success: "Your Excel document is ready.",
     accept: ".pdf",
     multiple: false,
-    availability: "server-coming-soon",
-    availabilityTitle: "Server processing coming soon",
-    availabilityMessage:
-      "This converter needs a dedicated document conversion server for reliable table extraction. It is temporarily unavailable on Vercel while we prepare the production worker.",
   },
 
   "pdf-to-image": {
@@ -100,10 +92,6 @@ export const toolConfig = {
     multiple: false,
     button: "Convert to PDF",
     success: "Your PDF document is ready.",
-    availability: "server-coming-soon",
-    availabilityTitle: "Server processing coming soon",
-    availabilityMessage:
-      "Word to PDF needs LibreOffice on a dedicated conversion server. It is temporarily unavailable on Vercel while we prepare the production worker.",
   },
 
   "excel-to-pdf": {
@@ -113,10 +101,6 @@ export const toolConfig = {
     success: "Your PDF document is ready.",
     accept: ".xls,.xlsx",
     multiple: false,
-    availability: "server-coming-soon",
-    availabilityTitle: "Server processing coming soon",
-    availabilityMessage:
-      "Excel to PDF needs a dedicated document conversion server. It is temporarily unavailable while we prepare production processing.",
   },
 
   "powerpoint-to-pdf": {
@@ -126,10 +110,6 @@ export const toolConfig = {
     success: "Your PDF document is ready.",
     accept: ".ppt,.pptx",
     multiple: false,
-    availability: "server-coming-soon",
-    availabilityTitle: "Server processing coming soon",
-    availabilityMessage:
-      "PowerPoint to PDF needs a dedicated document conversion server. It is temporarily unavailable while we prepare production processing.",
   },
 
   "jpg-to-png": {
@@ -312,10 +292,6 @@ export const toolConfig = {
       "Your PowerPoint presentation is ready.",
     accept: ".pdf",
     multiple: false,
-    availability: "server-coming-soon",
-    availabilityTitle: "Server processing coming soon",
-    availabilityMessage:
-      "This converter needs a dedicated document conversion server to produce reliable PowerPoint files. It is temporarily unavailable on Vercel while we prepare the production worker.",
   },
 
   "image-to-pdf": {

@@ -83,7 +83,7 @@ const pdfTools = [
       "Prepared for the dedicated rendering server required for high-quality page images.",
     href: "/tools/pdf/pdf-to-image",
     icon: FileImage,
-    badge: "Server soon",
+    badge: "Coming Soon",
     status: "server-coming-soon" as const,
   },
   {
@@ -92,7 +92,7 @@ const pdfTools = [
       "Prepared for the dedicated QPDF server required for password protection.",
     href: "/tools/pdf/protect-pdf",
     icon: Lock,
-    badge: "Server soon",
+    badge: "Coming Soon",
     status: "server-coming-soon" as const,
   },
   {
@@ -101,7 +101,7 @@ const pdfTools = [
       "Prepared for the dedicated QPDF server required for secure PDF unlocking.",
     href: "/tools/pdf/unlock-pdf",
     icon: UnlockKeyhole,
-    badge: "Server soon",
+    badge: "Coming Soon",
     status: "server-coming-soon" as const,
   },
 ];
@@ -111,7 +111,7 @@ export default function PDFToolsPage() {
     <ToolHubPage
       eyebrow="YAJU Documents"
       title="YAJU Documents"
-      subtitle="Use document and PDF tools that are live on Vercel now, while advanced server-based converters are prepared for the production worker."
+      subtitle="Explore seven live document tools. Tools that are not yet complete are clearly marked Coming Soon."
       tools={pdfTools}
     />
   );

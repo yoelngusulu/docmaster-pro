@@ -7,13 +7,14 @@ import {
   Image as ImageIcon,
   MapPinned,
 } from "lucide-react";
+import { TOOL_COUNTS } from "@/lib/tool-counts";
 
 const categories = [
   {
     icon: MapPinned,
     title: "YAJU Field Tools",
     href: "/tools/gis",
-    tools: "4 live tools",
+    tools: `${TOOL_COUNTS.field} active tools`,
     description:
       "Practical tools for GIS, surveying, water and engineering fieldwork, including coordinates, measurements, bearings and water storage sizing.",
   },
@@ -21,15 +22,15 @@ const categories = [
     icon: FileText,
     title: "YAJU Documents",
     href: "/tools/pdf",
-    tools: "7 live tools",
+    tools: `${TOOL_COUNTS.documents} active tools`,
     description:
-      "Use seven live document tools, including PDF merging, splitting, compression and document conversion. Tools that are not yet complete are marked “Coming Soon”.",
+      "Use active document tools for PDF merging, splitting, compression and supported document workflows. Tools that are not yet complete are marked “Coming Soon”.",
   },
   {
     icon: ImageIcon,
     title: "YAJU Images",
     href: "/tools/image",
-    tools: "1 live tool + compression coming soon",
+    tools: `${TOOL_COUNTS.images} active tool + compression coming soon`,
     description:
       "Convert images to PDF now while production image compression is being prepared.",
   },

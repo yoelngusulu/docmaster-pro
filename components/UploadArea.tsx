@@ -32,6 +32,15 @@ const AD_SUPPORTED_TOOLS = new Set([
   "compress-image",
 ]);
 
+const CLOUD_CONVERT_TOOL_FORMATS: Partial<Record<keyof typeof toolConfig, { inputFormats: string[]; outputFormat: string }>> = {
+  "pdf-to-word": { inputFormats: ["pdf"], outputFormat: "docx" },
+  "pdf-to-excel": { inputFormats: ["pdf"], outputFormat: "xlsx" },
+  "pdf-to-powerpoint": { inputFormats: ["pdf"], outputFormat: "pptx" },
+  "word-to-pdf": { inputFormats: ["doc", "docx"], outputFormat: "pdf" },
+  "excel-to-pdf": { inputFormats: ["xls", "xlsx"], outputFormat: "pdf" },
+  "powerpoint-to-pdf": { inputFormats: ["ppt", "pptx"], outputFormat: "pdf" },
+};
+
 function isAdSupportedTool(tool: string) {
   return AD_SUPPORTED_TOOLS.has(tool);
 }
@@ -484,6 +493,141 @@ const completeConversion = async (
   }
 };
 
+  const completeRemoteConversion = async (downloadUrl: string, fileName: string) => {
+    if (!downloadUrl.startsWith("https://")) {
+      throw new Error("The conversion service returned an invalid download link.");
+    }
+
+    resetConvertedFile();
+    setConvertedFileUrl(downloadUrl);
+    setConvertedFileName(fileName);
+    setProgress(100);
+    setIsConverting(false);
+    setIsCompleted(true);
+
+    const historyResult = await saveConversionHistory({
+      tool,
+      originalFileName: selectedFiles[0]?.name || "Unknown file",
+      outputFileName: fileName,
+    });
+
+    if (!historyResult?.isAuthenticated) {
+      setShowGuestAd(true);
+    }
+  };
+
+  const handleCloudConvert = async (inputFormat: string, outputFormat: string) => {
+    const file = selectedFiles[0];
+    if (!file) {
+      throw new Error("Please select a file first.");
+    }
+    if (file.size > 100 * 1024 * 1024) {
+      throw new Error("Maximum file size is 100 MB for this converter.");
+    }
+
+    setProgress(15);
+    const startResponse = await fetch("/api/convert/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filename: file.name,
+        fileSize: file.size,
+        inputFormat,
+        outputFormat,
+      }),
+      cache: "no-store",
+    });
+
+    const startData = await startResponse.json().catch(() => null) as {
+      message?: string;
+      jobId?: string;
+      uploadUrl?: string;
+      uploadParameters?: Record<string, string | number>;
+    } | null;
+
+    if (!startResponse.ok || !startData?.jobId || !startData.uploadUrl || !startData.uploadParameters) {
+      throw new Error(startData?.message || "Could not start the conversion. Please try again.");
+    }
+
+    const uploadHost = new URL(startData.uploadUrl).hostname;
+    if (new URL(startData.uploadUrl).protocol !== "https:" || !uploadHost.endsWith("cloudconvert.com")) {
+      throw new Error("The conversion service returned an unsafe upload address.");
+    }
+
+    if (typeof DataTransfer === "undefined") {
+      throw new Error("Your browser does not support the secure upload flow. Please use an updated browser.");
+    }
+
+    const frameName = "yaju-cloudconvert-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+    const iframe = document.createElement("iframe");
+    iframe.name = frameName;
+    iframe.style.display = "none";
+    document.body.appendChild(iframe);
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = startData.uploadUrl;
+    form.enctype = "multipart/form-data";
+    form.target = frameName;
+    form.style.display = "none";
+
+    Object.entries(startData.uploadParameters).forEach(([key, value]) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = key;
+      input.value = String(value);
+      form.appendChild(input);
+    });
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.name = "file";
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    fileInput.files = transfer.files;
+    form.appendChild(fileInput);
+    document.body.appendChild(form);
+
+    try {
+      form.submit();
+      setProgress(30);
+
+      for (let attempt = 0; attempt < 60; attempt += 1) {
+        await sleep(2000);
+        const statusResponse = await fetch("/api/convert/status?jobId=" + encodeURIComponent(startData.jobId), {
+          method: "GET",
+          cache: "no-store",
+        });
+        const statusData = await statusResponse.json().catch(() => null) as {
+          message?: string;
+          status?: string;
+          fileUrl?: string;
+          fileName?: string;
+        } | null;
+
+        if (!statusResponse.ok || !statusData) {
+          throw new Error(statusData?.message || "Could not check conversion status.");
+        }
+
+        if (statusData.status === "error") {
+          throw new Error(statusData.message || "The conversion service could not process this file.");
+        }
+
+        if (statusData.status === "finished" && statusData.fileUrl) {
+          const outputName = statusData.fileName || file.name.replace(/\\.[^/.]+$/, "") + "." + outputFormat;
+          await completeRemoteConversion(statusData.fileUrl, outputName);
+          return;
+        }
+
+        setProgress(Math.min(90, 30 + Math.floor((attempt / 60) * 60)));
+      }
+
+      throw new Error("Conversion is taking longer than expected. Please try again in a moment.");
+    } finally {
+      form.remove();
+      iframe.remove();
+    }
+  };
   const createBlobFromResponse = async (
     response: Response,
     fallbackMimeType: string
@@ -1568,6 +1712,16 @@ if (
       setProgress(10);
 
       try {
+        const cloudConvertConfig = CLOUD_CONVERT_TOOL_FORMATS[tool];
+        if (cloudConvertConfig) {
+          const inputFormat = selectedFiles[0]?.name.split(".").pop()?.toLowerCase() || "";
+          if (!cloudConvertConfig.inputFormats.includes(inputFormat)) {
+            throw new Error("The selected file format is not supported for this conversion.");
+          }
+          await handleCloudConvert(inputFormat, cloudConvertConfig.outputFormat);
+          return;
+        }
+
         if (
           tool === "pdf-to-word"
         ) {

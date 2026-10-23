@@ -21,9 +21,9 @@ const categories = [
     icon: FileText,
     title: "YAJU Documents",
     href: "/tools/pdf",
-    tools: "3 live tools + server tools coming soon",
+    tools: "7 live tools",
     description:
-      "Merge, split and compress PDFs now. Advanced document conversion tools are being prepared for the production server.",
+      "Use seven live document tools, including PDF merging, splitting, compression and document conversion. Tools that are not yet complete are marked “Coming Soon”.",
   },
   {
     icon: ImageIcon,

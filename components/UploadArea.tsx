@@ -550,7 +550,7 @@ const completeConversion = async (
     }
 
     const uploadHost = new URL(startData.uploadUrl).hostname;
-    if (new URL(startData.uploadUrl).protocol !== "https:" || !uploadHost.endsWith("cloudconvert.com")) {
+    if (new URL(startData.uploadUrl).protocol !== "https:" || !(uploadHost === "cloudconvert.com" || uploadHost.endsWith(".cloudconvert.com"))) {
       throw new Error("The conversion service returned an unsafe upload address.");
     }
 

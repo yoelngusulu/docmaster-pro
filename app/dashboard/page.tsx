@@ -80,6 +80,9 @@ export default async function DashboardPage() {
     billingSummary.plan === "PREMIUM"
       ? "Renew Premium"
       : "Upgrade to Premium";
+  const canStartPremiumCheckout =
+    premiumPlan.checkoutConfigured &&
+    billingSummary.plan !== "PREMIUM";
 
   const {
     data: conversions,
@@ -171,16 +174,37 @@ export default async function DashboardPage() {
                 Subscription / Billing
               </h2>
               <p className="mt-1 text-sm text-gray-500">
-                Premium access is activated after payment verification.
+                Premium access is activated only after an admin verifies payment.
               </p>
+              {!premiumPlan.checkoutConfigured && billingSummary.plan !== "PREMIUM" && (
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-amber-700">
+                  Premium checkout is not configured yet. A confirmed price and payment instructions are unavailable, so you cannot purchase Premium from this account yet.
+                </p>
+              )}
             </div>
 
-            <Link
-              href="/checkout/premium"
-              className="inline-flex w-full justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 sm:w-auto"
-            >
-              {billingCta}
-            </Link>
+            {billingSummary.plan === "PREMIUM" ? (
+              <Link
+                href="/checkout/premium"
+                className="inline-flex w-full justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 sm:w-auto"
+              >
+                {billingCta}
+              </Link>
+            ) : canStartPremiumCheckout ? (
+              <Link
+                href="/checkout/premium"
+                className="inline-flex w-full justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 sm:w-auto"
+              >
+                {billingCta}
+              </Link>
+            ) : (
+              <span
+                aria-disabled="true"
+                className="inline-flex w-full cursor-not-allowed justify-center rounded-xl bg-gray-100 px-5 py-3 text-sm font-semibold text-gray-500 sm:w-auto"
+              >
+                Premium setup pending
+              </span>
+            )}
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-4">

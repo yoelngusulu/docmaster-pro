@@ -190,7 +190,6 @@ export default function PricingPage() {
             controls have been implemented and tested.
           </p>
         </div>
-        </div>
       </section>
     </main>
   );

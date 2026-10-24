@@ -177,8 +177,10 @@ export default function UploadArea({
   const validateFiles = (
     files: File[]
   ) => {
-    const maxSize =
-      200 * 1024 * 1024;
+    // Match the UI limit to the server-side limits:
+    // AI processing accepts up to 25 MB; conversion APIs accept up to 100 MB.
+    const maxSizeMB = aiTools.has(tool) ? 25 : 100;
+    const maxSize = maxSizeMB * 1024 * 1024;
 
     const allowedExtensions =
       config.accept
@@ -215,7 +217,7 @@ export default function UploadArea({
 
       if (file.size > maxSize) {
         setError(
-          "Maximum file size is 200 MB."
+          `Maximum file size is ${maxSizeMB} MB for this tool.`
         );
 
         return false;

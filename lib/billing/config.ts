@@ -70,6 +70,8 @@ export function getPremiumPlanConfig(): PremiumPlanConfig {
     paymentReferencePrefix,
     requestExpiryHours,
     checkoutConfigured:
-      amountTzs > 0 && airtelLipaNamba.length > 0,
+      amountTzs > 0 &&
+      airtelLipaNamba.length > 0 &&
+      process.env.DOCMASTER_PREMIUM_PRICE_CONFIRMED === "true",
   };
 }

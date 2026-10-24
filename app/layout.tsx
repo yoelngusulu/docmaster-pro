@@ -10,7 +10,7 @@ const adsenseClient =
   process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "ca-pub-4368066697517385";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://yaju-tools.vercel.app"),
+  metadataBase: new URL("https://yaju-tools.com"),
   title: {
     default: "YAJU Utility: Free PDF, Image & Field Tools",
     template: "%s | YAJU",

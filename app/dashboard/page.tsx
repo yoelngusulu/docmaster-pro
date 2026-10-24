@@ -234,7 +234,7 @@ export default async function DashboardPage() {
               <p className="mt-2 text-sm font-bold leading-6 text-gray-900">
                 {premiumPlan.checkoutConfigured
                   ? `${formatTzs(premiumPlan.amountTzs)} / ${premiumPlan.billingPeriod}`
-                  : "Setup pending"}
+                  : "Price not confirmed"}
               </p>
             </div>
           </div>

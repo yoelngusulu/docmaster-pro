@@ -16,11 +16,9 @@ export default async function Home({
 }) {
   const params = await searchParams;
   const code = typeof params.code === "string" ? params.code : null;
-  const type = typeof params.type === "string" ? params.type : null;
-
-  // Some Supabase recovery email templates send recovery codes to the Site URL
-  // instead of honoring redirectTo. Route those links through the auth callback.
-  if (code && type === "recovery") {
+  // Supabase recovery emails can land on the Site URL with a code query parameter
+  // when the email template or redirect allow-list overrides redirectTo.
+  if (code) {
     redirect(`/auth/callback?code=${encodeURIComponent(code)}&next=/update-password`);
   }
 

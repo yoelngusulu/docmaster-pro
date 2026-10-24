@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const baseUrl = "https://yaju-tools.vercel.app";
+const baseUrl = "https://yaju-tools.com";
 
 type ChangeFrequency = NonNullable<
   MetadataRoute.Sitemap[number]["changeFrequency"]

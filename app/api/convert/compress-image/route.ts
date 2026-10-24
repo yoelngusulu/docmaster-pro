@@ -154,7 +154,7 @@ export async function POST(
       await fs.mkdtemp(
         path.join(
           os.tmpdir(),
-          `docmaster-image-${fileId}-`
+          `yaju-image-${fileId}-`
         )
       );
 

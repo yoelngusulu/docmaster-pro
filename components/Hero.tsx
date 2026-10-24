@@ -7,7 +7,7 @@ import { ACTIVE_TOOLS_COUNT } from "@/lib/tool-counts";
 
 export default function Hero() {
   const openAIAssistant = () => {
-    window.dispatchEvent(new CustomEvent("open-docmaster-ai"));
+    window.dispatchEvent(new CustomEvent("open-yaju-ai"));
   };
 
   return (

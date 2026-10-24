@@ -63,13 +63,13 @@ export default function AIAssistant() {
     };
 
     window.addEventListener(
-      "open-docmaster-ai",
+      "open-yaju-ai",
       handleOpenAssistant
     );
 
     return () => {
       window.removeEventListener(
-        "open-docmaster-ai",
+        "open-yaju-ai",
         handleOpenAssistant
       );
     };

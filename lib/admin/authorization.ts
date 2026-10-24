@@ -12,7 +12,7 @@ type SupabaseUserForAdmin = {
 };
 
 function getAllowedAdminEmails() {
-  return (process.env.DOCMASTER_ADMIN_EMAILS || "")
+  return (process.env.YAJU_ADMIN_EMAILS || "")
     .split(",")
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);

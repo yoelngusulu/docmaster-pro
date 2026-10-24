@@ -109,7 +109,7 @@ export async function POST(
       await fs.mkdtemp(
         path.join(
           os.tmpdir(),
-          "docmaster-pdf-to-excel-"
+          "yaju-pdf-to-excel-"
         )
       );
 

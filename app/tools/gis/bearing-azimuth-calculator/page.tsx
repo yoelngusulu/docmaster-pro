@@ -464,7 +464,7 @@ export default function BearingAzimuthCalculatorPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "docmaster-bearing-azimuth.csv";
+    link.download = "yaju-bearing-azimuth.csv";
     document.body.appendChild(link);
     link.click();
     link.remove();

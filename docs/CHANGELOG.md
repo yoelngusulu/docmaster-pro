@@ -55,7 +55,7 @@ All notable changes to the YAJU Field Tools project are documented in this file.
 
 ### Changed
 
-- Rebranded the user interface from DocMaster to **YAJU Field Tools**.
+- Rebranded the user interface from YAJU to **YAJU Field Tools**.
 - Updated the Navbar, Hero, About page, Footer, tool categories and supporting copy to use the YAJU identity.
 - Prioritized coordinate and GIS tools across the homepage, calls to action and popular tools.
 - Added the official YAJU logo, favicon and responsive wordmark treatment.

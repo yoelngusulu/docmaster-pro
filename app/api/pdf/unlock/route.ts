@@ -152,7 +152,7 @@ export async function POST(
     temporaryDirectory =
       path.join(
         os.tmpdir(),
-        `docmaster-unlock-${crypto.randomUUID()}`
+        `yaju-unlock-${crypto.randomUUID()}`
       );
 
     await mkdir(

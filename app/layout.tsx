@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 const themeScript = `
 (function () {
   try {
-    var storedTheme = localStorage.getItem("docmaster-theme");
+    var storedTheme = localStorage.getItem("yaju-theme");
     var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     var useDark = storedTheme ? storedTheme === "dark" : prefersDark;
     document.documentElement.classList.toggle("dark", useDark);

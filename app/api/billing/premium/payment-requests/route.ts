@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Premium checkout is not configured yet. Please contact DocMaster support.",
+          "Premium checkout is not configured yet. Please contact YAJU support.",
       },
       {
         status: 503,

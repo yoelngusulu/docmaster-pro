@@ -114,7 +114,7 @@ export async function POST(
     workingDirectory =
       path.join(
         os.tmpdir(),
-        `docmaster-${uniqueId}`
+        `yaju-${uniqueId}`
       );
 
     const outputDirectory =

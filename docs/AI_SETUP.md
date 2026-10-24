@@ -1,6 +1,6 @@
 # AI API Setup
 
-DocMaster AI uses the server-side route at `/api/ai/process`.
+YAJU AI uses the server-side route at `/api/ai/process`.
 
 Required environment variable:
 

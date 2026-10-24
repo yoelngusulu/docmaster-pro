@@ -43,7 +43,7 @@ export default async function PremiumCheckoutPage() {
         <div className="mt-8">
           <PremiumPaymentForm
             planName={premiumPlan.planName}
-            formattedPrice={formatTzs(premiumPlan.amountTzs)}
+            formattedPrice={premiumPlan.checkoutConfigured ? formatTzs(premiumPlan.amountTzs) : "Price not confirmed"}
             amountTzs={premiumPlan.amountTzs}
             billingPeriod={premiumPlan.billingPeriod}
             airtelLipaNamba={premiumPlan.airtelLipaNamba}

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const baseUrl = "https://yaju-tools.vercel.app";
+const baseUrl = "https://yaju-tools.com";
 
 export default function robots(): MetadataRoute.Robots {
   return {

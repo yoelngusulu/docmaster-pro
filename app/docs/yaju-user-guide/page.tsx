@@ -83,8 +83,8 @@ export default function YajuUserGuidePage() {
         </section>
 
         <footer className="mt-10 border-t border-gray-200 pt-6 text-sm text-gray-600 print:border-gray-400">
-          <p>Website: https://yaju-tools.vercel.app</p>
-          <p className="mt-1">Open tools: https://yaju-tools.vercel.app/tools</p>
+          <p>Website: https://yaju-tools.com</p>
+          <p className="mt-1">Open tools: https://yaju-tools.com/tools</p>
           <p className="mt-1 print:hidden"><Link href="/docs" className="font-semibold text-blue-600">Back to YAJU documentation</Link></p>
         </footer>
       </article>

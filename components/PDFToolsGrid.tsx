@@ -23,17 +23,17 @@ const pdfTools = [
   {
     title: "PDF to Word",
     href: "/tools/pdf/pdf-to-word",
-    status: "Server soon",
+    status: "Available",
   },
   {
     title: "PDF to Excel",
     href: "/tools/pdf/pdf-to-excel",
-    status: "Server soon",
+    status: "Available",
   },
   {
     title: "PDF to PowerPoint",
     href: "/tools/pdf/pdf-to-powerpoint",
-    status: "Server soon",
+    status: "Available",
   },
   {
     title: "PDF to Image",
@@ -61,12 +61,12 @@ export default function PDFToolsGrid() {
         </h2>
 
         <p className="mt-4 text-center text-gray-600">
-          Choose a live tool now, or view the status of server-based converters.
+          Choose an available tool, or check which server-based converters are coming soon.
         </p>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {pdfTools.map((tool, index) => {
-            const isLive = tool.status === "Live";
+            const isLive = tool.status === "Live" || tool.status === "Available";
 
             return (
               <motion.div

@@ -31,66 +31,50 @@ function getPlans(): Plan[] {
     },
     {
       name: "Daily Pass",
-      price: "TSh 700",
-      cadence: "/ 24 hours",
+      price: "Coming Soon",
       description:
-        "For short, one-day jobs when you want paid YAJU tools without a monthly subscription.",
+        "A short-term paid option is planned, but it is not available for purchase yet.",
       features: [
-        "Full-day access to paid tools",
-        "Bulk coordinate conversion",
-        "Paid PDF tools included during the pass",
-        "No ads during the pass",
-        "More room for larger files than Free",
+        "Planned: temporary access to selected paid tools",
+        "Final features and limits will be published before launch",
       ],
-      cta: "Coming Soon",
+      cta: "Not Available",
     },
     {
       name: "Pro Monthly",
-      price: "TSh 10,500",
-      cadence: "/ month",
+      price: "Coming Soon",
       description:
-        "The main YAJU plan for regular GIS, coordinate and document workflows.",
+        "A monthly plan for regular GIS, coordinate and document workflows is planned.",
       features: [
-        "Monthly access for regular work",
-        "All bulk coordinate conversions",
-        "Batch and advanced PDF tools",
-        "No ads",
-        "More room for larger files and heavier processing",
+        "Planned: expanded access to selected tools",
+        "Final features, limits and price will be published before launch",
       ],
-      cta: "Coming Soon",
+      cta: "Not Available",
       featured: true,
       badge: "Most Popular",
     },
     {
       name: "Pro Yearly",
-      price: "TSh 100,000",
-      cadence: "/ year",
+      price: "Coming Soon",
       description:
-        "The same Pro experience at a lower effective monthly cost.",
+        "A yearly plan is planned but is not available for purchase yet.",
       features: [
-        "Monthly Pro access refreshed throughout the year",
-        "All bulk coordinate conversions",
-        "Batch and advanced PDF tools",
-        "No ads",
-        "Save TSh 26,000 versus monthly billing",
+        "Planned: access for longer-term professional use",
+        "Final benefits and price will be published before launch",
       ],
-      cta: "Coming Soon",
+      cta: "Not Available",
       badge: "Best Value",
     },
     {
       name: "Power User",
-      price: "TSh 30,000",
-      cadence: "/ month",
+      price: "Coming Soon",
       description:
-        "For professionals with high-volume GIS, document and data-processing workloads.",
+        "A higher-volume plan for professional workloads is under consideration.",
       features: [
-        "High-volume monthly access",
-        "High-volume bulk processing",
-        "Larger temporary workspace and file capacity",
-        "Priority processing",
-        "Fair-use high-volume access",
+        "Potential future option for higher-volume processing",
+        "Availability, capacity and service levels are not confirmed",
       ],
-      cta: "Coming Soon",
+      cta: "Not Available",
     },
   ];
 }
@@ -197,39 +181,15 @@ export default function PricingPage() {
 
         <div className="mx-auto mt-12 max-w-4xl rounded-2xl border border-gray-200 bg-white p-7 shadow-sm">
           <h2 className="text-2xl font-bold text-gray-900">
-            How YAJU processing credits work
+            Paid features are not available yet
           </h2>
           <p className="mt-3 leading-7 text-gray-600">
-            Credits help YAJU manage operations that consume more server
-            resources, such as bulk conversions and heavy PDF processing.
-            Simple tools can remain free and ad-supported.
+            Paid plans, checkout, processing credits and their limits are still being prepared.
+            No payment should be made based on planned prices or features shown in drafts.
+            We will publish confirmed prices, limits and included tools when purchase and access
+            controls have been implemented and tested.
           </p>
-
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[640px] border-collapse text-left text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 text-gray-900">
-                  <th className="py-3 pr-4 font-semibold">Operation</th>
-                  <th className="py-3 pr-4 font-semibold">Credits</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-600">
-                <tr className="border-b border-gray-100"><td className="py-3 pr-4">Bulk coordinates: up to 100 points</td><td className="py-3 pr-4">5</td></tr>
-                <tr className="border-b border-gray-100"><td className="py-3 pr-4">Bulk coordinates: 101-1,000 points</td><td className="py-3 pr-4">15</td></tr>
-                <tr className="border-b border-gray-100"><td className="py-3 pr-4">Bulk coordinates: over 1,000 points</td><td className="py-3 pr-4">40</td></tr>
-                <tr className="border-b border-gray-100"><td className="py-3 pr-4">PDF to Word</td><td className="py-3 pr-4">10</td></tr>
-                <tr className="border-b border-gray-100"><td className="py-3 pr-4">PDF to Excel</td><td className="py-3 pr-4">12</td></tr>
-                <tr className="border-b border-gray-100"><td className="py-3 pr-4">PDF to PowerPoint</td><td className="py-3 pr-4">12</td></tr>
-                <tr><td className="py-3 pr-4">Heavy AI/document processing</td><td className="py-3 pr-4">20</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <p className="mt-5 text-sm leading-6 text-gray-500">
-            Temporary storage and file-size capacity remain separate from
-            credits. YAJU can adjust credit costs later if real server usage
-            shows that an operation is much lighter or heavier than expected.
-          </p>
+        </div>
         </div>
       </section>
     </main>

@@ -13,6 +13,10 @@ import {
 
 import ToolHubPage from "@/components/ToolHubPage";
 
+export const metadata = {
+  title: "Free PDF Tools: Convert, Merge, Split & Compress",
+};
+
 const pdfTools = [
   {
     title: "HTML to PDF",

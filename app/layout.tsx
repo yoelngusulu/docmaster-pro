@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     shortcut: "/icon.svg",
   },
   verification: {
-    google: "FppDEXu38DNorAFUEUKxvodn18B68YT6hF8uvmpBDuo",
+    google: "Dqo7Z3gjGqRAPpzePOTWljf4s0_z7ZAkv17bDBh76mo",
   },
 };
 

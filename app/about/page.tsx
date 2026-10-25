@@ -37,8 +37,8 @@ const reasons = [
 ];
 
 export const metadata = {
-  title: `About ${siteConfig.productName} | ${siteConfig.legalOwnerName}`,
-  description: "Learn about YAJU, a workspace for field tools, documents, images and AI-powered productivity.",
+  title: { absolute: "About YAJU: Field, PDF & Image Tools" },
+  description: "Discover YAJU Field Tools, PDF and image utilities, and AI features in one practical productivity platform.",
 };
 
 export default function AboutPage() {
@@ -91,7 +91,7 @@ export default function AboutPage() {
         </section>
 
         <div className="mt-10 border-t border-gray-200 pt-8 text-center">
-          <p className="font-semibold text-gray-900">{siteConfig.productName} - {siteConfig.developerAttribution}</p>
+          <p className="font-semibold text-gray-900">YAJU Field Tools, Documents, Images & AI</p>
           <p className="mt-2 text-sm italic text-gray-500">{siteConfig.tagline}</p>
         </div>
       </section>

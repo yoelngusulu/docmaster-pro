@@ -5,6 +5,9 @@ export default function PopularTools() {
     { label: "Coordinates Converter", href: "/tools/coordinates-converter" },
     { label: "Measure Distance & Area", href: "/tools/gis/distance-area-calculator" },
     { label: "Water Storage & Tank Sizing", href: "/tools/gis/water-storage-calculator" },
+    { label: "PDF to Word", href: "/tools/pdf/pdf-to-word" },
+    { label: "PDF to Excel", href: "/tools/pdf/pdf-to-excel" },
+    { label: "PDF to PowerPoint", href: "/tools/pdf/pdf-to-powerpoint" },
     { label: "Merge PDF", href: "/tools/pdf/merge-pdf" },
     { label: "Split PDF", href: "/tools/pdf/split-pdf" },
     { label: "Compress PDF", href: "/tools/pdf/compress-pdf" },
@@ -21,7 +24,7 @@ export default function PopularTools() {
         </h2>
 
         <p className="mt-4 text-center text-gray-600">
-          Convert coordinates, measure distance and area, size water storage, and manage documents and images in one smart workspace.
+          Convert coordinates, measure distance and area, size water storage, convert PDFs to Word, Excel and PowerPoint, and manage images in one smart workspace.
         </p>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

@@ -21,8 +21,6 @@ const capabilities = [
       "Convert, compress and improve images with simple tools built for everyday work.",
     icon: ImageIcon,
   },
-  {
-  },
 ];
 
 const reasons = [
@@ -50,7 +48,7 @@ export default function AboutPage() {
           </div>
           <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white"><Layers3 size={24} /></div>
-            <h2 className="mt-5 text-2xl font-bold text-gray-900">One master brand, four workspaces</h2>
+            <h2 className="mt-5 text-2xl font-bold text-gray-900">One master brand, three workspaces</h2>
             <p className="mt-3 leading-7 text-gray-600">YAJU brings Field Tools, Documents and Images together in one workspace for practical work with field data and files.</p>
           </div>
         </div>

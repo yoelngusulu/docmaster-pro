@@ -3,7 +3,7 @@ export const siteConfig = {
   displayName: "YAJU",
   tagline: "Smart digital tools for documents & fieldwork.",
   platformDescription:
-    "YAJU brings together practical field tools, PDF and image utilities, and AI features in one simple productivity workspace.",
+    "YAJU brings together practical field tools, PDF and image utilities in one simple productivity workspace.",
   copyrightText:
     "© 2026 YAJU. Developed by Yoel Ngusulu. All rights reserved.",
 };

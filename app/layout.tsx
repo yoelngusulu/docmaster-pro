@@ -12,7 +12,7 @@ const adsenseClient =
 export const metadata: Metadata = {
   metadataBase: new URL("https://yaju-tools.com"),
   title: {
-    default: "YAJU Utility: Free PDF, Image & Field Tools",
+    default: "YAJU Tools: Free GIS, PDF & Image Tools",
     template: "%s | YAJU",
   },
   description:

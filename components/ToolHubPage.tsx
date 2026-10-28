@@ -5,6 +5,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import GoogleAd from "./GoogleAd";
+import { canServeAdsForCurrentUser } from "@/lib/ads/visibility";
 
 type ToolStatus =
   | "available"
@@ -28,7 +29,7 @@ type ToolHubPageProps = {
   tools: ToolHubItem[];
 };
 
-export default function ToolHubPage({
+export default async function ToolHubPage({
   eyebrow,
   title,
   subtitle,
@@ -36,6 +37,8 @@ export default function ToolHubPage({
   backText = "Back to Home",
   tools,
 }: ToolHubPageProps) {
+  const showAds = await canServeAdsForCurrentUser();
+
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
@@ -61,10 +64,6 @@ export default function ToolHubPage({
           </p>
         </section>
 
-        <GoogleAd
-          slot={process.env.NEXT_PUBLIC_ADSENSE_TOOLS_HUB_SLOT}
-          className="mt-10"
-        />
 
         <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {tools.map((tool) => {
@@ -132,6 +131,13 @@ export default function ToolHubPage({
             );
           })}
         </section>
+
+        {showAds && (
+          <GoogleAd
+            slot={process.env.NEXT_PUBLIC_ADSENSE_TOOLS_HUB_SLOT}
+            className="mt-16"
+          />
+        )}
       </div>
     </main>
   );

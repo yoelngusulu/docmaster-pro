@@ -18,19 +18,6 @@ import {
   useRef,
   useState,
 } from "react";
-const AD_WAIT_SECONDS = 7;
-
-const AD_SUPPORTED_TOOLS = new Set([
-  "merge-pdf",
-  "split-pdf",
-  "compress-pdf",
-  "protect-pdf",
-  "unlock-pdf",
-  "word-to-pdf",
-  "pdf-to-image",
-  "image-to-pdf",
-  "compress-image",
-]);
 
 const CLOUD_CONVERT_TOOL_FORMATS: Partial<Record<keyof typeof toolConfig, { inputFormats: string[]; outputFormat: string }>> = {
   "pdf-to-word": { inputFormats: ["pdf"], outputFormat: "docx" },
@@ -40,10 +27,6 @@ const CLOUD_CONVERT_TOOL_FORMATS: Partial<Record<keyof typeof toolConfig, { inpu
   "excel-to-pdf": { inputFormats: ["xls", "xlsx"], outputFormat: "pdf" },
   "powerpoint-to-pdf": { inputFormats: ["ppt", "pptx"], outputFormat: "pdf" },
 };
-
-function isAdSupportedTool(tool: string) {
-  return AD_SUPPORTED_TOOLS.has(tool);
-}
 
 function sleep(ms: number) {
   return new Promise((resolve) => {
@@ -75,12 +58,6 @@ export default function UploadArea({
     isConverting,
     setIsConverting,
   ] = useState(false);
-    const [isAdWaiting, setIsAdWaiting] =
-    useState(false);
-
-  const [adCountdown, setAdCountdown] =
-    useState(0);
-
   const [progress, setProgress] =
     useState(0);
 
@@ -121,11 +98,6 @@ export default function UploadArea({
     convertedFileName,
     setConvertedFileName,
   ] = useState("");
-
-    const [
-    showGuestAd,
-    setShowGuestAd,
-  ] = useState(false);
 
   const aiActions = [
     "Remove Background",
@@ -292,7 +264,6 @@ export default function UploadArea({
     setIsCompleted(false);
     setIsConverting(false);
     setSelectedAction("");
-    setShowGuestAd(false);
     setError("");
   };
 
@@ -314,7 +285,6 @@ export default function UploadArea({
     setPassword("");
     setConfirmPassword("");
     setPreviewUrl("");
-    setShowGuestAd(false);
     setError("");
 
     if (fileInputRef.current) {
@@ -349,11 +319,6 @@ export default function UploadArea({
     link.click();
 
     link.remove();
-  };
-
-  const handleContinueAfterAd = () => {
-    setShowGuestAd(false);
-    handleDownload();
   };
 
   const handleDrop = (
@@ -481,18 +446,13 @@ const completeConversion = async (
     selectedFiles[0]?.name ||
     "Unknown file";
 
-  const historyResult =
-    await saveConversionHistory({
+  await saveConversionHistory({
       tool,
       originalFileName,
       outputFileName: fileName,
     });
 
-  if (
-    !historyResult?.isAuthenticated
-  ) {
-    setShowGuestAd(true);
-  }
+
 };
 
   const completeRemoteConversion = async (downloadUrl: string, fileName: string) => {
@@ -507,15 +467,13 @@ const completeConversion = async (
     setIsConverting(false);
     setIsCompleted(true);
 
-    const historyResult = await saveConversionHistory({
+    await saveConversionHistory({
       tool,
       originalFileName: selectedFiles[0]?.name || "Unknown file",
       outputFileName: fileName,
     });
 
-    if (!historyResult?.isAuthenticated) {
-      setShowGuestAd(true);
-    }
+
   };
 
   const handleCloudConvert = async (inputFormat: string, outputFormat: string) => {
@@ -913,7 +871,7 @@ const handleCompressImage = async () => {
     fileName
   );
 };
-    
+
   const handleCompressPdf =
     async () => {
       if (
@@ -1067,7 +1025,7 @@ const handleCompressImage = async () => {
       );
     };
 
-  
+
   const handlePdfToImage =
     async () => {
       if (selectedFiles.length !== 1) {
@@ -1358,7 +1316,7 @@ const handleCompressImage = async () => {
           "Please enter the PDF password."
         );
       }
-      
+
 
       const formData = new FormData();
 
@@ -1495,23 +1453,7 @@ const handleCompressImage = async () => {
     };
 
 
-  
-  async function runAdWait() {
-    setIsAdWaiting(true);
-
-    for (
-      let seconds = AD_WAIT_SECONDS;
-      seconds > 0;
-      seconds -= 1
-    ) {
-      setAdCountdown(seconds);
-      await sleep(1000);
-    }
-
-    setAdCountdown(0);
-    setIsAdWaiting(false);
-  }
-const handleConvert =
+  const handleConvert =
     async () => {
       if (isConverting) {
         return;
@@ -1705,10 +1647,6 @@ if (
       }
 
       setError("");
-      if (isAdSupportedTool(tool)) {
-      await runAdWait();
-    }
-
     setIsConverting(true);
       setIsCompleted(false);
       setProgress(10);
@@ -1863,29 +1801,7 @@ if (
         duration: 0.5,
       }}
       className="mt-0"
-    >
-      {isAdWaiting && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
-            <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-              Sponsored Free Tool
-            </p>
-
-            <h2 className="mt-3 text-2xl font-bold text-gray-900">
-              Conversion starts in {adCountdown}s
-            </h2>
-
-            <div className="mt-5 flex min-h-32 items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
-              Google AdSense placement will appear here
-            </div>
-
-            <p className="mt-4 text-sm leading-6 text-gray-600">
-              Free tools are supported by ads so more users can access DocMaster.
-            </p>
-          </div>
-        </div>
-      )}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm sm:p-6 lg:p-8">
+    >      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm sm:p-6 lg:p-8">
         {error && (
           <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-left text-sm text-red-700">
             <AlertCircle size={20} className="mt-0.5 shrink-0" />
@@ -2276,42 +2192,8 @@ if (
               </div>
             </>
           )}
-        
+
       </div>
-
-      {showGuestAd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 text-center shadow-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
-              Advertisement
-            </p>
-
-            <div className="mt-5 flex min-h-48 items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-6">
-              <div>
-                <p className="text-lg font-semibold text-gray-800">
-                  Sponsored content will appear here.
-                </p>
-
-                <p className="mt-2 text-sm text-gray-500">
-                  Guest users see one advertisement after each successful conversion.
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleContinueAfterAd}
-              className="mt-6 w-full rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
-            >
-              Continue to Download
-            </button>
-
-            <p className="mt-3 text-xs text-gray-500">
-              Create a free account to unlock account features and a better experience.
-            </p>
-          </div>
-        </div>
-      )}
 
       <input
         ref={fileInputRef}

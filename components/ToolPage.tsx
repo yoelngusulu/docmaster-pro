@@ -6,12 +6,12 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import GoogleAd from "./GoogleAd";
 import MergePdfUploadArea from "./MergePdfUploadArea";
 import SplitPdfUploadArea from "./SplitPdfUploadArea";
 import UploadArea from "./UploadArea";
 import { toolConfig } from "./toolConfig";
-import { canServeAdsForCurrentUser } from "@/lib/ads/visibility";
+import { Suspense } from "react";
+import ConditionalGoogleAd from "@/components/ConditionalGoogleAd";
 
 type ToolPageProps = {
   tool: keyof typeof toolConfig;
@@ -124,7 +124,7 @@ const liveVercelTools = [
   },
 ];
 
-export default async function ToolPage({
+export default function ToolPage({
   tool,
   backLink,
   backText,
@@ -145,7 +145,6 @@ export default async function ToolPage({
     "availabilityMessage" in config
       ? config.availabilityMessage
       : "This converter needs a dedicated conversion server before it can run in production.";
-  const showAds = await canServeAdsForCurrentUser();
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -304,12 +303,12 @@ export default async function ToolPage({
           </section>
         ) : null}
 
-        {showAds && (
-          <GoogleAd
+        <Suspense fallback={null}>
+          <ConditionalGoogleAd
             slot={process.env.NEXT_PUBLIC_ADSENSE_TOOL_BOTTOM_SLOT}
             className="mt-16"
           />
-        )}
+        </Suspense>
       </div>
     </main>
   );

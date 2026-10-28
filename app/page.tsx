@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import Hero from "@/components/Hero";
 import ToolCategories from "@/components/ToolCategories";
@@ -8,8 +9,7 @@ import PopularTools from "@/components/PopularTools";
 import WaitlistForm from "@/components/WaitlistForm";
 import CallToAction from "@/components/CallToAction";
 import AIAssistant from "@/components/AIAssistant";
-import GoogleAd from "@/components/GoogleAd";
-import { canServeAdsForCurrentUser } from "@/lib/ads/visibility";
+import ConditionalGoogleAd from "@/components/ConditionalGoogleAd";
 
 export default async function Home({
   searchParams,
@@ -24,20 +24,18 @@ export default async function Home({
     redirect(`/auth/callback?code=${encodeURIComponent(code)}&next=/update-password`);
   }
 
-  const showAds = await canServeAdsForCurrentUser();
-
   return (
     <main>
       {/* Hero section */}
       <Hero />
       {/* Main tool categories */}
       <ToolCategories />
-      {showAds && (
-        <GoogleAd
+      <Suspense fallback={null}>
+        <ConditionalGoogleAd
           slot={process.env.NEXT_PUBLIC_ADSENSE_HOME_SLOT}
           className="my-12"
         />
-      )}
+      </Suspense>
       {/* Website features */}
       <Features />
       {/* How the platform works */}

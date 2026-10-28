@@ -4,8 +4,8 @@ import {
   ArrowLeft,
   ArrowRight,
 } from "lucide-react";
-import GoogleAd from "./GoogleAd";
-import { canServeAdsForCurrentUser } from "@/lib/ads/visibility";
+import { Suspense } from "react";
+import ConditionalGoogleAd from "@/components/ConditionalGoogleAd";
 
 type ToolStatus =
   | "available"
@@ -29,7 +29,7 @@ type ToolHubPageProps = {
   tools: ToolHubItem[];
 };
 
-export default async function ToolHubPage({
+export default function ToolHubPage({
   eyebrow,
   title,
   subtitle,
@@ -37,7 +37,6 @@ export default async function ToolHubPage({
   backText = "Back to Home",
   tools,
 }: ToolHubPageProps) {
-  const showAds = await canServeAdsForCurrentUser();
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -132,12 +131,12 @@ export default async function ToolHubPage({
           })}
         </section>
 
-        {showAds && (
-          <GoogleAd
+        <Suspense fallback={null}>
+          <ConditionalGoogleAd
             slot={process.env.NEXT_PUBLIC_ADSENSE_TOOLS_HUB_SLOT}
             className="mt-16"
           />
-        )}
+        </Suspense>
       </div>
     </main>
   );

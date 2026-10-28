@@ -11,6 +11,7 @@ import MergePdfUploadArea from "./MergePdfUploadArea";
 import SplitPdfUploadArea from "./SplitPdfUploadArea";
 import UploadArea from "./UploadArea";
 import { toolConfig } from "./toolConfig";
+import { canServeAdsForCurrentUser } from "@/lib/ads/visibility";
 
 type ToolPageProps = {
   tool: keyof typeof toolConfig;
@@ -123,7 +124,7 @@ const liveVercelTools = [
   },
 ];
 
-export default function ToolPage({
+export default async function ToolPage({
   tool,
   backLink,
   backText,
@@ -144,6 +145,7 @@ export default function ToolPage({
     "availabilityMessage" in config
       ? config.availabilityMessage
       : "This converter needs a dedicated conversion server before it can run in production.";
+  const showAds = await canServeAdsForCurrentUser();
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -156,10 +158,6 @@ export default function ToolPage({
           {backText}
         </Link>
 
-        <GoogleAd
-          slot={process.env.NEXT_PUBLIC_ADSENSE_TOOL_TOP_SLOT}
-          className="mt-8"
-        />
 
         <section className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.25fr)] lg:items-start">
           <div className="lg:sticky lg:top-28">
@@ -258,10 +256,6 @@ export default function ToolPage({
           )}
         </section>
 
-        <GoogleAd
-          slot={process.env.NEXT_PUBLIC_ADSENSE_TOOL_BOTTOM_SLOT}
-          className="mt-10"
-        />
 
         {seo ? (
           <section className="mx-auto mt-12 max-w-4xl border-t border-gray-200 pt-10 text-gray-700">
@@ -309,6 +303,13 @@ export default function ToolPage({
             </nav>
           </section>
         ) : null}
+
+        {showAds && (
+          <GoogleAd
+            slot={process.env.NEXT_PUBLIC_ADSENSE_TOOL_BOTTOM_SLOT}
+            className="mt-16"
+          />
+        )}
       </div>
     </main>
   );

@@ -26,7 +26,6 @@ import {
   type DragEvent,
 } from "react";
 
-const AD_WAIT_SECONDS = 7;
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
 
 type MergeFileStatus = "reading" | "ready" | "error";
@@ -255,9 +254,6 @@ export default function MergePdfUploadArea() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState("");
-  const [isAdWaiting, setIsAdWaiting] = useState(false);
-  const [adCountdown, setAdCountdown] = useState(0);
-  const [showGuestAd, setShowGuestAd] = useState(false);
   const [convertedFileUrl, setConvertedFileUrl] = useState("");
   const [convertedFileName, setConvertedFileName] = useState("");
   const [mergedFileSize, setMergedFileSize] = useState("");
@@ -396,7 +392,6 @@ export default function MergePdfUploadArea() {
     resetConvertedFile();
     setIsCompleted(false);
     setIsConverting(false);
-    setShowGuestAd(false);
     setProgress(0);
     setProgressMessage("");
     setError("");
@@ -414,7 +409,6 @@ export default function MergePdfUploadArea() {
     resetConvertedFile();
     setIsCompleted(false);
     setIsConverting(false);
-    setShowGuestAd(false);
     setProgress(0);
     setProgressMessage("");
     setError("");
@@ -475,7 +469,6 @@ export default function MergePdfUploadArea() {
     setReplaceFileId(null);
     setProgress(0);
     setProgressMessage("");
-    setShowGuestAd(false);
     setError("");
     clearFileInput();
     clearReplaceInput();
@@ -547,23 +540,6 @@ export default function MergePdfUploadArea() {
     setDraggedFileId(null);
   };
 
-  const sleep = (ms: number) =>
-    new Promise((resolve) => {
-      window.setTimeout(resolve, ms);
-    });
-
-  const runAdWait = async () => {
-    setIsAdWaiting(true);
-
-    for (let seconds = AD_WAIT_SECONDS; seconds > 0; seconds -= 1) {
-      setAdCountdown(seconds);
-      await sleep(1000);
-    }
-
-    setAdCountdown(0);
-    setIsAdWaiting(false);
-  };
-
   const readErrorMessage = async (
     response: Response,
     fallbackMessage: string
@@ -633,11 +609,6 @@ export default function MergePdfUploadArea() {
     link.remove();
   };
 
-  const handleContinueAfterAd = () => {
-    setShowGuestAd(false);
-    downloadMergedPdf();
-  };
-
   const completeMergeConversion = async (
     blob: Blob,
     fileName: string,
@@ -666,15 +637,12 @@ export default function MergePdfUploadArea() {
       .map((item, index) => `${index + 1}. ${item.file.name}`)
       .join(" | ");
 
-    const historyResult = await saveConversionHistory({
+    await saveConversionHistory({
       tool: `Merge PDF - ${fileCount} files, ${totalPages} pages, Completed`,
       originalFileName,
       outputFileName: `${fileName} (${outputSize})`,
     });
 
-    if (!historyResult?.isAuthenticated) {
-      setShowGuestAd(true);
-    }
   };
 
   const handleMergePdf = async () => {
@@ -772,7 +740,6 @@ export default function MergePdfUploadArea() {
     }
 
     setError("");
-    await runAdWait();
     setIsConverting(true);
     setIsCompleted(false);
     setProgress(10);
@@ -978,24 +945,6 @@ export default function MergePdfUploadArea() {
       transition={{ duration: 0.5 }}
       className="mt-0"
     >
-      {isAdWaiting && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
-            <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-              Sponsored Free Tool
-            </p>
-            <h2 className="mt-3 text-2xl font-bold text-gray-900">
-              Merge starts in {adCountdown}s
-            </h2>
-            <div className="mt-5 flex min-h-32 items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
-              Google AdSense placement will appear here
-            </div>
-            <p className="mt-4 text-sm leading-6 text-gray-600">
-              Free tools are supported by ads so more users can access DocMaster.
-            </p>
-          </div>
-        </div>
-      )}
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm sm:p-6 lg:p-8">
         {error && (
@@ -1244,36 +1193,6 @@ export default function MergePdfUploadArea() {
           </>
         )}
       </div>
-
-      {showGuestAd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 text-center shadow-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
-              Advertisement
-            </p>
-            <div className="mt-5 flex min-h-48 items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-6">
-              <div>
-                <p className="text-lg font-semibold text-gray-800">
-                  Sponsored content will appear here.
-                </p>
-                <p className="mt-2 text-sm text-gray-500">
-                  Guest users see one advertisement after each successful merge.
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={handleContinueAfterAd}
-              className="mt-6 w-full rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
-            >
-              Continue to Download
-            </button>
-            <p className="mt-3 text-xs text-gray-500">
-              Create a free account to unlock account features and a better experience.
-            </p>
-          </div>
-        </div>
-      )}
 
       <input
         ref={fileInputRef}

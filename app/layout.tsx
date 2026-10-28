@@ -32,6 +32,9 @@ export const metadata: Metadata = {
   verification: {
     google: "Dqo7Z3gjGqRAPpzePOTWljf4s0_z7ZAkv17bDBh76mo",
   },
+  other: {
+    "google-adsense-account": adsenseClient,
+  },
 };
 
 const themeScript = `

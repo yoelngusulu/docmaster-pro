@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import Hero from "@/components/Hero";
 import ToolCategories from "@/components/ToolCategories";
@@ -8,6 +9,7 @@ import PopularTools from "@/components/PopularTools";
 import WaitlistForm from "@/components/WaitlistForm";
 import CallToAction from "@/components/CallToAction";
 import AIAssistant from "@/components/AIAssistant";
+import ConditionalGoogleAd from "@/components/ConditionalGoogleAd";
 
 export default async function Home({
   searchParams,
@@ -28,6 +30,12 @@ export default async function Home({
       <Hero />
       {/* Main tool categories */}
       <ToolCategories />
+      <Suspense fallback={null}>
+        <ConditionalGoogleAd
+          slot={process.env.NEXT_PUBLIC_ADSENSE_HOME_SLOT}
+          className="my-12"
+        />
+      </Suspense>
       {/* Website features */}
       <Features />
       {/* How the platform works */}

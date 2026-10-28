@@ -1,39 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAllowedConversionOrigin } from "@/lib/security/conversionOrigin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function isAllowedOrigin(request: NextRequest): boolean {
-  const allowedHosts = new Set([
-    "yaju-tools.com",
-    "www.yaju-tools.com",
-    "localhost:3000",
-    "127.0.0.1:3000",
-  ]);
-  if (process.env.VERCEL_URL) allowedHosts.add(process.env.VERCEL_URL);
-
-  // Browsers commonly omit Origin on same-origin GET requests. In that case,
-  // allow the request only when its own Host is one of our known app hosts.
-  const requestHost = request.headers.get("host") || new URL(request.url).host;
-  if (!allowedHosts.has(requestHost)) return false;
-
-  const origin = request.headers.get("origin");
-  if (!origin) return true;
-
-  try {
-    const parsedOrigin = new URL(origin);
-    const isLocalHost = parsedOrigin.hostname === "localhost"
-      || parsedOrigin.hostname === "127.0.0.1";
-    const protocolIsAllowed = parsedOrigin.protocol === "https:"
-      || (isLocalHost && parsedOrigin.protocol === "http:");
-    return protocolIsAllowed && allowedHosts.has(parsedOrigin.host);
-  } catch {
-    return false;
-  }
-}
-
 export async function GET(request: NextRequest) {
-  if (!isAllowedOrigin(request)) {
+  if (!isAllowedConversionOrigin(request, true)) {
     return NextResponse.json({ message: "Request origin is not allowed." }, { status: 403 });
   }
 

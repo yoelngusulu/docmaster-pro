@@ -4,7 +4,8 @@ import {
   ArrowLeft,
   ArrowRight,
 } from "lucide-react";
-import GoogleAd from "./GoogleAd";
+import { Suspense } from "react";
+import ConditionalGoogleAd from "@/components/ConditionalGoogleAd";
 
 type ToolStatus =
   | "available"
@@ -36,6 +37,7 @@ export default function ToolHubPage({
   backText = "Back to Home",
   tools,
 }: ToolHubPageProps) {
+
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
@@ -61,10 +63,6 @@ export default function ToolHubPage({
           </p>
         </section>
 
-        <GoogleAd
-          slot={process.env.NEXT_PUBLIC_ADSENSE_TOOLS_HUB_SLOT}
-          className="mt-10"
-        />
 
         <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {tools.map((tool) => {
@@ -132,6 +130,13 @@ export default function ToolHubPage({
             );
           })}
         </section>
+
+        <Suspense fallback={null}>
+          <ConditionalGoogleAd
+            slot={process.env.NEXT_PUBLIC_ADSENSE_TOOLS_HUB_SLOT}
+            className="mt-16"
+          />
+        </Suspense>
       </div>
     </main>
   );

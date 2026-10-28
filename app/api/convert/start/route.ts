@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAllowedConversionOrigin } from "@/lib/security/conversionOrigin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,27 +19,6 @@ const RATE_WINDOW_MS = 60_000;
 const RATE_LIMIT = 8;
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
 
-function isAllowedOrigin(request: NextRequest): boolean {
-  const origin = request.headers.get("origin");
-  if (!origin) return false;
-
-  let host = "";
-  try {
-    host = new URL(origin).host;
-  } catch {
-    return false;
-  }
-
-  const allowedHosts = new Set([
-    "yaju-tools.com",
-    "www.yaju-tools.com",
-    "localhost:3000",
-    "127.0.0.1:3000",
-  ]);
-  if (process.env.VERCEL_URL) allowedHosts.add(process.env.VERCEL_URL);
-  return allowedHosts.has(host);
-}
-
 function getClientKey(request: NextRequest): string {
   return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
     || request.headers.get("x-real-ip")
@@ -46,7 +26,7 @@ function getClientKey(request: NextRequest): string {
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAllowedOrigin(request)) {
+  if (!isAllowedConversionOrigin(request)) {
     return NextResponse.json({ message: "Request origin is not allowed." }, { status: 403 });
   }
 

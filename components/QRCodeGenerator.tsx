@@ -71,7 +71,7 @@ export default function QRCodeGenerator() {
   };
 
   const label = { website: "Website URL", text: "Plain text", email: "Email address", phone: "Telephone number" }[type];
-  const placeholder = { website: "https://example.com", text: "Type your message", email: "name@example.com", phone: "+1 555 123 4567" }[type];
+  const placeholder = { website: "https://example.com", text: "Type your message", email: "name@example.com", phone: "+255 712 345 678" }[type];
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">

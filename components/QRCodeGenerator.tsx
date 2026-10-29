@@ -5,7 +5,8 @@ import QRCode from "qrcode";
 import Link from "next/link";
 import { ArrowLeft, Download, QrCode } from "lucide-react";
 
-type ContentType = "website" | "text" | "email" | "phone";
+type ContentType = "website" | "text" | "email" | "phone" | "wifi";
+type WifiSecurity = "WPA" | "WEP" | "nopass";
 type Output = { key: string; png: string; svg: string; error?: string };
 
 function encodeContent(type: ContentType, value: string): string {
@@ -29,17 +30,40 @@ function encodeContent(type: ContentType, value: string): string {
   return trimmed;
 }
 
+function encodeWifi(ssid: string, password: string, security: WifiSecurity, hidden: boolean): string {
+  const networkName = ssid;
+  if (!networkName.trim()) throw new Error("Enter the Wi-Fi network name (SSID).");
+  if (new TextEncoder().encode(networkName).length > 32) throw new Error("Wi-Fi network names must be 32 bytes or fewer.");
+  if (security === "WPA" && !(password.length >= 8 && password.length <= 63) && !/^[\da-fA-F]{64}$/.test(password)) {
+    throw new Error("WPA passwords must be 8–63 characters, or a 64-character hexadecimal key.");
+  }
+  if (security === "WEP" && !([5, 13].includes(password.length) || ([10, 26].includes(password.length) && /^[\da-fA-F]+$/.test(password)))) {
+    throw new Error("WEP passwords must be 5 or 13 characters, or a 10 or 26-character hexadecimal key.");
+  }
+  const escape = (text: string) => text.replace(/[\\;,:\"]/g, "\\$&");
+  const passwordPart = security === "nopass" ? "" : `P:${escape(password)};`;
+  return `WIFI:T:${security};S:${escape(networkName)};${passwordPart}H:${hidden ? "true" : "false"};;`;
+}
+
 export default function QRCodeGenerator() {
   const [type, setType] = useState<ContentType>("website");
   const [value, setValue] = useState("");
+  const [ssid, setSsid] = useState("");
+  const [wifiPassword, setWifiPassword] = useState("");
+  const [wifiSecurity, setWifiSecurity] = useState<WifiSecurity>("WPA");
+  const [wifiHidden, setWifiHidden] = useState(false);
   const [size, setSize] = useState(512);
   const [foreground, setForeground] = useState("#111827");
   const [background, setBackground] = useState("#ffffff");
   const [result, setResult] = useState<Output | null>(null);
   const payload = useMemo(() => {
-    try { return { data: encodeContent(type, value), error: "" }; }
-    catch (reason) { return { data: "", error: value.trim() ? (reason as Error).message : "" }; }
-  }, [type, value]);
+    try {
+      return { data: type === "wifi" ? encodeWifi(ssid, wifiPassword, wifiSecurity, wifiHidden) : encodeContent(type, value), error: "" };
+    } catch (reason) {
+      const hasInput = type === "wifi" ? Boolean(ssid.trim()) : Boolean(value.trim());
+      return { data: "", error: hasInput ? (reason as Error).message : "" };
+    }
+  }, [type, value, ssid, wifiPassword, wifiSecurity, wifiHidden]);
   const requestKey = JSON.stringify([payload.data, size, foreground, background]);
   const output = result?.key === requestKey && !result.error ? result : null;
   const loading = Boolean(payload.data) && result?.key !== requestKey;
@@ -70,8 +94,8 @@ export default function QRCodeGenerator() {
     if (format === "svg") URL.revokeObjectURL(url);
   };
 
-  const label = { website: "Website URL", text: "Plain text", email: "Email address", phone: "Telephone number" }[type];
-  const placeholder = { website: "https://example.com", text: "Type your message", email: "name@example.com", phone: "+255 7XX XXX XXX" }[type];
+  const label = { website: "Website URL", text: "Plain text", email: "Email address", phone: "Telephone number" }[type as Exclude<ContentType, "wifi">];
+  const placeholder = { website: "https://example.com", text: "Type your message", email: "name@example.com", phone: "+255 7XX XXX XXX" }[type as Exclude<ContentType, "wifi">];
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
@@ -80,21 +104,38 @@ export default function QRCodeGenerator() {
         <header className="mb-8">
           <div className="flex items-center gap-3 text-blue-600"><QrCode size={28} /><p className="text-sm font-bold uppercase tracking-wide">YAJU Documents</p></div>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl">QR Code Generator</h1>
-          <p className="mt-3 max-w-2xl text-gray-600">Create and download a scannable QR code for a website, text, email address or phone number.</p>
+          <p className="mt-3 max-w-2xl text-gray-600">Create and download a scannable QR code for a website, text, email, phone number or Wi-Fi network.</p>
         </header>
         <div className="grid gap-6 lg:grid-cols-[1fr_0.85fr]">
           <section className="space-y-5 rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7" aria-label="QR code settings">
             <div>
               <label htmlFor="qr-type" className="mb-2 block text-sm font-semibold text-gray-800">Content type</label>
               <select id="qr-type" value={type} onChange={(event) => setType(event.target.value as ContentType)} className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
-                <option value="website">Website URL</option><option value="text">Plain text</option><option value="email">Email address</option><option value="phone">Telephone number</option>
+                <option value="website">Website URL</option><option value="text">Plain text</option><option value="email">Email address</option><option value="phone">Telephone number</option><option value="wifi">Wi-Fi network</option>
               </select>
             </div>
-            <div>
+            {type === "wifi" ? <>
+              <div>
+                <label htmlFor="wifi-ssid" className="mb-2 block text-sm font-semibold text-gray-800">Wi-Fi network name (SSID)</label>
+                <input id="wifi-ssid" type="text" value={ssid} onChange={(event) => setSsid(event.target.value)} placeholder="Enter the network name" maxLength={32} autoComplete="off" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+              </div>
+              <div>
+                <label htmlFor="wifi-security" className="mb-2 block text-sm font-semibold text-gray-800">Security type</label>
+                <select id="wifi-security" value={wifiSecurity} onChange={(event) => setWifiSecurity(event.target.value as WifiSecurity)} className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                  <option value="WPA">WPA / WPA2 / WPA3</option><option value="WEP">WEP</option><option value="nopass">Open network (no password)</option>
+                </select>
+              </div>
+              {wifiSecurity !== "nopass" && <div>
+                <label htmlFor="wifi-password" className="mb-2 block text-sm font-semibold text-gray-800">Wi-Fi password</label>
+                <input id="wifi-password" type="password" value={wifiPassword} onChange={(event) => setWifiPassword(event.target.value)} placeholder="Enter the network password" maxLength={64} autoComplete="new-password" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+              </div>}
+              <label className="flex items-center gap-3 text-sm text-gray-700"><input type="checkbox" checked={wifiHidden} onChange={(event) => setWifiHidden(event.target.checked)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />This is a hidden network</label>
+              <p className="text-xs text-gray-500">Wi-Fi details are encoded in the QR code so a compatible phone can join the network.</p>
+            </> : <div>
               <label htmlFor="qr-content" className="mb-2 block text-sm font-semibold text-gray-800">{label}</label>
               <textarea id="qr-content" value={value} onChange={(event) => setValue(event.target.value)} placeholder={placeholder} rows={4} maxLength={2500} className="w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100" />
               <p className="mt-1 text-right text-xs text-gray-500">{value.length}/2500</p>
-            </div>
+            </div>}
             <div>
               <label htmlFor="qr-size" className="mb-2 block text-sm font-semibold text-gray-800">Output size</label>
               <select id="qr-size" value={size} onChange={(event) => setSize(Number(event.target.value))} className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">

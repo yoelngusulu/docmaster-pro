@@ -21,7 +21,7 @@ export const metadata = {
 const pdfTools = [
   {
     title: "QR Code Generator",
-    description: "Create a custom QR code for a website, text, email or phone number and download it as PNG or SVG.",
+    description: "Create a custom QR code for a website, text, email, phone number or Wi-Fi network; download PNG or SVG.",
     href: "/tools/pdf/qr-code-generator",
     icon: QrCode,
     badge: "New",

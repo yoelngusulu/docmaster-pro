@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const documentTools = [
-  ["QR Code Generator", "Choose website, text, email or phone, enter the content, customize the code, then download PNG or SVG."],
+  ["QR Code Generator", "Choose website, text, email, phone or Wi-Fi, enter the details, customize the code, then download PNG or SVG."],
   ["Split PDF", "Upload one PDF, choose pages or ranges, then download the separated files."],
   ["Merge PDF", "Upload two or more PDFs, arrange the order, then download one combined PDF."],
   ["Compress PDF", "Upload a PDF, run compression, then download a smaller file for sharing."],

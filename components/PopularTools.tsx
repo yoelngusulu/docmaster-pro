@@ -11,6 +11,7 @@ export default function PopularTools() {
     { label: "Merge PDF", href: "/tools/pdf/merge-pdf" },
     { label: "Split PDF", href: "/tools/pdf/split-pdf" },
     { label: "Compress PDF", href: "/tools/pdf/compress-pdf" },
+    { label: "QR Code Generator", href: "/tools/pdf/qr-code-generator" },
     { label: "Image to PDF", href: "/tools/image/image-to-pdf" },
     { label: "Bearing & Azimuth", href: "/tools/gis/bearing-azimuth-calculator" },
   ];

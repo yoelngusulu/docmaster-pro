@@ -2,7 +2,7 @@
 // Coming Soon tools must not be included.
 export const TOOL_COUNTS = {
   field: 4,
-  documents: 7,
+  documents: 8,
   images: 1,
 } as const;
 

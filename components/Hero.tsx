@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles, UploadCloud } from "lucide-react";
+import { QrCode, Sparkles, UploadCloud } from "lucide-react";
 import { motion } from "framer-motion";
 import { ACTIVE_TOOLS_COUNT } from "@/lib/tool-counts";
 
@@ -41,6 +41,7 @@ export default function Hero() {
             <Link href="/tools/pdf/pdf-to-excel" className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"><span className="font-medium text-gray-800">📊 PDF to Excel</span><span className="font-semibold text-green-600">✓ Ready</span></Link>
             <Link href="/tools/pdf/pdf-to-powerpoint" className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"><span className="font-medium text-gray-800">📽️ PDF to PowerPoint</span><span className="font-semibold text-green-600">✓ Ready</span></Link>
             <Link href="/tools/pdf/merge-pdf" className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"><span className="font-medium text-gray-800">📄 Merge PDF</span><span className="font-semibold text-green-600">✓ Ready</span></Link>
+            <Link href="/tools/pdf/qr-code-generator" className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"><span className="flex items-center gap-2 font-medium text-gray-800"><QrCode size={17} />QR Code Generator</span><span className="font-semibold text-green-600">✓ Ready</span></Link>
             <Link href="/tools/image/image-to-pdf" className="flex items-center justify-between rounded-xl bg-blue-50 p-4 transition hover:bg-blue-100"><span className="font-medium text-gray-800">🖼️ Image → PDF</span><span className="font-semibold text-green-600">✓ Ready</span></Link>
           </div>
           <div className="mt-6 rounded-xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-3 text-center text-sm text-gray-600">Practical tools for field, engineering and digital workflows.</div>

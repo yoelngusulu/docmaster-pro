@@ -24,6 +24,7 @@ const routes: SitemapRoute[] = [
   { path: "/tools/gis/bearing-azimuth-calculator", changeFrequency: "monthly", priority: 0.8 },
   { path: "/tools/gis/water-storage-calculator", changeFrequency: "monthly", priority: 0.8 },
   { path: "/tools/pdf/html-to-pdf", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/tools/pdf/qr-code-generator", changeFrequency: "monthly", priority: 0.85 },
   { path: "/tools/pdf/merge-pdf", changeFrequency: "monthly", priority: 0.8 },
   { path: "/tools/pdf/split-pdf", changeFrequency: "monthly", priority: 0.8 },
   { path: "/tools/pdf/compress-pdf", changeFrequency: "monthly", priority: 0.8 },

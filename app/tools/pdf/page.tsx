@@ -6,6 +6,7 @@ import {
   Lock,
   Merge,
   Presentation,
+  QrCode,
   Scissors,
   Table2,
   UnlockKeyhole,
@@ -18,6 +19,14 @@ export const metadata = {
 };
 
 const pdfTools = [
+  {
+    title: "QR Code Generator",
+    description: "Create a custom QR code for a website, text, email or phone number and download it as PNG or SVG.",
+    href: "/tools/pdf/qr-code-generator",
+    icon: QrCode,
+    badge: "New",
+    status: "available" as const,
+  },
   {
     title: "HTML to PDF",
     description:
@@ -115,7 +124,7 @@ export default function PDFToolsPage() {
     <ToolHubPage
       eyebrow="YAJU Documents"
       title="YAJU Documents"
-      subtitle="Explore seven live document tools. Tools that are not yet complete are clearly marked Coming Soon."
+      subtitle="Explore eight live document tools. Tools that are not yet complete are clearly marked Coming Soon."
       tools={pdfTools}
     />
   );

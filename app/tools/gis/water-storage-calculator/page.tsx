@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Calculator, Droplets, Gauge, Sprout } from "lucide-react";
+import { ArrowLeft, Calculator, Droplets, Gauge, Sprout } from "lucide-react";
 
 type Mode = "rainwater" | "pump" | "irrigation" | "dimensions";
 
@@ -75,7 +75,7 @@ export default function WaterStorageCalculatorPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 px-5 py-12"><div className="mx-auto max-w-6xl">
-      <Link href="/tools/gis" className="text-sm font-semibold text-blue-600 hover:text-blue-700">← Back to YAJU Field Tools</Link>
+      <Link href="/tools/gis" className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-blue-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50"><ArrowLeft size={16} />Back to YAJU Field Tools</Link>
       <div className="mt-5 max-w-4xl"><p className="text-sm font-bold uppercase tracking-wider text-blue-600">YAJU Field Tools</p><h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">Water Storage & Tank Sizing Calculator</h1><p className="mt-4 text-lg leading-8 text-gray-600">Estimate storage for rainwater harvesting, borehole and pumping systems, irrigation demand, or calculate physical tank capacity.</p></div>
       <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{modes.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => setMode(id)} className={`flex items-center gap-3 rounded-xl border p-4 text-left font-semibold transition ${mode === id ? "border-blue-600 bg-blue-600 text-white shadow-sm" : "border-gray-200 bg-white text-gray-700 hover:border-blue-300"}`}><Icon size={20} /> {label}</button>)}</div>
       <div className="mt-7 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">

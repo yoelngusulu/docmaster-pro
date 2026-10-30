@@ -97,8 +97,8 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <Link href="/" onClick={closeMobileMenu} className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:px-6 lg:px-8">
+        <Link href="/" onClick={closeMobileMenu} className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3 lg:flex-none">
           <motion.div
             animate={{ rotate: [0, -3, 2, 0] }}
             whileHover={{ scale: 1.04 }}
@@ -112,7 +112,7 @@ export default function Navbar() {
           </motion.div>
           <div className="min-w-0 leading-tight">
             <p><YajuWordmark /></p>
-            <p className="block max-w-[160px] whitespace-nowrap text-[9px] font-semibold tracking-wide text-gray-500 sm:max-w-none sm:text-[10px] dark:text-slate-400">{siteConfig.tagline}</p>
+            <p className="block max-w-full truncate whitespace-nowrap text-[9px] font-semibold tracking-wide text-gray-500 sm:max-w-none sm:text-[10px] dark:text-slate-400">{siteConfig.tagline}</p>
           </div>
         </Link>
 

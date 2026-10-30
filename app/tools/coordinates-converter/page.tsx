@@ -2182,10 +2182,6 @@ export default function CoordinatesConverterPage() {
 
         <section className="mt-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <div>
-            <p className="text-sm font-semibold text-blue-600">
-              GIS Utility
-            </p>
-
             <h1 className="mt-2 text-3xl font-bold text-gray-900">
               Coordinates Converter
             </h1>

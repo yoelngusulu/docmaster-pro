@@ -55,6 +55,8 @@ export default function QRCodeGenerator() {
   const [size, setSize] = useState(512);
   const [foreground, setForeground] = useState("#111827");
   const [background, setBackground] = useState("#ffffff");
+  const [logo, setLogo] = useState("");
+  const [logoError, setLogoError] = useState("");
   const [result, setResult] = useState<Output | null>(null);
   const payload = useMemo(() => {
     try {
@@ -64,7 +66,7 @@ export default function QRCodeGenerator() {
       return { data: "", error: hasInput ? (reason as Error).message : "" };
     }
   }, [type, value, ssid, wifiPassword, wifiSecurity, wifiHidden]);
-  const requestKey = JSON.stringify([payload.data, size, foreground, background]);
+  const requestKey = JSON.stringify([payload.data, size, foreground, background, logo]);
   const output = result?.key === requestKey && !result.error ? result : null;
   const loading = Boolean(payload.data) && result?.key !== requestKey;
   const error = payload.error || (result?.key === requestKey ? result.error || "" : "");
@@ -72,9 +74,51 @@ export default function QRCodeGenerator() {
   useEffect(() => {
     let active = true;
     if (!payload.data) return;
-    const options = { width: size, margin: 4, errorCorrectionLevel: "M" as const, color: { dark: foreground, light: background } };
+    const options = { width: size, margin: 4, errorCorrectionLevel: (logo ? "H" : "M") as "H" | "M", color: { dark: foreground, light: background } };
     Promise.all([QRCode.toDataURL(payload.data, options), QRCode.toString(payload.data, { ...options, type: "svg" })])
-      .then(([png, svg]) => { if (active) setResult({ key: requestKey, png, svg }); })
+      .then(async ([qrPng, baseSvg]) => {
+        let png = qrPng;
+        let svg = baseSvg;
+        if (logo) {
+          const logoSize = Math.round(size * 0.2);
+          const padding = Math.round(size * 0.025);
+          const logoImage = new Image();
+          logoImage.src = logo;
+          await new Promise<void>((resolve, reject) => {
+            logoImage.onload = () => resolve();
+            logoImage.onerror = () => reject(new Error("Could not read this logo image."));
+          });
+          const canvas = document.createElement("canvas");
+          canvas.width = size;
+          canvas.height = size;
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("Could not prepare the QR image.");
+          const qrImage = new Image();
+          qrImage.src = qrPng;
+          await new Promise<void>((resolve, reject) => {
+            qrImage.onload = () => resolve();
+            qrImage.onerror = () => reject(new Error("Could not prepare the QR image."));
+          });
+          context.drawImage(qrImage, 0, 0, size, size);
+          const x = (size - logoSize) / 2;
+          const y = (size - logoSize) / 2;
+          const plate = logoSize + padding * 2;
+          context.fillStyle = background;
+          context.fillRect(x - padding, y - padding, plate, plate);
+          context.drawImage(logoImage, x, y, logoSize, logoSize);
+          png = canvas.toDataURL("image/png");
+          const viewBox = baseSvg.match(/viewBox="([^"]+)"/i)?.[1];
+          const dimensions = viewBox?.split(/[ ,]+/).map(Number);
+          const svgSize = dimensions?.[2] || size;
+          const svgLogo = svgSize * 0.2;
+          const svgPadding = svgSize * 0.025;
+          const svgX = (svgSize - svgLogo) / 2;
+          const svgY = (svgSize - svgLogo) / 2;
+          const logoOverlay = `<rect x="${svgX - svgPadding}" y="${svgY - svgPadding}" width="${svgLogo + svgPadding * 2}" height="${svgLogo + svgPadding * 2}" fill="${background}"/><image href="${logo}" x="${svgX}" y="${svgY}" width="${svgLogo}" height="${svgLogo}" preserveAspectRatio="xMidYMid meet"/>`;
+          svg = baseSvg.replace("</svg>", `${logoOverlay}</svg>`);
+        }
+        if (active) setResult({ key: requestKey, png, svg });
+      })
       .catch(() => { if (active) setResult({ key: requestKey, png: "", svg: "", error: "This content is too long to fit in a QR code. Try a shorter value." }); });
     return () => { active = false; };
   }, [payload.data, requestKey, size, foreground, background]);
@@ -146,6 +190,25 @@ export default function QRCodeGenerator() {
               <label className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 p-3 text-sm font-medium text-gray-800">Foreground color <input aria-label="Foreground color" type="color" value={foreground} onChange={(event) => setForeground(event.target.value)} className="h-9 w-12 cursor-pointer rounded border-0 bg-transparent" /></label>
               <label className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 p-3 text-sm font-medium text-gray-800">Background color <input aria-label="Background color" type="color" value={background} onChange={(event) => setBackground(event.target.value)} className="h-9 w-12 cursor-pointer rounded border-0 bg-transparent" /></label>
             </div>
+            <div>
+              <label htmlFor="qr-logo" className="mb-2 block text-sm font-semibold text-gray-800">Logo (optional)</label>
+              <div className="flex flex-wrap items-center gap-3">
+                <input id="qr-logo" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  setLogoError("");
+                  if (!file) return;
+                  if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) { setLogoError("Choose a PNG, JPG or WebP image."); event.target.value = ""; return; }
+                  if (file.size > 2 * 1024 * 1024) { setLogoError("Logo must be 2 MB or smaller."); event.target.value = ""; return; }
+                  const reader = new FileReader();
+                  reader.onload = () => setLogo(typeof reader.result === "string" ? reader.result : "");
+                  reader.onerror = () => setLogoError("Could not read this logo image.");
+                  reader.readAsDataURL(file);
+                }} className="block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:font-semibold file:text-blue-700 hover:file:bg-blue-100" />
+                {logo && <button type="button" onClick={() => { setLogo(""); const input = document.getElementById("qr-logo") as HTMLInputElement | null; if (input) input.value = ""; }} className="text-sm font-medium text-blue-700 underline">Remove logo</button>}
+              </div>
+              <p className="mt-1 text-xs text-gray-500">PNG, JPG or WebP, up to 2 MB. The logo is added in the center; keep it small for reliable scanning.</p>
+              {logoError && <p className="mt-1 text-sm text-red-700" role="alert">{logoError}</p>}
+            </div>
             <p className="text-xs leading-5 text-gray-500">A four-module quiet zone is included around each code. Keep strong contrast for reliable scanning.</p>
           </section>
           <section className="flex flex-col items-center rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7" aria-label="QR code preview">
@@ -169,3 +232,4 @@ export default function QRCodeGenerator() {
     </main>
   );
 }
+

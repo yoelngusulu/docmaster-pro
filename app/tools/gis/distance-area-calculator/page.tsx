@@ -10,7 +10,6 @@ import {
   ArrowLeft,
   Clipboard,
   Download,
-  MapPinned,
   RefreshCw,
   Upload,
 } from "lucide-react";
@@ -1881,11 +1880,6 @@ export default function DistanceAreaCalculatorPage() {
         <section className="mt-8 rounded-lg border border-gray-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase text-blue-700">
-                <MapPinned size={14} />
-                GIS Utility
-              </p>
-
               <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl">
                 Distance, Area & Bearing Calculator
               </h1>

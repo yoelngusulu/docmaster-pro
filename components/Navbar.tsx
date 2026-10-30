@@ -110,9 +110,9 @@ export default function Navbar() {
           >
             <Image src="/images/yaju-logo-v2.svg" alt="YAJU logo" width={42} height={40} priority className="h-10 w-auto object-contain" />
           </motion.div>
-          <div className="min-w-0 leading-tight">
+          <div className="min-w-0 flex-1 leading-tight">
             <p><YajuWordmark /></p>
-            <p className="block max-w-full truncate whitespace-nowrap text-[9px] font-semibold tracking-wide text-gray-500 sm:max-w-none sm:text-[10px] dark:text-slate-400">{siteConfig.tagline}</p>
+            <p className="block w-full max-w-[calc(100vw-190px)] overflow-hidden text-ellipsis whitespace-nowrap text-[9px] font-semibold tracking-wide text-gray-500 sm:max-w-none sm:text-[10px] dark:text-slate-400">{siteConfig.tagline}</p>
           </div>
         </Link>
 

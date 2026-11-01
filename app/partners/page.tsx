@@ -16,30 +16,18 @@ type FormStatus = "idle" | "submitting" | "success" | "error";
 export default function PartnersPage() {
   const [status, setStatus] = useState<FormStatus>("idle");
   const [message, setMessage] = useState("");
-  const [form, setForm] = useState({
-    fullName: "",
-    organization: "",
-    email: "",
-    partnershipType: "Business Partner",
-    inquiry: "",
-    website: "",
-  });
+  const [form, setForm] = useState({ fullName: "", organization: "", email: "", partnershipType: "Business Partner", inquiry: "", website: "" });
 
   const update = (field: keyof typeof form, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
-    if (status !== "submitting") {
-      setStatus("idle");
-      setMessage("");
-    }
+    if (status !== "submitting") { setStatus("idle"); setMessage(""); }
   };
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (status === "submitting") return;
-
     setStatus("submitting");
     setMessage("");
-
     try {
       const response = await fetch("/api/partners", {
         method: "POST",
@@ -85,14 +73,7 @@ export default function PartnersPage() {
           <p className="mt-4 leading-7 text-slate-600 dark:text-slate-300">Tell us what you have in mind. We are open to exploring collaborations that align with YAJU’s products and users.</p>
         </div>
         <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {partnershipTypes.map((item) => {
-            const Icon = item.icon;
-            return <article key={item.title} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300"><Icon size={22} /></div>
-              <h3 className="mt-5 font-bold">{item.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
-            </article>;
-          })}
+          {partnershipTypes.map((item) => { const Icon = item.icon; return <article key={item.title} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"><div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300"><Icon size={22} /></div><h3 className="mt-5 font-bold">{item.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p></article>; })}
         </div>
       </section>
 
@@ -108,42 +89,17 @@ export default function PartnersPage() {
               <p className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 shrink-0 text-blue-600" size={18} /> No commitment required to make an inquiry</p>
             </div>
           </div>
-
           <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-950 sm:p-8">
-            <div className="hidden" aria-hidden="true">
-              <label htmlFor="partner-website">Website</label>
-              <input id="partner-website" name="website" tabIndex={-1} autoComplete="off" value={form.website} onChange={(event) => update("website", event.target.value)} />
-            </div>
+            <div className="hidden" aria-hidden="true"><label htmlFor="partner-website">Website</label><input id="partner-website" name="website" tabIndex={-1} autoComplete="off" value={form.website} onChange={(event) => update("website", event.target.value)} /></div>
             <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label htmlFor="partner-name" className="mb-2 block text-sm font-semibold">Full name <span className="text-red-500">*</span></label>
-                <input id="partner-name" required minLength={2} maxLength={120} autoComplete="name" value={form.fullName} onChange={(event) => update("fullName", event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-blue-950" placeholder="Your full name" />
-              </div>
-              <div>
-                <label htmlFor="partner-organization" className="mb-2 block text-sm font-semibold">Organization / Company</label>
-                <input id="partner-organization" maxLength={160} autoComplete="organization" value={form.organization} onChange={(event) => update("organization", event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-blue-950" placeholder="Organization name (optional)" />
-              </div>
-              <div className="sm:col-span-2">
-                <label htmlFor="partner-email" className="mb-2 block text-sm font-semibold">Email address <span className="text-red-500">*</span></label>
-                <input id="partner-email" type="email" required maxLength={254} autoComplete="email" value={form.email} onChange={(event) => update("email", event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-blue-950" placeholder="you@company.com" />
-              </div>
-              <div className="sm:col-span-2">
-                <label htmlFor="partner-type" className="mb-2 block text-sm font-semibold">Partnership type <span className="text-red-500">*</span></label>
-                <select id="partner-type" required value={form.partnershipType} onChange={(event) => update("partnershipType", event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-blue-950">
-                  {partnershipTypes.map((item) => <option key={item.title} value={item.title}>{item.title}</option>)}
-                </select>
-              </div>
-              <div className="sm:col-span-2">
-                <label htmlFor="partner-message" className="mb-2 block text-sm font-semibold">Tell us about your proposal <span className="text-red-500">*</span></label>
-                <textarea id="partner-message" required minLength={10} maxLength={3000} rows={5} value={form.inquiry} onChange={(event) => update("inquiry", event.target.value)} className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-blue-950" placeholder="Briefly describe your organization, idea or proposed collaboration..." />
-                <p className="mt-1 text-right text-xs text-slate-500">{form.inquiry.length}/3000</p>
-              </div>
+              <div><label htmlFor="partner-name" className="mb-2 block text-sm font-semibold">Full name <span className="text-red-500">*</span></label><input id="partner-name" required minLength={2} maxLength={120} autoComplete="name" value={form.fullName} onChange={(event) => update("fullName", event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-blue-950" placeholder="Your full name" /></div>
+              <div><label htmlFor="partner-organization" className="mb-2 block text-sm font-semibold">Organization / Company</label><input id="partner-organization" maxLength={160} autoComplete="organization" value={form.organization} onChange={(event) => update("organization", event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-blue-950" placeholder="Organization name (optional)" /></div>
+              <div className="sm:col-span-2"><label htmlFor="partner-email" className="mb-2 block text-sm font-semibold">Email address <span className="text-red-500">*</span></label><input id="partner-email" type="email" required maxLength={254} autoComplete="email" value={form.email} onChange={(event) => update("email", event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-blue-950" placeholder="you@company.com" /></div>
+              <div className="sm:col-span-2"><label htmlFor="partner-type" className="mb-2 block text-sm font-semibold">Partnership type <span className="text-red-500">*</span></label><select id="partner-type" required value={form.partnershipType} onChange={(event) => update("partnershipType", event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-blue-950">{partnershipTypes.map((item) => <option key={item.title} value={item.title}>{item.title}</option>)}</select></div>
+              <div className="sm:col-span-2"><label htmlFor="partner-message" className="mb-2 block text-sm font-semibold">Tell us about your proposal <span className="text-red-500">*</span></label><textarea id="partner-message" required minLength={10} maxLength={3000} rows={5} value={form.inquiry} onChange={(event) => update("inquiry", event.target.value)} className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-blue-950" placeholder="Briefly describe your organization, idea or proposed collaboration..." /><p className="mt-1 text-right text-xs text-slate-500">{form.inquiry.length}/3000</p></div>
             </div>
-
             {message && <p role={status === "error" ? "alert" : "status"} className={`mt-5 rounded-xl px-4 py-3 text-sm ${status === "success" ? "bg-green-50 text-green-800 dark:bg-green-950/40 dark:text-green-300" : "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300"}`}>{message}</p>}
-            <button type="submit" disabled={status === "submitting" || status === "success"} className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
-              {status === "submitting" ? <><Loader2 size={18} className="animate-spin" /> Sending inquiry...</> : status === "success" ? "Inquiry received" : <>Submit partnership inquiry <ArrowRight size={18} /></>}
-            </button>
+            <button type="submit" disabled={status === "submitting" || status === "success"} className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">{status === "submitting" ? <><Loader2 size={18} className="animate-spin" /> Sending inquiry...</> : status === "success" ? "Inquiry received" : <>Submit partnership inquiry <ArrowRight size={18} /></>}</button>
             <p className="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">Your information will be used only to review and respond to this partnership inquiry. See our <Link href="/privacy" className="font-medium text-blue-600 underline dark:text-blue-400">Privacy Policy</Link>.</p>
           </form>
         </div>
@@ -151,8 +107,3 @@ export default function PartnersPage() {
     </main>
   );
 }
-
-export const metadata = {
-  title: "Become a Partner",
-  description: "Explore technology, business, strategic and affiliate partnership opportunities with YAJU Tools.",
-};

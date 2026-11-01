@@ -36,6 +36,7 @@ const routes: SitemapRoute[] = [
   { path: "/docs/images", changeFrequency: "monthly", priority: 0.75 },
   { path: "/pricing", changeFrequency: "monthly", priority: 0.6 },
   { path: "/about", changeFrequency: "monthly", priority: 0.6 },
+  { path: "/partners", changeFrequency: "monthly", priority: 0.7 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.4 },
 ];
 

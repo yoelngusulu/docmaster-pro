@@ -86,6 +86,7 @@ export default function Footer() {
             <h3 className="font-semibold text-white">About</h3>
             <ul className="mt-4 space-y-3">
               <li><Link href="/about" className="transition hover:text-white">About</Link></li>
+              <li><Link href="/partners" className="transition hover:text-white">Become a Partner</Link></li>
               <li><Link href="/privacy" className="transition hover:text-white">Privacy Policy</Link></li>
               <li>Terms of Service</li>
               <li>Contact</li>

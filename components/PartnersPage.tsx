@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { ArrowRight, CheckCircle2, Handshake, Loader2, Network, Rocket, ShieldCheck, Sparkles } from "lucide-react";

@@ -16,9 +16,9 @@ export default function Hero() {
       <div className="pointer-events-none absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
       <div className="relative mx-auto grid max-w-7xl items-start gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-14 lg:px-8">
         <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }} className="text-center lg:text-left">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700"><Sparkles size={18} />Field Tools - Documents - Images</div>
-          <h1 className="mt-4 text-4xl font-bold text-blue-600 sm:text-3xl md:text-5xl">Smart Tools for Fieldwork & Digital Work</h1>
-          <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-gray-600 sm:text-lg lg:mx-0">Convert coordinates, measure field data, size water storage, and work with documents and images using fast, practical tools built for professionals.</p>
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700"><Sparkles size={18} />Fieldwork - PDFs - Images - QR Codes</div>
+          <h1 className="mt-4 text-4xl font-bold text-blue-600 sm:text-3xl md:text-5xl">Practical tools for fieldwork and everyday tasks</h1>
+          <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-gray-600 sm:text-lg lg:mx-0">Look up CRS/EPSG codes, convert coordinates, and measure field distances or areas. Estimate water storage for rainwater harvesting and borehole projects. You can also create QR codes, turn HTML files into PDFs, and merge, split, compress, or convert PDFs to Word, Excel and PowerPoint.</p>
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row sm:flex-wrap lg:justify-start">
             <Link href="#tools" className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-4 font-semibold text-white shadow-md transition hover:bg-blue-700 hover:shadow-lg"><UploadCloud size={20} />Explore YAJU Tools</Link>
             <button type="button" onClick={openAIAssistant} className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-600 bg-white px-8 py-4 font-semibold text-blue-600 transition hover:bg-blue-50"><Sparkles size={20} />Ask YAJU AI</button>

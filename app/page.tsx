@@ -46,8 +46,8 @@ export default async function Home({
       <PopularTools />
       {/* Helpful overview of YAJU tools */}
       <section className="bg-white px-5 py-16 sm:py-20">
-        <div className="mx-auto max-w-6xl">
-          <div className="max-w-3xl">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-4xl text-center">
             <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">A practical toolkit</p>
             <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">Useful tools for fieldwork and everyday tasks</h2>
             <p className="mt-5 text-lg leading-8 text-slate-600">
